@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Company A — Hyderabad Biryani & Direct Ordering KDS</title>
+  <title>Dum & Co. — Royal Hyderabad Biryani & Direct Kitchen Display Platform</title>
   
   <!-- Modern Luxury Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,10 +21,10 @@
     <div class="announcement-inner">
       <div class="announcement-tag">
         <span class="live-dot"></span>
-        <span>Company A • Hyderabad Direct Platform</span>
+        <span>Dum & Co. • Company A, Hyderabad</span>
       </div>
       <div class="announcement-text">
-        🎉 <strong>Save 15% Net Margin:</strong> Direct orders bypass 25% app fees • Real-time KDS • 5% Direct Cashback
+        🎉 <strong>Save 15% Net Margin:</strong> Direct orders bypass 27% aggregator app fees • Real-Time KDS • 5% Direct Loyalty Cashback
       </div>
       <div class="announcement-stats">
         <span>Target: <strong>₹1.14 Cr/yr Savings</strong></span>
@@ -50,14 +50,14 @@
             <span>👑</span>
           </div>
           <div class="brand-info">
-            <div class="brand-title">Company A</div>
-            <div class="brand-subtitle">Hyderabad Biryani & Curries</div>
+            <div class="brand-title">Dum & Co.</div>
+            <div class="brand-subtitle">Hyderabad Biryani • 14 Outlets + 3 Kitchens</div>
           </div>
         </a>
       </div>
 
       <!-- Center: Outlet Selector Pill -->
-      <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet">
+      <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet or check radius">
         <span class="pulse-ring">📍</span>
         <div class="outlet-pill-text">
           <div class="outlet-pill-kicker">DELIVERING FROM</div>
@@ -81,10 +81,19 @@
           <span class="nav-link-icon">📍</span>
           <span>Track Order</span>
         </button>
+        <button class="cust-nav-link" id="link-account" onclick="App.navigate('account')">
+          <span class="nav-link-icon">👤</span>
+          <span>My Account</span>
+        </button>
       </nav>
 
-      <!-- Right: Cart Only (Pure Customer Experience) -->
+      <!-- Right: Auth Pill & Cart -->
       <div class="nav-actions">
+        <button id="nav-auth-btn" class="btn-auth-nav" onclick="App.openAuthModal()" title="Account & Roles">
+          <span id="nav-auth-icon">👤</span>
+          <span id="nav-auth-label">Sign In</span>
+        </button>
+
         <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
           <span class="cart-icon-wrap">🛍️</span>
           <span class="cart-label">Cart</span>
@@ -199,6 +208,25 @@
     </div>
   </div>
 
+  <!-- AUTHENTICATION & LOGIN MODAL -->
+  <div id="auth-modal" class="modal-backdrop" onclick="App.closeAuthModal()">
+    <div class="modal-card" id="auth-modal-card" style="max-width: 500px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
+            👑 DUM & CO. SECURE AUTHENTICATION
+          </div>
+          <h3 class="modal-title" style="margin-top: 0.2rem;" id="auth-modal-header-title">Sign In to Your Account</h3>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeAuthModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" id="auth-modal-body">
+        <!-- Rendered dynamically by JS with Tabs: 1-Click Demo Login, Sign In, Register -->
+      </div>
+    </div>
+  </div>
+
   <!-- INTERACTIVE MOCK PAYMENT GATEWAY MODAL (TEST MODE UPI & CARD) -->
   <div id="payment-modal" class="modal-backdrop" onclick="App.closePaymentModal()">
     <div class="modal-card" id="payment-modal-card" style="max-width: 480px;" onclick="event.stopPropagation()">
@@ -237,7 +265,7 @@
     </div>
   </div>
 
-  <!-- OUTLET SELECTION MODAL -->
+  <!-- OUTLET SELECTION & RADIUS CHECKER MODAL -->
   <div id="outlet-modal" class="modal-backdrop" onclick="App.handleModalBackdropClick(event)">
     <div class="modal-card" id="outlet-modal-panel" onclick="event.stopPropagation()">
       <div class="modal-header">
@@ -248,7 +276,7 @@
         <button class="modal-close-btn" onclick="App.closeOutletModal()">&times;</button>
       </div>
       <div class="modal-body" id="outlet-selection-list">
-        <!-- Rendered by JS -->
+        <!-- Rendered by JS with interactive delivery address radius check -->
       </div>
     </div>
   </div>
@@ -267,6 +295,38 @@
         <!-- Rendered by JS -->
       </div>
       <div class="modal-footer" id="custom-modal-footer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTRAL MENU CMS ITEM EDIT / CREATE MODAL -->
+  <div id="cms-item-modal" class="modal-backdrop" onclick="App.closeCmsItemModal()">
+    <div class="modal-card" style="max-width: 600px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="cms-item-modal-title">Create / Edit Dish</h3>
+          <p class="modal-subtitle">Central Menu Catalog Management</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeCmsItemModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="cms-item-modal-body">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTRAL MENU CITY PRICING MODAL -->
+  <div id="cms-city-modal" class="modal-backdrop" onclick="App.closeCmsCityModal()">
+    <div class="modal-card" style="max-width: 520px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Configure City-Specific Price</h3>
+          <p class="modal-subtitle">Regional pricing overrides (Hyderabad, Secunderabad, Cyberabad)</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeCmsCityModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="cms-city-modal-body">
         <!-- Rendered by JS -->
       </div>
     </div>

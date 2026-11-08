@@ -7,6 +7,9 @@
 
 export const App = {
   state: {
+    currentUser: null,
+    authToken: localStorage.getItem('dumco_token') || null,
+    authTab: 'demo',
     currentRole: 'customer',
     currentView: 'ordering',
     outlets: [],
@@ -30,18 +33,21 @@ export const App = {
     aiRecommendations: [],
     customizingItem: null,
     selectedPortion: null,
-    selectedAddOns: []
+    selectedAddOns: [],
+    editingMenuItem: null
   },
 
   audioCtx: null,
 
   async init() {
-    console.log('⚡ Initializing Company A Direct Platform...');
+    console.log('⚡ Initializing Dum & Co. Direct Platform...');
+    await this.checkSession();
     await this.fetchOutlets();
     await this.fetchMenu();
     await this.fetchOrders();
     await this.fetchLoyalty();
     await this.fetchAiRecommendations();
+    this.updateNavAuthPill();
     this.initSSE();
     this.navigate('ordering');
 
@@ -53,6 +59,330 @@ export const App = {
         this.updateTrackingTimer();
       }
     }, 10000);
+  },
+
+  getAuthHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    if (this.state.authToken) {
+      headers['Authorization'] = `Bearer ${this.state.authToken}`;
+    }
+    return headers;
+  },
+
+  async checkSession() {
+    if (!this.state.authToken) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: this.getAuthHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated) {
+          this.state.currentUser = data.user;
+          this.state.customerName = data.user.name;
+          if (data.user.phone) this.state.customerPhone = data.user.phone;
+          if (data.user.role === 'kitchen_staff' && data.user.outlet_id) {
+            this.state.currentRole = 'kitchen_staff';
+            this.state.kdsOutletFilter = data.user.outlet_id;
+          } else if (data.user.role === 'admin') {
+            this.state.currentRole = 'admin';
+          }
+        }
+      } else {
+        this.state.authToken = null;
+        localStorage.removeItem('dumco_token');
+      }
+    } catch (e) {
+      console.warn('Session check error:', e);
+    }
+  },
+
+  updateNavAuthPill() {
+    const btn = document.getElementById('nav-auth-btn');
+    const label = document.getElementById('nav-auth-label');
+    const icon = document.getElementById('nav-auth-icon');
+    if (!btn || !label) return;
+
+    if (this.state.currentUser) {
+      const firstName = this.state.currentUser.name.split(' ')[0];
+      const roleBadge = this.state.currentUser.role === 'kitchen_staff' ? 'Kitchen' : this.state.currentUser.role === 'admin' ? 'Admin' : 'Guest';
+      label.textContent = `${firstName} (${roleBadge})`;
+      if (icon) icon.textContent = this.state.currentUser.role === 'kitchen_staff' ? '🍳' : this.state.currentUser.role === 'admin' ? '🛡️' : '👤';
+      btn.style.borderColor = 'var(--accent-gold)';
+    } else {
+      label.textContent = 'Sign In';
+      if (icon) icon.textContent = '👤';
+      btn.style.borderColor = 'var(--border-subtle)';
+    }
+  },
+
+  openAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (!modal) return;
+    this.renderAuthModalBody();
+    modal.classList.add('open');
+  },
+
+  closeAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) modal.classList.remove('open');
+  },
+
+  switchAuthTab(tab) {
+    this.state.authTab = tab;
+    this.renderAuthModalBody();
+  },
+
+  async loginWithDemo(role) {
+    try {
+      const res = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.state.authToken = data.token;
+        this.state.currentUser = data.user;
+        localStorage.setItem('dumco_token', data.token);
+        this.updateNavAuthPill();
+        this.closeAuthModal();
+        this.showToast(`Signed in as ${data.user.name} (${data.user.role})`, 'success');
+
+        if (data.user.role === 'customer') {
+          this.state.customerName = data.user.name;
+          if (data.user.phone) this.state.customerPhone = data.user.phone;
+          this.navigate('ordering');
+        } else if (data.user.role === 'kitchen_staff') {
+          this.state.kdsOutletFilter = data.user.outlet_id || 'out-kondapur';
+          this.navigate('kds');
+        } else if (data.user.role === 'admin') {
+          this.navigate('cms');
+        }
+      } else {
+        this.showToast(data.error || 'Login failed', 'error');
+      }
+    } catch (e) {
+      this.showToast('Demo login network error', 'error');
+    }
+  },
+
+  async submitLogin(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('auth-login-email')?.value;
+    const password = document.getElementById('auth-login-password')?.value;
+    if (!email || !password) return this.showToast('Please enter email and password', 'error');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.state.authToken = data.token;
+        this.state.currentUser = data.user;
+        localStorage.setItem('dumco_token', data.token);
+        this.updateNavAuthPill();
+        this.closeAuthModal();
+        this.showToast(`Welcome back, ${data.user.name}!`, 'success');
+
+        if (data.user.role === 'customer') this.navigate('ordering');
+        else if (data.user.role === 'kitchen_staff') {
+          this.state.kdsOutletFilter = data.user.outlet_id || 'out-kondapur';
+          this.navigate('kds');
+        } else if (data.user.role === 'admin') this.navigate('cms');
+      } else {
+        this.showToast(data.error || 'Invalid credentials', 'error');
+      }
+    } catch (err) {
+      this.showToast('Sign-in failed', 'error');
+    }
+  },
+
+  async submitRegister(e) {
+    if (e) e.preventDefault();
+    const name = document.getElementById('auth-reg-name')?.value;
+    const email = document.getElementById('auth-reg-email')?.value;
+    const phone = document.getElementById('auth-reg-phone')?.value;
+    const password = document.getElementById('auth-reg-password')?.value;
+
+    if (!name || !email || !password) return this.showToast('Please fill all required fields', 'error');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.state.authToken = data.token;
+        this.state.currentUser = data.user;
+        localStorage.setItem('dumco_token', data.token);
+        this.updateNavAuthPill();
+        this.closeAuthModal();
+        this.showToast(`Account created for ${data.user.name}!`, 'success');
+        this.navigate('ordering');
+      } else {
+        this.showToast(data.error || 'Registration failed', 'error');
+      }
+    } catch (err) {
+      this.showToast('Registration failed', 'error');
+    }
+  },
+
+  async logoutUser() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', headers: this.getAuthHeaders() });
+    } catch {}
+    this.state.authToken = null;
+    this.state.currentUser = null;
+    localStorage.removeItem('dumco_token');
+    this.updateNavAuthPill();
+    this.closeAuthModal();
+    this.showToast('Signed out successfully', 'info');
+    this.navigate('ordering');
+  },
+
+  renderAuthModalBody() {
+    const body = document.getElementById('auth-modal-body');
+    if (!body) return;
+
+    if (this.state.currentUser) {
+      body.innerHTML = `
+        <div style="text-align: center; padding: 1.5rem 1rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">👑</div>
+          <h3 style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 0.25rem;">${this.state.currentUser.name}</h3>
+          <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            ${this.state.currentUser.email} • Role: <strong>${this.state.currentUser.role.toUpperCase()}</strong>
+            ${this.state.currentUser.outlet_name ? ` (${this.state.currentUser.outlet_name})` : ''}
+          </p>
+          <div style="display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-cart-nav" style="background: var(--text-main);" onclick="App.navigate('account'); App.closeAuthModal();">
+              View Order History
+            </button>
+            <button class="side-action-btn" style="background: #FEE2E2; color: #DC2626; border-color: #FCA5A5;" onclick="App.logoutUser()">
+              Sign Out
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const tab = this.state.authTab || 'demo';
+    body.innerHTML = `
+      <div class="auth-tab-group">
+        <button class="auth-tab-btn ${tab === 'demo' ? 'active' : ''}" onclick="App.switchAuthTab('demo')">
+          ⚡ 1-Click Demo
+        </button>
+        <button class="auth-tab-btn ${tab === 'login' ? 'active' : ''}" onclick="App.switchAuthTab('login')">
+          Sign In
+        </button>
+        <button class="auth-tab-btn ${tab === 'register' ? 'active' : ''}" onclick="App.switchAuthTab('register')">
+          New Customer
+        </button>
+      </div>
+
+      ${tab === 'demo' ? `
+        <div style="margin-bottom: 0.75rem;">
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+            Select a verified reviewer persona to authenticate instantly with real cryptographically hashed credentials:
+          </p>
+          
+          <div class="demo-account-card" onclick="App.loginWithDemo('customer')">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Rahul Verma</span>
+                <span class="demo-badge demo-badge-customer">Customer</span>
+              </div>
+              <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.15rem;">customer@dumco.in • 340 Loyalty Points</div>
+            </div>
+            <span style="color: var(--accent-gold); font-weight: 800; font-size: 0.84rem;">Login ➔</span>
+          </div>
+
+          <div class="demo-account-card" onclick="App.loginWithDemo('kitchen_kondapur')">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Chef Mohammed Qasim</span>
+                <span class="demo-badge demo-badge-kitchen">Kitchen Staff</span>
+              </div>
+              <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.15rem;">kondapur@dumco.in • Kondapur Flagship KDS</div>
+            </div>
+            <span style="color: var(--accent-gold); font-weight: 800; font-size: 0.84rem;">Login ➔</span>
+          </div>
+
+          <div class="demo-account-card" onclick="App.loginWithDemo('kitchen_gachibowli')">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Chef Syed Arshad</span>
+                <span class="demo-badge demo-badge-kitchen">Kitchen Staff</span>
+              </div>
+              <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.15rem;">gachibowli@dumco.in • Gachibowli Cloud Kitchen</div>
+            </div>
+            <span style="color: var(--accent-gold); font-weight: 800; font-size: 0.84rem;">Login ➔</span>
+          </div>
+
+          <div class="demo-account-card" onclick="App.loginWithDemo('kitchen_kukatpally')">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Chef Nageshwar Rao</span>
+                <span class="demo-badge demo-badge-kitchen">Kitchen Staff</span>
+              </div>
+              <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.15rem;">kukatpally@dumco.in • Kukatpally KPHB</div>
+            </div>
+            <span style="color: var(--accent-gold); font-weight: 800; font-size: 0.84rem;">Login ➔</span>
+          </div>
+
+          <div class="demo-account-card" onclick="App.loginWithDemo('admin')">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Zafar Khan</span>
+                <span class="demo-badge demo-badge-admin">Central Admin</span>
+              </div>
+              <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.15rem;">admin@dumco.in • Central Menu CMS & Analytics</div>
+            </div>
+            <span style="color: var(--accent-gold); font-weight: 800; font-size: 0.84rem;">Login ➔</span>
+          </div>
+        </div>
+      ` : tab === 'login' ? `
+        <form onsubmit="App.submitLogin(event)">
+          <div class="auth-form-group">
+            <label>Email Address</label>
+            <input type="email" id="auth-login-email" value="customer@dumco.in" required>
+          </div>
+          <div class="auth-form-group">
+            <label>Password</label>
+            <input type="password" id="auth-login-password" value="Customer@123" required>
+          </div>
+          <button type="submit" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; margin-top: 0.5rem; background: var(--text-main);">
+            Sign In with Password ➔
+          </button>
+        </form>
+      ` : `
+        <form onsubmit="App.submitRegister(event)">
+          <div class="auth-form-group">
+            <label>Full Name</label>
+            <input type="text" id="auth-reg-name" placeholder="e.g. Rahul Verma" required>
+          </div>
+          <div class="auth-form-group">
+            <label>Email Address</label>
+            <input type="email" id="auth-reg-email" placeholder="name@example.com" required>
+          </div>
+          <div class="auth-form-group">
+            <label>Mobile Number (for WhatsApp / SMS Updates)</label>
+            <input type="tel" id="auth-reg-phone" placeholder="+91 98490 12345" required>
+          </div>
+          <div class="auth-form-group">
+            <label>Password</label>
+            <input type="password" id="auth-reg-password" placeholder="Min 8 characters" required>
+          </div>
+          <button type="submit" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; margin-top: 0.5rem; background: var(--accent-gold);">
+            Create Customer Account ➔
+          </button>
+        </form>
+      `}
+    `;
   },
 
   // --------------------------------------------------------------------------
@@ -282,6 +612,8 @@ export const App = {
       document.getElementById('link-party')?.classList.add('active');
     } else if (viewName === 'tracking') {
       document.getElementById('link-tracking')?.classList.add('active');
+    } else if (viewName === 'account') {
+      document.getElementById('link-account')?.classList.add('active');
     }
 
     const container = document.getElementById('app-view-container');
@@ -313,9 +645,136 @@ export const App = {
       case 'ai_lab':
         this.renderAiLabView();
         break;
+      case 'account':
+        this.renderAccountView();
+        break;
       default:
         this.renderOrderingView();
     }
+  },
+
+  renderAccountView() {
+    const container = document.getElementById('app-view-container');
+    const user = this.state.currentUser || {
+      name: this.state.customerName,
+      phone: this.state.customerPhone,
+      email: 'customer@dumco.in',
+      role: 'customer'
+    };
+
+    const userOrders = this.state.orders.filter(o => 
+      !this.state.customerPhone || o.customer_phone === this.state.customerPhone
+    );
+
+    container.innerHTML = `
+      <div style="max-width: 900px; margin: 0 auto; padding-bottom: 3rem;">
+        
+        <!-- Account Hero & Loyalty Card -->
+        <div class="account-hero-card">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.8rem;">👑</span>
+              <h2 style="font-size: 1.6rem; color: #FFFFFF; margin: 0;">${user.name}</h2>
+              <span class="demo-badge demo-badge-customer">${user.role.toUpperCase()}</span>
+            </div>
+            <p style="color: #94A3B8; font-size: 0.88rem; margin: 0.2rem 0 0 0;">
+              ${user.phone || '+91 98490 12345'} • ${user.email}
+            </p>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.08); padding: 1rem 1.4rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); text-align: right;">
+            <div style="font-size: 0.72rem; color: #F59E0B; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
+              ROYALTY BALANCE
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #FFFFFF; font-family: 'JetBrains Mono', monospace;">
+              ${this.state.customerLoyaltyBalance} <span style="font-size: 0.9rem; color: #F59E0B;">pts</span>
+            </div>
+            <div style="font-size: 0.72rem; color: #94A3B8;">1 pt = ₹1 instant checkout credit</div>
+          </div>
+        </div>
+
+        <!-- Orders Section Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+          <div>
+            <h3 style="font-size: 1.3rem; color: var(--text-main); margin: 0;">Order History & Live Status</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Track current kitchen preparations and re-order previous feasts</p>
+          </div>
+          <button class="btn-cart-nav" onclick="App.navigate('ordering')">
+            + New Order
+          </button>
+        </div>
+
+        <!-- Orders List -->
+        <div class="account-orders-list">
+          ${userOrders.length === 0 ? `
+            <div style="text-align: center; padding: 4rem 1rem; background: #FFFFFF; border-radius: 16px; border: 1.5px dashed var(--border-subtle);">
+              <div style="font-size: 3rem; margin-bottom: 0.5rem;">🍲</div>
+              <h4 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 0.3rem;">No past orders found</h4>
+              <p style="font-size: 0.86rem; color: var(--text-muted); margin-bottom: 1.2rem;">Order your first authentic Hyderabadi Dum Biryani directly from the kitchen!</p>
+              <button class="btn-cart-nav" onclick="App.navigate('ordering')">Explore Direct Menu ➔</button>
+            </div>
+          ` : userOrders.map(order => {
+            const statusColor = order.status === 'COMPLETED' ? '#10B981' : order.status === 'READY_FOR_PICKUP' ? '#3B82F6' : order.status === 'PREPARING' ? '#F59E0B' : '#6B7280';
+            return `
+              <div class="order-history-card">
+                <div class="order-history-header">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                      <strong style="font-size: 1.05rem; color: var(--text-main); font-family: 'JetBrains Mono', monospace;">#${order.id}</strong>
+                      <span style="font-size: 0.75rem; background: ${statusColor}20; color: ${statusColor}; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: var(--radius-full);">
+                        ${order.status}
+                      </span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">
+                      ${order.outlet_name} • Placed ${new Date(order.placed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">₹${order.total_amount}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${order.payment_method} • ${order.payment_status}</div>
+                  </div>
+                </div>
+
+                <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.9rem;">
+                  ${order.items.map(it => `${it.quantity}x ${it.name} ${it.portion ? `(${it.portion})` : ''}`).join(' • ')}
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem;">
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">
+                    Promised delivery: ~${order.ai_prep_estimate_minutes} mins
+                  </span>
+                  <div style="display: flex; gap: 0.6rem;">
+                    <button class="side-action-btn" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;" onclick="App.state.activeOrderId='${order.id}'; App.navigate('tracking');">
+                      📍 Track Live
+                    </button>
+                    <button class="btn-add-action" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;" onclick="App.reorderPastOrder('${order.id}')">
+                      🔄 Re-Order
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+      </div>
+    `;
+  },
+
+  reorderPastOrder(orderId) {
+    const order = this.state.orders.find(o => o.id === orderId);
+    if (!order) return;
+    this.state.cart = order.items.map(it => ({
+      item_id: it.item_id || it.id,
+      name: it.name,
+      portion: it.portion || 'Regular',
+      unit_price: it.unit_price || it.base_price || 380,
+      quantity: it.quantity || 1,
+      add_ons: it.add_ons || []
+    }));
+    this.updateCartBadge();
+    this.showToast(`Re-ordered feast from #${orderId}!`, 'success');
+    this.openCartDrawer();
   },
 
   handleRoleChange(role) {
@@ -1175,22 +1634,25 @@ export const App = {
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; background: #008643; border-radius: 10px;" onclick="App.processMockPayment('UPI (Google Pay)', 'GPAY_TXN_' + Math.floor(100000 + Math.random() * 900000))">
-            🟢 Simulate Google Pay Approval ➔
+          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; background: #008643; border-radius: 10px;" onclick="App.processMockPayment('UPI (Google Pay)', 'GPAY_TXN_' + Math.floor(100000 + Math.random() * 900000), 'SUCCESS')">
+            🟢 Authorize UPI Payment (Simulate Success) ➔
           </button>
-          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; background: #5F259F; border-radius: 10px;" onclick="App.processMockPayment('UPI (PhonePe)', 'PHONEPE_TXN_' + Math.floor(100000 + Math.random() * 900000))">
-            🟣 Simulate PhonePe Approval ➔
-          </button>
-          <button class="category-chip" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.86rem; border-radius: 10px;" onclick="App.processMockPayment('UPI (Paytm)', 'PAYTM_TXN_' + Math.floor(100000 + Math.random() * 900000))">
-            🔵 Simulate Paytm UPI Approval ➔
-          </button>
+          
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="side-action-btn" style="flex: 1; padding: 0.65rem; font-size: 0.8rem; background: #FEE2E2; color: #DC2626; border-color: #FCA5A5;" onclick="App.processMockPayment('UPI (GPay)', 'SIM_DECLINE_' + Math.floor(100000 + Math.random() * 900000), 'DECLINE')">
+              🔴 Simulate Bank Decline
+            </button>
+            <button class="side-action-btn" style="flex: 1; padding: 0.65rem; font-size: 0.8rem; background: #FEF3C7; color: #D97706; border-color: #FCD34D;" onclick="App.processMockPayment('UPI (GPay)', 'SIM_TIMEOUT_' + Math.floor(100000 + Math.random() * 900000), 'TIMEOUT')">
+              🟠 Simulate PSP Timeout
+            </button>
+          </div>
         </div>
       ` : tab === 'card' ? `
         <!-- Card Test Mode Simulation -->
         <div class="mock-card-visual">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <span style="font-size: 1.4rem;">💳</span>
-            <span style="font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em;">VISA TEST</span>
+            <span style="font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em;">VISA TEST GATEWAY</span>
           </div>
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; letter-spacing: 0.15em; margin-bottom: 1.25rem;">
             4242 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4242
@@ -1211,9 +1673,20 @@ export const App = {
           </div>
         </div>
 
-        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px; background: #2563EB;" onclick="App.processMockPayment('Card (Visa 4242)', 'CARD_AUTH_' + Math.floor(100000 + Math.random() * 900000))">
-          Authorize ₹${totalAmount} Test Card Payment ➔
-        </button>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1rem; border-radius: 12px; background: #2563EB;" onclick="App.processMockPayment('Card (Visa 4242)', 'CARD_AUTH_' + Math.floor(100000 + Math.random() * 900000), 'SUCCESS')">
+            Authorize ₹${totalAmount} Test Card Payment ➔
+          </button>
+          
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="side-action-btn" style="flex: 1; padding: 0.65rem; font-size: 0.8rem; background: #FEE2E2; color: #DC2626; border-color: #FCA5A5;" onclick="App.processMockPayment('Card (Visa 4242)', 'CARD_DECLINE_' + Math.floor(100000 + Math.random() * 900000), 'DECLINE')">
+              🔴 Simulate Card Decline
+            </button>
+            <button class="side-action-btn" style="flex: 1; padding: 0.65rem; font-size: 0.8rem; background: #FEF3C7; color: #D97706; border-color: #FCD34D;" onclick="App.processMockPayment('Card (Visa 4242)', 'CARD_TIMEOUT_' + Math.floor(100000 + Math.random() * 900000), 'TIMEOUT')">
+              🟠 Simulate Issuer Timeout
+            </button>
+          </div>
+        </div>
       ` : `
         <!-- Cash On Delivery -->
         <div style="background: var(--bg-surface); padding: 1.5rem; border-radius: 14px; border: 1.5px solid var(--border-subtle); margin-bottom: 1.25rem; text-align: center;">
@@ -1224,31 +1697,71 @@ export const App = {
           </p>
         </div>
 
-        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px;" onclick="App.processMockPayment('Cash on Delivery', 'COD_' + Math.floor(100000 + Math.random() * 900000))">
+        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px;" onclick="App.processMockPayment('Cash on Delivery', 'COD_' + Math.floor(100000 + Math.random() * 900000), 'SUCCESS')">
           Confirm Order with Pay on Delivery (₹${totalAmount}) ➔
         </button>
       `}
     `;
   },
 
-  async processMockPayment(method, refId) {
+  async processMockPayment(method, refId, action = 'SUCCESS') {
     const body = document.getElementById('payment-modal-body');
     if (body) {
       body.innerHTML = `
-        <div style="text-align: center; padding: 3rem 1rem;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem; animation: kdsPulse 1s infinite;">⚡</div>
-          <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.4rem;">Authorizing Test Transaction...</h3>
-          <p style="font-size: 0.86rem; color: var(--text-muted);">Simulating banking gateway authorization (${method} • ${refId})</p>
+        <div style="text-align: center; padding: 2.5rem 1rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.8rem; animation: kdsPulse 1s infinite;">⚡</div>
+          <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.3rem;">Contacting Payment Gateway...</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Simulating banking authorization (${method} • ${refId})</p>
         </div>
       `;
     }
 
-    setTimeout(async () => {
+    try {
+      const amount = this.state.pendingPayment ? this.state.pendingPayment.totalAmount : 1180;
+      const res = await fetch('/api/payments/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          method,
+          test_action: action,
+          ref_id: refId
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        this.closePaymentModal();
+        if (!this.state.pendingPayment) return;
+        const { totalAmount, subtotal, gst, discount, loyaltyRedeemed } = this.state.pendingPayment;
+        await this.submitOrder(totalAmount, subtotal, gst, discount, loyaltyRedeemed, method, data.transaction_id);
+      } else {
+        // Failed or declined state: display error in modal with Retry button
+        if (body) {
+          body.innerHTML = `
+            <div style="text-align: center; padding: 1.5rem 1rem;">
+              <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+              <h3 style="font-size: 1.2rem; color: #DC2626; margin-bottom: 0.4rem;">Payment Authorization Failed</h3>
+              <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+                ${data.error || 'The test transaction was declined by the simulated payment network.'}
+              </p>
+              <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-cart-nav" style="background: #16A34A;" onclick="App.renderPaymentModalContent()">
+                  🔄 Retry Payment
+                </button>
+                <button class="side-action-btn" onclick="App.closePaymentModal()">
+                  Back to Cart
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      }
+    } catch (e) {
+      this.showToast('Network error during payment gateway simulation', 'error');
       this.closePaymentModal();
-      if (!this.state.pendingPayment) return;
-      const { totalAmount, subtotal, gst, discount, loyaltyRedeemed } = this.state.pendingPayment;
-      await this.submitOrder(totalAmount, subtotal, gst, discount, loyaltyRedeemed, method, refId);
-    }, 1000);
+    }
   },
 
   async applyCoupon() {
@@ -1804,21 +2317,29 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
     const outlet = this.state.currentOutlet;
 
     container.innerHTML = `
-      <div style="max-width: 1160px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div style="max-width: 1160px; margin: 0 auto; padding-bottom: 3rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <h2 style="font-size: 2rem; color: var(--text-main);">Central Menu CMS & Real-Time Stock</h2>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <h2 style="font-size: 2rem; color: var(--text-main); margin: 0;">Central Menu CMS & Catalog</h2>
+              <span class="demo-badge demo-badge-admin">HQ Admin</span>
+            </div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
-              Manage prices across Hyderabad, time-based menus, and pause out-of-stock items ("86 item") in real time.
+              Create, edit, or delete dishes, configure regional pricing, and pause out-of-stock items in real time across 17 locations.
             </p>
           </div>
           
-          <div style="display: flex; gap: 0.85rem; align-items: center;">
-            <button class="btn-return-customer" onclick="App.navigate('ordering')">
-              ← Exit to Customer Menu
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn-cart-nav" style="background: var(--accent-gold); padding: 0.55rem 1.1rem; font-size: 0.88rem;" onclick="App.openCmsItemModal()">
+              ＋ Create New Dish
             </button>
-            <label style="font-size: 0.88rem; color: var(--text-secondary); font-weight: 700;">Active Outlet:</label>
-            <select class="role-dropdown" onchange="App.switchOutlet(this.value)">
+            <button class="side-action-btn" style="padding: 0.55rem 1rem; font-size: 0.88rem;" onclick="App.openCmsCityModal()">
+              🏙️ City Prices
+            </button>
+            <button class="btn-return-customer" onclick="App.navigate('ordering')">
+              ← Customer View
+            </button>
+            <select class="role-dropdown" onchange="App.switchOutlet(this.value)" title="Active outlet stock preview">
               ${this.state.outlets.map(o => `
                 <option value="${o.id}" ${o.id === outlet.id ? 'selected' : ''}>${o.name}</option>
               `).join('')}
@@ -1830,12 +2351,13 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
           <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
               <tr style="background-color: var(--bg-surface); border-bottom: 1.5px solid var(--border-subtle); color: var(--text-secondary);">
-                <th style="padding: 1.1rem;">Item Name</th>
+                <th style="padding: 1.1rem;">Item Name & Classification</th>
                 <th style="padding: 1.1rem;">Category</th>
                 <th style="padding: 1.1rem;">Base Price (incl 5% GST)</th>
                 <th style="padding: 1.1rem;">Time Rule</th>
-                <th style="padding: 1.1rem;">Prep Weight</th>
-                <th style="padding: 1.1rem; text-align: right;">Live Stock Status</th>
+                <th style="padding: 1.1rem;">Complexity</th>
+                <th style="padding: 1.1rem; text-align: center;">Live Stock (${outlet.name.split(' ')[0]})</th>
+                <th style="padding: 1.1rem; text-align: right;">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -1845,7 +2367,10 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
                     <img src="${item.image_url}" alt="${item.name}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;">
                     <div>
                       <strong style="color: var(--text-main); font-size: 0.95rem;">${item.name}</strong>
-                      <div style="font-size: 0.78rem; color: var(--text-muted);">${item.is_veg ? '🌱 Veg' : '🍖 Non-Veg'} • ${item.spice_level}</div>
+                      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem;">
+                        ${item.is_veg ? '🌱 Veg' : '🍖 Non-Veg'} • ${item.spice_level}
+                        ${item.allergens ? ` • Allergen: ${item.allergens}` : ''}
+                      </div>
                     </div>
                   </td>
                   <td style="padding: 1.1rem; color: var(--text-secondary); font-weight: 600;">${item.category}</td>
@@ -1856,11 +2381,19 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
                     </span>
                   </td>
                   <td style="padding: 1.1rem; color: var(--text-muted); font-weight: 600;">${item.prep_complexity_minutes} mins</td>
-                  <td style="padding: 1.1rem; text-align: right;">
+                  <td style="padding: 1.1rem; text-align: center;">
                     <button class="category-chip ${item.is_available ? 'active' : ''}" 
-                            style="padding: 0.4rem 1rem; font-size: 0.82rem; ${!item.is_available ? 'background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);' : ''}"
+                            style="padding: 0.35rem 0.85rem; font-size: 0.78rem; ${!item.is_available ? 'background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);' : ''}"
                             onclick="App.toggleItemStock('${item.id}', ${!item.is_available})">
                       ${item.is_available ? '🟢 Available' : '🔴 Paused (86)'}
+                    </button>
+                  </td>
+                  <td style="padding: 1.1rem; text-align: right; white-space: nowrap;">
+                    <button class="side-action-btn" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; margin-right: 0.35rem;" onclick="App.openCmsItemModal('${item.id}')">
+                      ✏️ Edit
+                    </button>
+                    <button class="side-action-btn" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; background: #FEE2E2; color: #DC2626; border-color: #FCA5A5;" onclick="App.deleteCmsItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                      🗑️
                     </button>
                   </td>
                 </tr>
@@ -1872,11 +2405,251 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
     `;
   },
 
+  openCmsItemModal(itemId = null) {
+    const modal = document.getElementById('cms-item-modal');
+    const title = document.getElementById('cms-item-modal-title');
+    const body = document.getElementById('cms-item-modal-body');
+    if (!modal || !body) return;
+
+    const item = itemId ? this.state.menu.find(m => m.id === itemId) : null;
+    this.state.editingMenuItem = item;
+
+    if (title) title.textContent = item ? `Edit Dish: ${item.name}` : 'Create New Menu Dish';
+
+    const categories = ['Dum Biryani', 'Royal Specials', 'Starters & Kebabs', 'Hyderabadi Curries', 'Desserts & Shakes', 'Specialties'];
+
+    body.innerHTML = `
+      <form onsubmit="App.submitCmsItem(event)">
+        <div class="auth-form-group">
+          <label>Dish Name *</label>
+          <input type="text" id="cms-dish-name" value="${item ? item.name : ''}" placeholder="e.g. Shahi Mutton Dum Biryani" required>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Category *</label>
+            <select id="cms-dish-category">
+              ${categories.map(c => `
+                <option value="${c}" ${item && item.category === c ? 'selected' : ''}>${c}</option>
+              `).join('')}
+            </select>
+          </div>
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Base Price (₹ incl 5% GST) *</label>
+            <input type="number" id="cms-dish-price" value="${item ? item.base_price : 380}" min="10" required>
+          </div>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Description</label>
+          <textarea id="cms-dish-desc" rows="2" placeholder="Description of spices, slow-cooking technique, and aroma...">${item ? item.description : ''}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Classification</label>
+            <select id="cms-dish-veg">
+              <option value="0" ${item && !item.is_veg ? 'selected' : ''}>🍖 Non-Vegetarian</option>
+              <option value="1" ${item && item.is_veg ? 'selected' : ''}>🌱 Pure Vegetarian</option>
+            </select>
+          </div>
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Spice Level</label>
+            <select id="cms-dish-spice">
+              <option value="Mild" ${item && item.spice_level === 'Mild' ? 'selected' : ''}>Mild</option>
+              <option value="Medium" ${item && item.spice_level === 'Medium' ? 'selected' : ''}>Medium</option>
+              <option value="Fiery" ${item && item.spice_level === 'Fiery' ? 'selected' : ''}>Fiery</option>
+              <option value="Nawabi Dum" ${item && item.spice_level === 'Nawabi Dum' ? 'selected' : ''}>Nawabi Dum</option>
+            </select>
+          </div>
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Allergens</label>
+            <input type="text" id="cms-dish-allergens" value="${item ? item.allergens : ''}" placeholder="e.g. Dairy, Nuts">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Prep Complexity (Mins)</label>
+            <input type="number" id="cms-dish-complexity" value="${item ? item.prep_complexity_minutes : 12}" min="2" max="60">
+          </div>
+          <div class="auth-form-group" style="flex: 1;">
+            <label>Time-Based Menu Tag</label>
+            <select id="cms-dish-tag">
+              <option value="All Day" ${item && item.time_based_tag === 'All Day' ? 'selected' : ''}>All Day</option>
+              <option value="Lunch Special" ${item && item.time_based_tag === 'Lunch Special' ? 'selected' : ''}>Lunch Special</option>
+              <option value="Dinner & Midnight Biryani" ${item && item.time_based_tag === 'Dinner & Midnight Biryani' ? 'selected' : ''}>Dinner & Midnight Biryani</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Food Photograph Image URL</label>
+          <input type="url" id="cms-dish-image" value="${item ? item.image_url : 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80'}">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" class="side-action-btn" onclick="App.closeCmsItemModal()">Cancel</button>
+          <button type="submit" class="btn-cart-nav" style="background: var(--accent-gold);">
+            ${item ? 'Save Changes ➔' : 'Create Dish ➔'}
+          </button>
+        </div>
+      </form>
+    `;
+
+    modal.classList.add('open');
+  },
+
+  closeCmsItemModal() {
+    const modal = document.getElementById('cms-item-modal');
+    if (modal) modal.classList.remove('open');
+  },
+
+  async submitCmsItem(e) {
+    if (e) e.preventDefault();
+    const item = this.state.editingMenuItem;
+    const isEdit = !!item;
+
+    const payload = {
+      name: document.getElementById('cms-dish-name')?.value,
+      category: document.getElementById('cms-dish-category')?.value,
+      base_price: Number(document.getElementById('cms-dish-price')?.value),
+      description: document.getElementById('cms-dish-desc')?.value,
+      is_veg: Number(document.getElementById('cms-dish-veg')?.value),
+      spice_level: document.getElementById('cms-dish-spice')?.value,
+      allergens: document.getElementById('cms-dish-allergens')?.value,
+      prep_complexity_minutes: Number(document.getElementById('cms-dish-complexity')?.value),
+      time_based_tag: document.getElementById('cms-dish-tag')?.value,
+      image_url: document.getElementById('cms-dish-image')?.value
+    };
+
+    try {
+      const url = isEdit ? `/api/menu/items/${item.id}` : '/api/menu/items';
+      const method = isEdit ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        this.showToast(isEdit ? `Updated dish: ${payload.name}` : `Created dish: ${payload.name}`, 'success');
+        this.closeCmsItemModal();
+        await this.fetchMenu();
+        this.renderCmsView();
+      } else {
+        const err = await res.json();
+        this.showToast(err.error || 'Failed to save dish', 'error');
+      }
+    } catch (err) {
+      this.showToast('Network error saving dish', 'error');
+    }
+  },
+
+  async deleteCmsItem(itemId, name) {
+    if (!confirm(`Are you sure you want to permanently delete "${name}" from the central catalog?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/menu/items/${itemId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (res.ok) {
+        this.showToast(`Deleted dish: ${name}`, 'info');
+        await this.fetchMenu();
+        this.renderCmsView();
+      } else {
+        const err = await res.json();
+        this.showToast(err.error || 'Failed to delete dish', 'error');
+      }
+    } catch (err) {
+      this.showToast('Network error deleting dish', 'error');
+    }
+  },
+
+  openCmsCityModal() {
+    const modal = document.getElementById('cms-city-modal');
+    const body = document.getElementById('cms-city-modal-body');
+    if (!modal || !body) return;
+
+    body.innerHTML = `
+      <form onsubmit="App.submitCityPrice(event)">
+        <div class="auth-form-group">
+          <label>Target City / Region</label>
+          <select id="cms-city-name">
+            <option value="Hyderabad">Hyderabad Core</option>
+            <option value="Secunderabad">Secunderabad</option>
+            <option value="Cyberabad">Cyberabad (Hitec/Gachibowli)</option>
+          </select>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Menu Item</label>
+          <select id="cms-city-item">
+            ${this.state.menu.map(m => `
+              <option value="${m.id}">${m.name} (Current: ₹${m.base_price})</option>
+            `).join('')}
+          </select>
+        </div>
+
+        <div class="auth-form-group">
+          <label>City-Specific Base Price (₹ incl 5% GST)</label>
+          <input type="number" id="cms-city-price" placeholder="e.g. 420" required min="10">
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="button" class="side-action-btn" onclick="App.closeCmsCityModal()">Cancel</button>
+          <button type="submit" class="btn-cart-nav" style="background: var(--accent-gold);">
+            Save Regional Override ➔
+          </button>
+        </div>
+      </form>
+    `;
+
+    modal.classList.add('open');
+  },
+
+  closeCmsCityModal() {
+    const modal = document.getElementById('cms-city-modal');
+    if (modal) modal.classList.remove('open');
+  },
+
+  async submitCityPrice(e) {
+    if (e) e.preventDefault();
+    const city = document.getElementById('cms-city-name')?.value;
+    const menuItemId = document.getElementById('cms-city-item')?.value;
+    const price = Number(document.getElementById('cms-city-price')?.value);
+
+    try {
+      const res = await fetch('/api/menu/city-price', {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ city, menu_item_id: menuItemId, price })
+      });
+
+      if (res.ok) {
+        this.showToast(`Configured regional price for ${city}: ₹${price}`, 'success');
+        this.closeCmsCityModal();
+        await this.fetchMenu();
+        this.renderCmsView();
+      } else {
+        const err = await res.json();
+        this.showToast(err.error || 'Failed to set city price', 'error');
+      }
+    } catch (err) {
+      this.showToast('Network error setting city price', 'error');
+    }
+  },
+
   async toggleItemStock(itemId, makeAvailable) {
     try {
       const res = await fetch('/api/menu/toggle-stock', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           outlet_id: this.state.currentOutlet.id,
           menu_item_id: itemId,
@@ -1887,6 +2660,9 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
         this.showToast(`Item stock ${makeAvailable ? 'restored' : 'paused'} for ${this.state.currentOutlet.name}`, 'info');
         await this.fetchMenu();
         this.renderCmsView();
+      } else {
+        const err = await res.json();
+        this.showToast(err.error || 'Failed to update stock', 'error');
       }
     } catch (e) {
       this.showToast('Failed to update stock', 'error');
@@ -2513,6 +3289,21 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
     }
 
     list.innerHTML = `
+      <!-- Delivery Radius & Geofence Verification Tool -->
+      <div class="outlet-radius-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <strong style="font-size: 0.88rem; color: var(--text-main);">📍 Verify Delivery Radius for Your Address</strong>
+          <span style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800;">DETERMINISTIC GEO-CALC</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="delivery-address-check-input" placeholder="Enter landmark / area (e.g. Kondapur, Gachibowli, Kukatpally, Shamshabad)..." style="flex: 1; padding: 0.6rem 0.85rem; font-size: 0.85rem;">
+          <button class="btn-cart-nav" style="padding: 0.6rem 1rem; font-size: 0.82rem; background: var(--accent-gold); white-space: nowrap;" onclick="App.checkDeliveryRadius()">
+            Check Radius
+          </button>
+        </div>
+        <div id="delivery-check-result" style="display: none;"></div>
+      </div>
+
       <!-- Location Filter Tabs -->
       <div class="modal-outlet-tabs">
         <button class="modal-outlet-tab-btn ${this.state.outletModalFilter === 'all' ? 'active' : ''}" onclick="App.setOutletFilter('all')">
@@ -2593,6 +3384,54 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
     const nearest = this.state.outlets.find(o => o.slug === 'kondapur') || this.state.outlets[0];
     this.showToast(`📍 Geolocation locked: Nearest kitchen is ${nearest.name} (1.4 km away, within 7.0 km radius)`, 'success');
     this.switchOutlet(nearest.id);
+  },
+
+  async checkDeliveryRadius() {
+    const input = document.getElementById('delivery-address-check-input');
+    const resultBox = document.getElementById('delivery-check-result');
+    if (!input || !resultBox) return;
+
+    const address = input.value.trim();
+    if (!address) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'radius-check-result radius-check-warning';
+      resultBox.innerHTML = '⚠️ Please enter an area or address to verify delivery.';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/outlets/check-delivery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address })
+      });
+      const data = await res.json();
+      resultBox.style.display = 'block';
+
+      if (data.serviceable) {
+        resultBox.className = 'radius-check-result radius-check-success';
+        resultBox.innerHTML = `
+          <strong>✅ Delivery Available!</strong><br>
+          Delivering from <strong>${data.recommended_outlet.name}</strong> (${data.recommended_outlet.distance_km} km away, within ${data.recommended_outlet.delivery_radius_km} km radius).<br>
+          <button class="btn-add-action" style="margin-top: 0.5rem; padding: 0.35rem 0.8rem; font-size: 0.8rem;" onclick="App.switchOutlet('${data.recommended_outlet.id}')">
+            Set ${data.recommended_outlet.name} as Delivery Kitchen ➔
+          </button>
+        `;
+      } else {
+        resultBox.className = 'radius-check-result radius-check-warning';
+        resultBox.innerHTML = `
+          <strong>⚠️ Outside Standard Delivery Radius</strong><br>
+          ${data.message}<br>
+          <button class="btn-add-action" style="margin-top: 0.5rem; padding: 0.35rem 0.8rem; font-size: 0.8rem; background: #B45309;" onclick="App.switchOutlet('${data.nearest_outlet.id}')">
+            Switch to ${data.nearest_outlet.name} for Pickup ➔
+          </button>
+        `;
+      }
+    } catch (e) {
+      resultBox.style.display = 'block';
+      resultBox.className = 'radius-check-result radius-check-warning';
+      resultBox.innerHTML = 'Could not verify coordinates. Please try another area name.';
+    }
   },
 
   closeOutletModal() {

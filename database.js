@@ -1,12 +1,13 @@
 /**
- * Database Module for Nizami Biryani / Nawabi Zaika
- * Powered by Node.js 24 native node:sqlite (DatabaseSync)
- * Real ACID relational store with complete SQL injection prevention
+ * Database Module for Dum & Co. / Company A Hyderabad Direct Ordering Platform
+ * Powered by Node.js 24 native node:sqlite (DatabaseSync) and node:crypto
+ * Real ACID relational store with secure password hashing, session tokens, and SQL injection prevention
  */
 
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { OUTLETS, MENU_ITEMS, COUPONS, SAMPLE_ORDERS, DEMO_USERS } from './sample-data.js';
 
@@ -25,6 +26,28 @@ export const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA foreign_keys = ON;');
 db.exec('PRAGMA journal_mode = WAL;');
 db.exec('PRAGMA busy_timeout = 5000;');
+
+// ----------------- CRYPTOGRAPHIC HELPERS -----------------
+
+export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return { hash, salt };
+}
+
+export function verifyPassword(password, hash, salt) {
+  try {
+    const testHash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return crypto.timingSafeEqual(Buffer.from(testHash, 'hex'), Buffer.from(hash, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
+export function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// ----------------- SCHEMA DEFINITION -----------------
 
 export function initDatabase() {
   db.exec(`
@@ -86,6 +109,14 @@ export function initDatabase() {
       FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)
     );
 
+    CREATE TABLE IF NOT EXISTS city_prices (
+      city TEXT NOT NULL,
+      menu_item_id TEXT NOT NULL,
+      price REAL NOT NULL,
+      PRIMARY KEY (city, menu_item_id),
+      FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS orders (
       id TEXT PRIMARY KEY,
       outlet_id TEXT NOT NULL,
@@ -109,6 +140,7 @@ export function initDatabase() {
       late_alert_triggered INTEGER NOT NULL DEFAULT 0,
       dpdp_marketing_consent INTEGER NOT NULL DEFAULT 0,
       cancellation_reason TEXT,
+      idempotency_key TEXT,
       FOREIGN KEY (outlet_id) REFERENCES outlets(id)
     );
 
@@ -150,6 +182,27 @@ export function initDatabase() {
       FOREIGN KEY (outlet_id) REFERENCES outlets(id)
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      phone TEXT,
+      password_hash TEXT NOT NULL,
+      salt TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'customer',
+      outlet_id TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (outlet_id) REFERENCES outlets(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS audit_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       event_type TEXT NOT NULL,
@@ -162,9 +215,19 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_orders_outlet_status ON orders(outlet_id, status);
     CREATE INDEX IF NOT EXISTS idx_orders_placed_at ON orders(placed_at);
     CREATE INDEX IF NOT EXISTS idx_loyalty_phone ON loyalty_ledger(customer_phone);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
   `);
 
+  // Migrate existing tables if new columns added
+  try {
+    db.exec('ALTER TABLE orders ADD COLUMN idempotency_key TEXT;');
+  } catch {
+    // Column already exists
+  }
+
   seedDataIfEmpty();
+  seedDemoUsersIfEmpty();
 }
 
 export function seedDataIfEmpty() {
@@ -268,7 +331,7 @@ export function seedDataIfEmpty() {
     INSERT INTO loyalty_ledger (customer_phone, points_earned, points_spent, balance, order_id, note)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
-  insertLoyalty.run('+91 98490 12345', 340, 0, 340, 'SIGNUP_BONUS', 'Welcome to Nizami Zaika Direct Rewards');
+  insertLoyalty.run('+91 98490 12345', 340, 0, 340, 'SIGNUP_BONUS', 'Welcome to Dum & Co. Direct Rewards');
 
   // Seed sample Party Order
   const insertParty = db.prepare(`
@@ -291,6 +354,219 @@ export function seedDataIfEmpty() {
   );
 }
 
+export function seedDemoUsersIfEmpty() {
+  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get();
+  if (userCount.count > 0) {
+    return;
+  }
+
+  const insertUser = db.prepare(`
+    INSERT INTO users (id, name, email, phone, password_hash, salt, role, outlet_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const demoAccounts = [
+    {
+      id: 'usr-customer-rahul',
+      name: 'Rahul Verma',
+      email: 'customer@dumco.in',
+      phone: '+91 98490 12345',
+      password: 'Customer@123',
+      role: 'customer',
+      outlet_id: null
+    },
+    {
+      id: 'usr-kitchen-kondapur',
+      name: 'Chef Mohammed Qasim',
+      email: 'kondapur@dumco.in',
+      phone: '+91 40 6822 1001',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-kondapur'
+    },
+    {
+      id: 'usr-kitchen-gachibowli',
+      name: 'Chef Syed Arshad',
+      email: 'gachibowli@dumco.in',
+      phone: '+91 40 6822 1002',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-gachibowli-ck'
+    },
+    {
+      id: 'usr-kitchen-kukatpally',
+      name: 'Chef Nageshwar Rao',
+      email: 'kukatpally@dumco.in',
+      phone: '+91 40 6822 1003',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-kukatpally'
+    },
+    {
+      id: 'usr-admin-zafar',
+      name: 'Zafar Khan',
+      email: 'admin@dumco.in',
+      phone: '+91 40 6822 1000',
+      password: 'Admin@123',
+      role: 'admin',
+      outlet_id: null
+    }
+  ];
+
+  for (const acc of demoAccounts) {
+    const { hash, salt } = hashPassword(acc.password);
+    insertUser.run(acc.id, acc.name, acc.email.toLowerCase(), acc.phone, hash, salt, acc.role, acc.outlet_id);
+  }
+}
+
+// ----------------- AUTHENTICATION REPOSITORY -----------------
+
+export function registerUser({ name, email, phone, password, role = 'customer', outlet_id = null }) {
+  if (!name || !email || !password) {
+    throw new Error('Name, email and password are required');
+  }
+
+  const existing = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(email);
+  if (existing) {
+    throw new Error('An account with this email address already exists');
+  }
+
+  const id = `usr-${crypto.randomBytes(6).toString('hex')}`;
+  const { hash, salt } = hashPassword(password);
+
+  db.prepare(`
+    INSERT INTO users (id, name, email, phone, password_hash, salt, role, outlet_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, name, email.toLowerCase(), phone || '', hash, salt, role, outlet_id);
+
+  return getUserById(id);
+}
+
+export function authenticateUser(email, password) {
+  if (!email || !password) return null;
+
+  const user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email);
+  if (!user) return null;
+
+  const isValid = verifyPassword(password, user.password_hash, user.salt);
+  if (!isValid) return null;
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    outlet_id: user.outlet_id
+  };
+}
+
+export function createSession(userId, expiresInHours = 72) {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + expiresInHours * 3600 * 1000).toISOString();
+
+  db.prepare(`
+    INSERT INTO sessions (token, user_id, expires_at)
+    VALUES (?, ?, ?)
+  `).run(token, userId, expiresAt);
+
+  return { token, expiresAt };
+}
+
+export function getUserByToken(token) {
+  if (!token) return null;
+
+  const row = db.prepare(`
+    SELECT u.id, u.name, u.email, u.phone, u.role, u.outlet_id, s.expires_at,
+           out.name as outlet_name
+    FROM sessions s
+    JOIN users u ON s.user_id = u.id
+    LEFT JOIN outlets out ON u.outlet_id = out.id
+    WHERE s.token = ?
+  `).get(token);
+
+  if (!row) return null;
+
+  // Check expiration
+  if (new Date(row.expires_at) < new Date()) {
+    deleteSession(token);
+    return null;
+  }
+
+  return row;
+}
+
+export function deleteSession(token) {
+  db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
+  return { success: true };
+}
+
+export function getUserById(id) {
+  const user = db.prepare(`
+    SELECT u.id, u.name, u.email, u.phone, u.role, u.outlet_id, u.created_at,
+           out.name as outlet_name
+    FROM users u
+    LEFT JOIN outlets out ON u.outlet_id = out.id
+    WHERE u.id = ?
+  `).get(id);
+
+  return user || null;
+}
+
+export function getDemoAccounts() {
+  return [
+    {
+      role: 'customer',
+      role_label: 'Customer',
+      name: 'Rahul Verma',
+      email: 'customer@dumco.in',
+      password: 'Customer@123',
+      phone: '+91 98490 12345',
+      note: 'Registered customer with 340 loyalty points'
+    },
+    {
+      role: 'kitchen_staff',
+      role_label: 'Kitchen Staff (Kondapur)',
+      name: 'Chef Mohammed Qasim',
+      email: 'kondapur@dumco.in',
+      password: 'Kitchen@123',
+      outlet_id: 'out-kondapur',
+      outlet_name: 'Kondapur Flagship',
+      note: 'Assigned to Kondapur Flagship kitchen display'
+    },
+    {
+      role: 'kitchen_staff',
+      role_label: 'Kitchen Staff (Gachibowli)',
+      name: 'Chef Syed Arshad',
+      email: 'gachibowli@dumco.in',
+      password: 'Kitchen@123',
+      outlet_id: 'out-gachibowli-ck',
+      outlet_name: 'Gachibowli Cloud Kitchen',
+      note: 'Assigned to Gachibowli cloud kitchen'
+    },
+    {
+      role: 'kitchen_staff',
+      role_label: 'Kitchen Staff (Kukatpally)',
+      name: 'Chef Nageshwar Rao',
+      email: 'kukatpally@dumco.in',
+      password: 'Kitchen@123',
+      outlet_id: 'out-kukatpally',
+      outlet_name: 'Kukatpally KPHB',
+      note: 'Assigned to Kukatpally KPHB kitchen display'
+    },
+    {
+      role: 'admin',
+      role_label: 'Central Administrator',
+      name: 'Zafar Khan',
+      email: 'admin@dumco.in',
+      password: 'Admin@123',
+      outlet_id: null,
+      outlet_name: 'Central HQ, Banjara Hills',
+      note: 'Central menu management, city prices, and analytics'
+    }
+  ];
+}
+
 // ----------------- QUERY & REPOSITORY METHODS -----------------
 
 export function getAllOutlets() {
@@ -301,14 +577,17 @@ export function getOutletById(outletId) {
   return db.prepare('SELECT * FROM outlets WHERE id = ?').get(outletId);
 }
 
-export function getFullMenuForOutlet(outletId) {
+export function getFullMenuForOutlet(outletId, city = 'Hyderabad') {
   const items = db.prepare(`
-    SELECT m.*, COALESCE(os.is_available, 1) as is_available
+    SELECT m.*,
+           COALESCE(cp.price, m.base_price) as effective_price,
+           COALESCE(os.is_available, 1) as is_available
     FROM menu_items m
+    LEFT JOIN city_prices cp ON m.id = cp.menu_item_id AND cp.city = ?
     LEFT JOIN outlet_stock os ON m.id = os.menu_item_id AND os.outlet_id = ?
     WHERE m.is_active = 1
     ORDER BY m.category ASC, m.base_price ASC
-  `).all(outletId);
+  `).all(city, outletId);
 
   const portions = db.prepare('SELECT * FROM portions').all();
   const addOns = db.prepare('SELECT * FROM add_ons').all();
@@ -327,10 +606,17 @@ export function getFullMenuForOutlet(outletId) {
 
   return items.map(item => ({
     ...item,
+    base_price: item.effective_price,
     is_available: Number(item.is_available) === 1,
     portions: portionsByItem[item.id] || [],
     add_ons: addOnsByItem[item.id] || []
   }));
+}
+
+export function checkItemAvailability(outletId, menuItemId) {
+  const stock = db.prepare('SELECT is_available FROM outlet_stock WHERE outlet_id = ? AND menu_item_id = ?').get(outletId, menuItemId);
+  if (!stock) return true; // Default available if no specific override
+  return Number(stock.is_available) === 1;
 }
 
 export function toggleOutletStock(outletId, menuItemId, isAvailable) {
@@ -342,8 +628,128 @@ export function toggleOutletStock(outletId, menuItemId, isAvailable) {
       updated_at = CURRENT_TIMESTAMP
   `);
   stmt.run(outletId, menuItemId, isAvailable ? 1 : 0);
-  return { success: true, outletId, menuItemId, isAvailable };
+  return { success: true, outletId, menuItemId, isAvailable: !!isAvailable };
 }
+
+// ----------------- CENTRAL MENU CMS CRUD METHODS -----------------
+
+export function createMenuItem(item) {
+  const id = item.id || `item-${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
+
+  db.prepare(`
+    INSERT INTO menu_items (
+      id, category, name, description, base_price, is_veg, spice_level,
+      allergens, prep_complexity_minutes, image_url, time_based_tag, is_active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    item.category || 'Specialties',
+    item.name,
+    item.description || '',
+    Number(item.base_price) || 0,
+    item.is_veg ? 1 : 0,
+    item.spice_level || 'Medium',
+    item.allergens || '',
+    Number(item.prep_complexity_minutes) || 12,
+    item.image_url || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+    item.time_based_tag || 'All Day',
+    item.is_active !== undefined ? (item.is_active ? 1 : 0) : 1
+  );
+
+  // Initialize stock in all outlets
+  const outlets = getAllOutlets();
+  const insertStock = db.prepare('INSERT OR IGNORE INTO outlet_stock (outlet_id, menu_item_id, is_available) VALUES (?, ?, 1)');
+  for (const o of outlets) {
+    insertStock.run(o.id, id);
+  }
+
+  // Handle portions if provided
+  if (Array.isArray(item.portions) && item.portions.length > 0) {
+    const insertPortion = db.prepare('INSERT INTO portions (id, menu_item_id, name, price_delta, serves_count) VALUES (?, ?, ?, ?, ?)');
+    for (const p of item.portions) {
+      insertPortion.run(
+        p.id || `portion-${id}-${p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+        id,
+        p.name,
+        Number(p.price_delta) || 0,
+        Number(p.serves_count) || 1
+      );
+    }
+  }
+
+  // Handle add-ons if provided
+  if (Array.isArray(item.add_ons) && item.add_ons.length > 0) {
+    const insertAddOn = db.prepare('INSERT INTO add_ons (id, menu_item_id, name, price) VALUES (?, ?, ?, ?)');
+    for (const a of item.add_ons) {
+      insertAddOn.run(
+        a.id || `addon-${id}-${a.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+        id,
+        a.name,
+        Number(a.price) || 0
+      );
+    }
+  }
+
+  return db.prepare('SELECT * FROM menu_items WHERE id = ?').get(id);
+}
+
+export function updateMenuItemDetails(id, item) {
+  db.prepare(`
+    UPDATE menu_items SET
+      category = COALESCE(?, category),
+      name = COALESCE(?, name),
+      description = COALESCE(?, description),
+      base_price = COALESCE(?, base_price),
+      is_veg = COALESCE(?, is_veg),
+      spice_level = COALESCE(?, spice_level),
+      allergens = COALESCE(?, allergens),
+      prep_complexity_minutes = COALESCE(?, prep_complexity_minutes),
+      image_url = COALESCE(?, image_url),
+      time_based_tag = COALESCE(?, time_based_tag),
+      is_active = COALESCE(?, is_active)
+    WHERE id = ?
+  `).run(
+    item.category,
+    item.name,
+    item.description,
+    item.base_price !== undefined ? Number(item.base_price) : null,
+    item.is_veg !== undefined ? (item.is_veg ? 1 : 0) : null,
+    item.spice_level,
+    item.allergens,
+    item.prep_complexity_minutes !== undefined ? Number(item.prep_complexity_minutes) : null,
+    item.image_url,
+    item.time_based_tag,
+    item.is_active !== undefined ? (item.is_active ? 1 : 0) : null,
+    id
+  );
+
+  return db.prepare('SELECT * FROM menu_items WHERE id = ?').get(id);
+}
+
+export function deleteMenuItem(id) {
+  // Cascades to portions, add_ons, outlet_stock via foreign keys or manual cleanup
+  db.prepare('DELETE FROM portions WHERE menu_item_id = ?').run(id);
+  db.prepare('DELETE FROM add_ons WHERE menu_item_id = ?').run(id);
+  db.prepare('DELETE FROM outlet_stock WHERE menu_item_id = ?').run(id);
+  db.prepare('DELETE FROM city_prices WHERE menu_item_id = ?').run(id);
+  const res = db.prepare('DELETE FROM menu_items WHERE id = ?').run(id);
+  return { success: true, id, changes: res.changes };
+}
+
+export function setCityPrice(city, menuItemId, price) {
+  db.prepare(`
+    INSERT INTO city_prices (city, menu_item_id, price)
+    VALUES (?, ?, ?)
+    ON CONFLICT(city, menu_item_id) DO UPDATE SET price = excluded.price
+  `).run(city, menuItemId, price);
+  return { success: true, city, menuItemId, price };
+}
+
+export function getCityPrices(city = 'Hyderabad') {
+  return db.prepare('SELECT * FROM city_prices WHERE city = ?').all(city);
+}
+
+// ----------------- ORDERS REPOSITORY -----------------
 
 export function getOrders(filter = {}) {
   let query = 'SELECT o.*, out.name as outlet_name FROM orders o JOIN outlets out ON o.outlet_id = out.id';
@@ -393,6 +799,21 @@ export function getOrderById(orderId) {
   };
 }
 
+export function getOrderByCustomerPhone(phone) {
+  const rows = db.prepare(`
+    SELECT o.*, out.name as outlet_name
+    FROM orders o
+    JOIN outlets out ON o.outlet_id = out.id
+    WHERE o.customer_phone = ?
+    ORDER BY o.placed_at DESC
+  `).all(phone);
+
+  return rows.map(r => ({
+    ...r,
+    items: JSON.parse(r.items_json)
+  }));
+}
+
 export function getActiveKitchenLoad(outletId) {
   const stmt = db.prepare(`
     SELECT COUNT(*) as active_count,
@@ -404,14 +825,22 @@ export function getActiveKitchenLoad(outletId) {
 }
 
 export function createOrderRecord(orderData) {
+  // Idempotency check if idempotency_key provided
+  if (orderData.idempotency_key) {
+    const existing = db.prepare('SELECT * FROM orders WHERE idempotency_key = ?').get(orderData.idempotency_key);
+    if (existing) {
+      return getOrderById(existing.id);
+    }
+  }
+
   const insertOrder = db.prepare(`
     INSERT INTO orders (
       id, outlet_id, customer_name, customer_phone, delivery_address,
       items_json, subtotal, gst_amount, discount_amount, loyalty_redeemed,
       total_amount, payment_method, payment_status, status, placed_at,
       promised_at, ai_prep_estimate_minutes, manager_override_minutes,
-      late_alert_triggered, dpdp_marketing_consent
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      late_alert_triggered, dpdp_marketing_consent, idempotency_key
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertOrder.run(
@@ -434,7 +863,8 @@ export function createOrderRecord(orderData) {
     orderData.ai_prep_estimate_minutes,
     orderData.manager_override_minutes || 0,
     orderData.late_alert_triggered || 0,
-    orderData.dpdp_marketing_consent ? 1 : 0
+    orderData.dpdp_marketing_consent ? 1 : 0,
+    orderData.idempotency_key || null
   );
 
   // If customer earned loyalty points (5% of order amount back as points)
@@ -462,13 +892,13 @@ export function updateOrderStatus(orderId, newStatus, overrideMinutes = null) {
   let query = 'UPDATE orders SET status = ?';
   const params = [newStatus];
 
+  if (newStatus === 'READY_FOR_PICKUP' || newStatus === 'COMPLETED') {
+    query += ', actual_ready_at = CURRENT_TIMESTAMP';
+  }
+
   if (overrideMinutes !== null) {
     query += ', manager_override_minutes = ?';
     params.push(overrideMinutes);
-  }
-
-  if (newStatus === 'READY_FOR_PICKUP' || newStatus === 'DISPATCHED' || newStatus === 'COMPLETED') {
-    query += ', actual_ready_at = CURRENT_TIMESTAMP';
   }
 
   query += ' WHERE id = ?';
@@ -497,18 +927,18 @@ export function getCustomerOrderHistory(phone) {
 }
 
 export function getCouponByCode(code) {
-  return db.prepare('SELECT * FROM coupons WHERE code = ? AND is_active = 1').get(code);
+  return db.prepare('SELECT * FROM coupons WHERE UPPER(code) = UPPER(?) AND is_active = 1').get(code);
 }
 
 export function createPartyOrder(data) {
-  const insert = db.prepare(`
+  const stmt = db.prepare(`
     INSERT INTO party_orders (
       id, customer_name, customer_phone, email, event_date, event_time,
       guest_count, outlet_id, requirements_text, estimated_budget, status, manager_notes
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  insert.run(
+  stmt.run(
     data.id,
     data.customer_name,
     data.customer_phone,
@@ -519,8 +949,8 @@ export function createPartyOrder(data) {
     data.outlet_id,
     data.requirements_text,
     data.estimated_budget,
-    'PENDING_REVIEW',
-    data.manager_notes || 'Assigned to Catering Desk'
+    data.status || 'PENDING_REVIEW',
+    data.manager_notes || ''
   );
 
   return db.prepare('SELECT * FROM party_orders WHERE id = ?').get(data.id);
@@ -528,10 +958,10 @@ export function createPartyOrder(data) {
 
 export function getAllPartyOrders() {
   return db.prepare(`
-    SELECT p.*, out.name as outlet_name
-    FROM party_orders p
-    JOIN outlets out ON p.outlet_id = out.id
-    ORDER BY p.created_at DESC
+    SELECT po.*, out.name as outlet_name
+    FROM party_orders po
+    JOIN outlets out ON po.outlet_id = out.id
+    ORDER BY po.created_at DESC
   `).all();
 }
 
@@ -547,6 +977,7 @@ export function cancelOrderRecord(orderId, reason = 'Customer requested cancella
       cancellation_reason = ?
     WHERE id = ?
   `).run(reason, orderId);
+
   return getOrderById(orderId);
 }
 

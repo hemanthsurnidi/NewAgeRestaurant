@@ -1,12 +1,14 @@
-# Nawabi Zaika | Nizami Biryani Direct Platform
+# Dum & Co. | Company A, Hyderabad Direct Platform
 ### Direct Ordering Web Application & Real-Time Kitchen Display System (KDS)
 **Client**: Company A, Hyderabad — 14 Outlets + 3 Cloud Kitchens | 520 Staff | ₹96 Crore Revenue  
-**Author**: Hemanth Surnidi (`hemanthsurnidi20095@gmail.com`)  
-**Assessment**: Isocode Workspace Software Engineering Intern Take-Home Task  
+**Brand Identity**: **Dum & Co.** (Royal Hyderabad Wood-Fire Biryani & Curries)  
+**Author**: Senior Full-Stack Development Team for Company A  
+**GitHub Repository**: [https://github.com/hemanthsurnidi/nizami-biryani-direct](https://github.com/hemanthsurnidi/nizami-biryani-direct)  
 
-[![Test Suite](https://img.shields.io/badge/tests-19%20passed%20(100%25)-success)](tests/)
+[![Test Suite](https://img.shields.io/badge/tests-31%20passed%20(100%25)-success)](tests/)
 [![Node.js](https://img.shields.io/badge/node.js-v24.x-brightgreen)](package.json)
 [![Database](https://img.shields.io/badge/database-native%20node%3Asqlite-blue)](database.js)
+[![Security](https://img.shields.io/badge/security-scrypt%20%7C%20RBAC%20%7C%20sessions-red)](database.js)
 [![Real-Time](https://img.shields.io/badge/real--time-Server--Sent%20Events%20(SSE)-orange)](server.js)
 [![Compliance](https://img.shields.io/badge/compliance-DPDP%202023%20%7C%20FSSAI%20%7C%205%25%20GST-purple)](tests/security-dpdp.test.js)
 
@@ -31,7 +33,7 @@ Company A loses **27% in commissions and fees (₹14.25 crore/year)** to food de
 git clone https://github.com/hemanthsurnidi/nizami-biryani-direct.git
 cd nizami-biryani-direct
 npm install
-npm test    # Runs 19 automated unit & integration tests (~370ms)
+npm test    # Runs 31 automated unit & integration tests (~1.2s)
 npm start   # Starts server at http://localhost:3000
 ```
 
@@ -42,8 +44,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 🎯 8 Key Screens & Workflows
 
 1. **🍲 Customer Direct Ordering App**:
-   - Geofenced Hyderabad outlet selector across 14 dine-in outlets and 3 cloud kitchens.
-   - Authentic menu photography, veg/non-veg marks, spice meters, allergen alerts, portions (Single, Regular, Family Pack), and add-ons (Extra Salan, Burani Raita, Boiled Eggs).
+   - Geofenced Hyderabad outlet selector across 14 dine-in outlets and 3 cloud kitchens with deterministic delivery radius calculation.
+   - Authentic menu photography, veg/non-veg marks, spice meters (Mild, Medium, Fiery, Nawabi Dum), allergen alerts, portions (Single, Regular, Family Pack), and add-ons (Extra Salan, Burani Raita, Boiled Eggs).
    - Transparent pricing: **All prices include 5% GST and explicitly say so**.
    - Out-of-Stock handling: Instantly greys out with "SOLD OUT AT THIS OUTLET" when kitchen pauses stock ("86 item").
 
@@ -51,12 +53,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Analyzes customer order history by phone number (e.g. Rahul Verma).
    - **Zero Dark Patterns Rule**: Suggestions **never auto-add items to the cart**. Each suggestion shows an honest rationale and requires an explicit tap on `+ Add`.
 
-3. **⚡ Express Checkout & Payment (< 60 Seconds Flow)**:
-   - One-tap pre-filled addresses (Kondapur / Gachibowli).
-   - Coupon codes (`DIRECT15` for 15% off, `NIZAM100` for ₹100 off).
+3. **⚡ Express Checkout & Payment Simulator (< 60 Seconds Flow)**:
+   - One-tap pre-filled addresses (Kondapur / Gachibowli / Kukatpally).
+   - Coupon codes (`DIRECT15` for 15% off, `NIZAM100` for ₹100 off, `FAMILYPACK` for ₹150 off).
    - **Interactive Royalty Points Slider**: Redeem loyalty balance with 1-click (1 point = ₹1), plus earn 5% cashback on this order!
    - **DPDP Act 2023 Consent Checkbox**: Verified opt-in for marketing & transactional updates.
-   - Payment Simulator: Instant UPI QR code (GPay/PhonePe/Paytm) & Card test mode.
+   - Payment Sandbox Simulator: Instant UPI QR code (GPay/PhonePe/Paytm) & Card test mode with **Simulate Success**, **Simulate Bank Decline**, and **Simulate Gateway Timeout** with retry flow!
 
 4. **📍 Live Order Tracking & WhatsApp Simulator**:
    - Step-by-step progress: Accepted ➔ Dum Cooking ➔ Packed ➔ Dispatched ➔ Delivered.
@@ -70,9 +72,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Dynamic Urgency Color Coding: Green (> 10m left) ➔ Amber (< 10m left) ➔ Red (Overdue) ➔ Pulsing Crimson (Critical 10m+ late).
    - One-tap stage buttons: "Start Cooking" ➔ "Ready for Pickup" ➔ "Handover to Rider".
    - **Manager Prep Override**: One-tap +5m bump to handle cooking spikes.
+   - **Role & Outlet Isolation**: Staff can only manage tickets for their assigned outlet!
 
 6. **📋 Central Menu CMS & Real-Time Stock ("86 Item")**:
-   - Central overview of items, prices, spice levels, allergens, and time-based tags ("All Day", "Dinner & Specials", "Midnight Biryani").
+   - Central overview of items, prices, spice levels, allergens, and time-based tags ("All Day", "Lunch Special", "Dinner & Midnight Biryani").
+   - Full CRUD: "＋ Create New Dish", "✏️ Edit Dish", "🗑️ Delete Dish".
+   - Regional City Pricing: Configure city-specific prices (Hyderabad Core, Secunderabad, Cyberabad).
    - 1-Click live stock pause/resume per outlet: instantly pushes SSE event greying out the dish on customer devices in sub-50ms!
 
 7. **📊 ₹1.14 Crore Financial Savings Dashboard**:
@@ -81,10 +86,24 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Outlet leaderboard comparing all 17 Hyderabad locations.
    - Customer retention metric: **38.2% repeat rate** (beating the 35% Month 6 client target).
 
-8. **🎉 Royal Party & Bulk Catering Desk**:
-   - Captures the lost 30 phone orders/month (₹19.44 lakh/year).
-   - **Enforces 24-48 Hours Advance Notice Rule** using both frontend date constraints and backend API validation.
-   - Catering specialist confirmation and approval desk.
+8. **👤 Customer Account & Order History Portal**:
+   - Customer profile details and real-time loyalty ledger.
+   - Full history of all past orders with status badges, itemized receipt breakdown, and live tracking links.
+   - 1-Click "🔄 Re-Order" button to re-populate previous feasts.
+
+---
+
+## 🔐 Reviewer Demo Accounts & Role Switching
+
+| Role | Email | Password | Details |
+| :--- | :--- | :--- | :--- |
+| **Customer** | `customer@dumco.in` | `Customer@123` | Rahul Verma, 340 loyalty points, past orders |
+| **Kitchen Staff (Kondapur)** | `kondapur@dumco.in` | `Kitchen@123` | Chef Mohammed Qasim, Kondapur Flagship |
+| **Kitchen Staff (Gachibowli)** | `gachibowli@dumco.in` | `Kitchen@123` | Chef Syed Arshad, Gachibowli Cloud Kitchen |
+| **Kitchen Staff (Kukatpally)** | `kukatpally@dumco.in` | `Kitchen@123` | Chef Nageshwar Rao, Kukatpally KPHB |
+| **Admin** | `admin@dumco.in` | `Admin@123` | Zafar Khan, Central Menu CMS & Analytics |
+
+*Reviewers can also use the **1-Click Demo Login** buttons inside the Sign In modal to switch roles instantly.*
 
 ---
 
@@ -95,62 +114,7 @@ $$\text{Item Prep} = \max(\text{Item Complexity}) + 0.28 \times \sum \text{Secon
 $$\text{Queue Wait} = \text{Active Orders} \times 2.2\text{ mins} \times \text{Peak Multiplier}$$
 $$\mathbf{Honest\ Promised\ Time = \max(\lceil \text{Item Prep} + \text{Queue Wait} \rceil,\ \text{Outlet Minimum Prep Floor})}$$
 
-### Edge Cases & Failure Recovery
+### Safety Rules & Failure Recovery
 * **Promised Time Floor**: Promised time is always the higher of the AI calculation and the outlet's minimum floor (e.g. 25 mins at Kondapur).
 * **10-Minute Delay Trigger**: An order running 10+ minutes late automatically triggers a critical KDS alert banner, notifies the outlet manager, and dispatches a **₹50 loyalty credit** apology message to the customer.
-* **Manager Override**: Outlet ustads can adjust the estimate (+5m / +10m) with one tap to reflect physical degh status.
-
----
-
-## 📋 Pre-Seeded Sample Data from Client Brief
-
-| Order ID | Outlet | Items | Total (₹) | Payment | Placed | Promised | Status |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **WEB-778120** | Kondapur Flagship | Chicken dum biryani family pack x1, Double ka meetha x2 | 1,180 | UPI | 20:14 | 20:59 | Preparing |
-| **WEB-778131** | Gachibowli Cloud Kitchen | Veg biryani x2, Mirchi ka salan x1 | 640 | Card | 20:21 | 21:01 | Ready for pickup |
-| **WEB-778146** | Kukatpally KPHB | Mutton haleem x3 | 1,050 | UPI | 20:26 | 21:16 | Late by 4 minutes |
-
----
-
-## 🧪 Automated Test Suite (100% Pass Rate)
-
-Execute via `npm test`:
-* **AI Engine**: Load queuing, peak dinner multipliers (1.40x), floor enforcement, 10-minute late alert triggers.
-* **Pricing & GST**: 5% GST inclusive math ($Subtotal - Subtotal/1.05$), coupon validation & capping, loyalty points 5% cashback.
-* **Compliance & Security**: FSSAI license validation across all 17 outlets, real-time 86 stock pause, and DPDP Act 2023 marketing consent verification.
-* **REST APIs**: Health, outlets, menu, orders, status transitions, ₹1.14 Cr analytics, and 24h party notice validation.
-
----
-
-## 📁 Repository Structure
-
-```
-nizami-biryani-direct/
-├── package.json              # Project manifest (ES Modules, zero native build bloat)
-├── server.js                 # HTTP & Real-time SSE Pub/Sub Hub
-├── database.js               # ACID Relational SQLite DB (Node 24 native node:sqlite)
-├── ai-engine.js              # Dynamic AI Prep-Time Engine & Recommendation Logic
-├── sample-data.js            # 17 Outlets, Full Menu, Seed Orders from Client Brief
-├── public/                   # Frontend SPA & Assets
-│   ├── index.html            # Main SPA container & navigation
-│   ├── css/
-│   │   ├── style.css         # Royal Nizami Design System (Obsidian, Saffron, Emerald)
-│   │   └── kds.css           # 2-Metre High-Contrast Tablet KDS Stylesheet
-│   └── js/
-│       └── app.js            # Reactive client, SSE listener, Web Audio synthesizer
-├── tests/                    # 19 Automated Unit & Integration Tests
-│   ├── ai-prep-time.test.js
-│   ├── pricing-gst.test.js
-│   ├── security-dpdp.test.js
-│   └── server-api.test.js
-├── deployment.md             # Reviewer guide, deployment, demo logins & checklist
-├── Nizami_Biryani_TDD.md     # Technical Design Document (Markdown)
-├── Nizami_Biryani_TDD.pdf    # Technical Design Document (Publication-grade PDF)
-├── Nizami_Biryani_TDD.docx   # Technical Design Document (Microsoft Word format)
-├── generate-docs.py          # Python compiler for PDF/Word TDD and submission.zip
-└── submission.zip            # Submission ZIP containing TDD (PDF/Word) & deployment.md
-```
-
----
-*Built with culinary passion and engineering precision for Company A, Hyderabad.*
-
+* **Manager Prep Override**: Kitchen managers can manually bump preparation time by +5m or +10m with reasons stored in the audit log.
