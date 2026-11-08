@@ -269,3 +269,4 @@ export function generateNotificationPreview(order, eventType, extraPayload = {})
     message_text: messageText
   };
 }
+

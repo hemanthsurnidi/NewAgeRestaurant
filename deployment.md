@@ -178,3 +178,4 @@ For rapid interview evaluation, a **Quick Role Switcher** is pinned directly at 
 
 ---
 *Developed with rigorous attention to detail for the Isocode Workspace Software Engineering assessment.*
+

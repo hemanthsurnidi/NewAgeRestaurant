@@ -54,7 +54,7 @@ export function broadcastSSE(eventType, data) {
 }
 
 // Background poller to monitor orders and trigger late alerts in real time
-setInterval(() => {
+const monitorInterval = setInterval(() => {
   try {
     const activeOrders = getOrders({ status: 'PREPARING' });
     const now = new Date();
@@ -71,6 +71,7 @@ setInterval(() => {
     // Keep monitor resilient
   }
 }, 15000); // Check every 15 seconds
+monitorInterval.unref();
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

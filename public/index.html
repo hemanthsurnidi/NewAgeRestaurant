@@ -129,6 +129,41 @@
     </div>
   </div>
 
+  <!-- Customization Modal (Portions & Add-ons) -->
+  <div id="custom-modal-backdrop" class="drawer-backdrop" style="justify-content: center; align-items: center;" onclick="App.closeCustomModal()">
+    <div class="drawer-panel custom-modal-panel" style="width: 100%; max-width: 480px; height: auto; max-height: 90vh; border-radius: 20px; transform: scale(0.95); opacity: 0; transition: all 0.2s;" id="custom-modal-panel" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <div>
+          <h3 class="drawer-title" id="custom-modal-title">Customize Dish</h3>
+          <div style="font-size: 0.8rem; color: var(--text-muted);" id="custom-modal-subtitle">Choose portion & accompaniments</div>
+        </div>
+        <button class="drawer-close-btn" onclick="App.closeCustomModal()">&times;</button>
+      </div>
+      <div class="drawer-body" id="custom-modal-body" style="padding: 1.5rem;">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="drawer-footer" id="custom-modal-footer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Mobile/Desktop Cart Bar -->
+  <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="App.openCartDrawer()">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="font-size: 1.3rem;">🛍️</span>
+      <div>
+        <strong id="floating-cart-count" style="font-size: 0.95rem;">0 Items</strong>
+        <span style="color: #A8A29E; margin: 0 0.35rem;">•</span>
+        <span id="floating-cart-total" style="font-weight: 800; color: #F59E0B;">₹0</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.92rem;">
+      <span>View Feast</span>
+      <span>➔</span>
+    </div>
+  </div>
+
   <!-- Toast Notifications Container -->
   <div id="toast-container"></div>
 

@@ -655,3 +655,4 @@ export const DEMO_USERS = [
     outlet_name: "Company A Central HQ, Banjara Hills"
   }
 ];
+
