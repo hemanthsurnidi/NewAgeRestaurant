@@ -205,24 +205,61 @@ export const App = {
   },
 
   // --------------------------------------------------------------------------
-  // DEVICE SIMULATOR TOGGLE (LAPTOP VS MOBILE VIEWPORT)
+  // OFF-CANVAS SIDE REVIEWER DRAWER & DEVICE VIEWPORT CONTROLS
   // --------------------------------------------------------------------------
-  toggleDeviceMode() {
-    const isMobile = document.body.classList.toggle('device-mode-mobile');
-    const btn = document.getElementById('device-toggle-btn');
-    const icon = document.getElementById('device-toggle-icon');
-    const label = document.getElementById('device-toggle-label');
-    if (isMobile) {
-      if (btn) btn.classList.add('active');
-      if (icon) icon.textContent = '💻';
-      if (label) label.textContent = 'Laptop';
-      this.showToast('📱 Switched to Mobile Viewport Simulator', 'info');
-    } else {
-      if (btn) btn.classList.remove('active');
-      if (icon) icon.textContent = '📱';
-      if (label) label.textContent = 'Mobile';
-      this.showToast('💻 Switched to Full Laptop Viewport', 'info');
-    }
+  toggleSideDrawer() {
+    const backdrop = document.getElementById('side-portal-backdrop');
+    if (backdrop) backdrop.classList.toggle('open');
+  },
+
+  closeSideDrawer() {
+    const backdrop = document.getElementById('side-portal-backdrop');
+    if (backdrop) backdrop.classList.remove('open');
+  },
+
+  setDeviceMode(mode) {
+    const isMobile = mode === 'mobile';
+    document.body.classList.toggle('device-mode-mobile', isMobile);
+    document.getElementById('side-device-laptop')?.classList.toggle('active', !isMobile);
+    document.getElementById('side-device-mobile')?.classList.toggle('active', isMobile);
+    this.showToast(isMobile ? '📱 Mobile Frame Active (390px Viewport)' : '💻 Laptop Fullscreen View Active', 'info');
+    this.closeSideDrawer();
+  },
+
+  switchRoleFromSide(role) {
+    this.handleRoleChange(role);
+    document.querySelectorAll('.side-role-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.role === role);
+    });
+    this.closeSideDrawer();
+  },
+
+  fillDemoCart() {
+    const chickenBiryani = this.state.menu.find(m => m.id === 'item-chicken-dum-biryani') || this.state.menu[0];
+    const doubleMeetha = this.state.menu.find(m => m.id === 'item-double-ka-meetha') || this.state.menu[1];
+    
+    this.state.cart = [
+      {
+        item_id: chickenBiryani.id,
+        name: chickenBiryani.name,
+        portion: 'Regular Handi (1-2 Persons)',
+        unit_price: chickenBiryani.base_price,
+        quantity: 2,
+        add_ons: []
+      },
+      {
+        item_id: doubleMeetha.id,
+        name: doubleMeetha.name,
+        portion: 'Single Portion',
+        unit_price: doubleMeetha.base_price,
+        quantity: 1,
+        add_ons: []
+      }
+    ];
+    this.updateCartBadge();
+    this.showToast('🛍️ Sample royal feast populated in cart!', 'success');
+    this.closeSideDrawer();
+    this.openCartDrawer();
   },
 
   // --------------------------------------------------------------------------
@@ -241,8 +278,6 @@ export const App = {
     document.querySelectorAll('.cust-nav-link').forEach(link => link.classList.remove('active'));
     if (viewName === 'ordering') {
       document.getElementById('link-menu')?.classList.add('active');
-      const roleSelect = document.getElementById('role-select');
-      if (roleSelect) roleSelect.value = 'customer';
     } else if (viewName === 'party') {
       document.getElementById('link-party')?.classList.add('active');
     } else if (viewName === 'tracking') {
@@ -898,18 +933,18 @@ export const App = {
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 390px; gap: 2.25rem;">
+        <div class="checkout-grid">
           
-          <!-- Left Column: Delivery & Payment -->
-          <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+          <!-- Left Column: Delivery & Payment Details -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             
             <!-- Delivery Address Card -->
-            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
-              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;">
                 <span>📍</span> Delivery Location (Hyderabad)
               </h3>
               
-              <div style="display: flex; gap: 0.6rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap;">
                 <button class="category-chip active" type="button" onclick="document.getElementById('checkout-address').value = 'Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084'">
                   Home (Kondapur)
                 </button>
@@ -920,63 +955,63 @@ export const App = {
 
               <textarea id="checkout-address" rows="2" style="width: 100%; margin-bottom: 1rem;" placeholder="Enter complete flat/plot, street, landmark...">Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084</textarea>
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
                 <input type="text" id="checkout-name" value="${this.state.customerName}" placeholder="Your Full Name">
                 <input type="tel" id="checkout-phone" value="${this.state.customerPhone}" placeholder="Phone Number (+91)">
               </div>
             </div>
 
             <!-- DPDP Act 2023 Consent Card -->
-            <div style="background-color: var(--accent-emerald-subtle); border: 1.5px solid #A7F3D0; border-radius: 14px; padding: 1.4rem;">
+            <div style="background-color: var(--accent-emerald-subtle); border: 1.5px solid #A7F3D0; border-radius: 14px; padding: 1.25rem;">
               <label style="display: flex; align-items: flex-start; gap: 0.85rem; cursor: pointer;">
                 <input type="checkbox" id="dpdp-consent" checked style="accent-color: var(--accent-emerald); width: 22px; height: 22px; margin-top: 2px;">
-                <span style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;">
+                <span style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
                   <strong>DPDP Act 2023 Consent:</strong> I agree to receive transactional order tracking messages via WhatsApp/SMS. I opt-in to direct reward updates and exclusive Company A promotions. You can opt out at any time.
                 </span>
               </label>
             </div>
 
-            <!-- Test Payment Selection -->
-            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
-              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
-                <span>💳</span> Test Mode Payment
+            <!-- Payment Method Preference Pre-Selector -->
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+                <span>💳</span> Choose Payment Mode
               </h3>
 
-              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 1rem 1.25rem; border-radius: 12px; border: 2px solid var(--accent-gold); cursor: pointer;">
-                  <div style="display: flex; align-items: center; gap: 0.85rem;">
-                    <input type="radio" name="payment-method" value="UPI" checked style="accent-color: var(--accent-gold); width: 20px; height: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 0.85rem 1.1rem; border-radius: 12px; border: 2px solid var(--accent-gold); cursor: pointer;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="radio" name="payment-method" value="UPI" checked style="accent-color: var(--accent-gold); width: 18px; height: 18px;">
                     <div>
-                      <strong style="color: var(--text-main); font-size: 0.95rem;">UPI Instant Pay (QR / VPA)</strong>
-                      <div style="font-size: 0.78rem; color: var(--text-muted);">GPay, PhonePe, Paytm, BHIM</div>
+                      <strong style="color: var(--text-main); font-size: 0.92rem;">UPI Instant Pay (QR / Apps)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">GPay, PhonePe, Paytm, BHIM</div>
                     </div>
                   </div>
-                  <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 800;">Zero Surcharge</span>
+                  <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 800;">Recommended</span>
                 </label>
 
-                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 1rem 1.25rem; border-radius: 12px; border: 1.5px solid var(--border-subtle); cursor: pointer;">
-                  <div style="display: flex; align-items: center; gap: 0.85rem;">
-                    <input type="radio" name="payment-method" value="Card" style="accent-color: var(--accent-gold); width: 20px; height: 20px;">
+                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 0.85rem 1.1rem; border-radius: 12px; border: 1.5px solid var(--border-subtle); cursor: pointer;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="radio" name="payment-method" value="Card" style="accent-color: var(--accent-gold); width: 18px; height: 18px;">
                     <div>
-                      <strong style="color: var(--text-main); font-size: 0.95rem;">Credit / Debit Card (Test Mock)</strong>
-                      <div style="font-size: 0.78rem; color: var(--text-muted);">Visa, Mastercard, RuPay</div>
+                      <strong style="color: var(--text-main); font-size: 0.92rem;">Credit / Debit Card (Mock Test)</strong>
+                      <div style="font-size: 0.76rem; color: var(--text-muted);">Visa, Mastercard, RuPay</div>
                     </div>
                   </div>
-                  <span style="color: var(--text-dim); font-size: 0.75rem; font-weight: 700;">Instant 4242</span>
+                  <span style="color: var(--text-dim); font-size: 0.72rem; font-weight: 700;">Test 4242</span>
                 </label>
               </div>
             </div>
 
           </div>
 
-          <!-- Right Column: Order Bill Breakdown -->
+          <!-- Right Column: Order Bill Breakdown & Action -->
           <div>
-            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm); position: sticky; top: 100px;">
-              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem;">Order Summary</h3>
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-sm); position: sticky; top: 90px;">
+              <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1rem;">Order Summary</h3>
               
-              <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 220px; overflow-y: auto;">
+              <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem; max-height: 200px; overflow-y: auto;">
                 ${this.state.cart.map(i => `
-                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.86rem;">
                     <span style="color: var(--text-secondary);"><strong style="color: var(--text-main);">${i.quantity}x</strong> ${i.name} (${i.portion})</span>
                     <strong style="color: var(--text-main);">₹${i.unit_price * i.quantity}</strong>
                   </div>
@@ -984,42 +1019,42 @@ export const App = {
               </div>
 
               <!-- Coupon Code Box -->
-              <div style="margin-bottom: 1.5rem;">
-                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem; font-weight: 700;">Coupon Code</label>
-                <div style="display: flex; gap: 0.5rem;">
+              <div style="margin-bottom: 1.25rem;">
+                <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem; font-weight: 700;">Coupon Code</label>
+                <div style="display: flex; gap: 0.45rem;">
                   <input type="text" id="coupon-input" value="${this.state.activeCoupon ? this.state.activeCoupon.code : 'DIRECT15'}" 
                          placeholder="e.g. DIRECT15" style="flex: 1; font-weight: 800; text-transform: uppercase;">
-                  <button class="category-chip active" style="padding: 0.5rem 1rem;" onclick="App.applyCoupon()">Apply</button>
+                  <button class="category-chip active" style="padding: 0.5rem 0.85rem;" onclick="App.applyCoupon()">Apply</button>
                 </div>
-                <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.35rem; font-weight: 600;">
+                <div style="font-size: 0.72rem; color: var(--accent-gold); margin-top: 0.3rem; font-weight: 600;">
                   Try <strong>DIRECT15</strong> for 15% off or <strong>NIZAM100</strong> for ₹100 off!
                 </div>
               </div>
 
               <!-- Loyalty Points Redemption -->
-              <div style="background-color: var(--bg-surface); padding: 1.1rem; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                  <span style="font-size: 0.86rem; font-weight: 800; color: var(--accent-gold);">👑 Direct Loyalty Balance</span>
-                  <span style="font-size: 0.88rem; font-weight: 800; color: var(--text-main);">${this.state.customerLoyaltyBalance} Pts (₹${this.state.customerLoyaltyBalance})</span>
+              <div style="background-color: var(--bg-surface); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                  <span style="font-size: 0.82rem; font-weight: 800; color: var(--accent-gold);">👑 Direct Loyalty Balance</span>
+                  <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">${this.state.customerLoyaltyBalance} Pts (₹${this.state.customerLoyaltyBalance})</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
                   <input type="range" min="0" max="${maxRedeemable}" value="${validLoyaltyRedeem}" step="10" 
                          style="flex: 1; accent-color: var(--accent-gold);" 
                          oninput="App.setLoyaltyRedeem(this.value)">
-                  <strong style="color: var(--accent-gold); min-width: 50px; text-align: right;">-₹${validLoyaltyRedeem}</strong>
+                  <strong style="color: var(--accent-gold); min-width: 45px; text-align: right; font-size: 0.9rem;">-₹${validLoyaltyRedeem}</strong>
                 </div>
-                <div style="font-size: 0.75rem; color: var(--accent-emerald); margin-top: 0.4rem; font-weight: 700;">
+                <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.35rem; font-weight: 700;">
                   + You will earn 5% back (₹${Math.round(finalTotal * 0.05)}) upon placing this order!
                 </div>
               </div>
 
               <!-- Bill Breakdown Lines -->
-              <div style="border-top: 1.5px solid var(--border-subtle); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+              <div style="border-top: 1.5px solid var(--border-subtle); padding-top: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.88rem;">
                 <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
                   <span>Subtotal:</span>
                   <strong style="color: var(--text-main);">₹${subtotal}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem;">
+                <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.78rem;">
                   <span>Incl. 5% GST (Taxable: ₹${Math.round(taxable)}):</span>
                   <span>₹${gst}</span>
                 </div>
@@ -1039,16 +1074,16 @@ export const App = {
                     <span>-₹${validLoyaltyRedeem}</span>
                   </div>
                 ` : ''}
-                <div style="display: flex; justify-content: space-between; border-top: 1.5px solid var(--border-subtle); padding-top: 0.85rem; font-size: 1.4rem; font-weight: 900; color: var(--text-main);">
+                <div style="display: flex; justify-content: space-between; border-top: 1.5px solid var(--border-subtle); padding-top: 0.75rem; font-size: 1.35rem; font-weight: 900; color: var(--text-main);">
                   <span>Grand Total:</span>
                   <span style="color: var(--accent-gold);">₹${finalTotal}</span>
                 </div>
               </div>
 
-              <!-- Place Order Button -->
-              <button id="place-order-btn" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1.1rem; font-size: 1.1rem; border-radius: 14px; margin-top: 1.75rem;" 
-                      onclick="App.submitOrder(${finalTotal}, ${subtotal}, ${gst}, ${discount}, ${validLoyaltyRedeem})">
-                Place Order in Test Mode ➔
+              <!-- Proceed to Mock Payment Button -->
+              <button id="place-order-btn" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1.1rem; font-size: 1.05rem; border-radius: 14px; margin-top: 1.5rem;" 
+                      onclick="App.openPaymentModal(${finalTotal}, ${subtotal}, ${gst}, ${discount}, ${validLoyaltyRedeem})">
+                Proceed to Mock Payment (₹${finalTotal}) ➔
               </button>
             </div>
           </div>
@@ -1056,6 +1091,164 @@ export const App = {
         </div>
       </div>
     `;
+  },
+
+  // --------------------------------------------------------------------------
+  // INTERACTIVE MOCK PAYMENT GATEWAY MODAL
+  // --------------------------------------------------------------------------
+  openPaymentModal(totalAmount, subtotal, gst, discount, loyaltyRedeemed) {
+    this.state.pendingPayment = { totalAmount, subtotal, gst, discount, loyaltyRedeemed };
+    this.state.paymentTab = this.state.paymentTab || 'upi';
+    this.renderPaymentModalContent();
+    const modal = document.getElementById('payment-modal');
+    if (modal) modal.classList.add('open');
+  },
+
+  closePaymentModal() {
+    const modal = document.getElementById('payment-modal');
+    if (modal) modal.classList.remove('open');
+  },
+
+  setPaymentTab(tab) {
+    this.state.paymentTab = tab;
+    this.renderPaymentModalContent();
+  },
+
+  renderPaymentModalContent() {
+    const body = document.getElementById('payment-modal-body');
+    if (!body || !this.state.pendingPayment) return;
+    const { totalAmount } = this.state.pendingPayment;
+    const tab = this.state.paymentTab;
+
+    body.innerHTML = `
+      <!-- Total Payable Banner -->
+      <div style="background: #F8FAFC; border: 1px solid var(--border-subtle); padding: 1rem 1.25rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Amount Payable</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--accent-gold);">₹${totalAmount}</div>
+        </div>
+        <span style="font-size: 0.75rem; background: var(--accent-emerald-light); color: var(--accent-emerald); padding: 0.3rem 0.65rem; border-radius: 9999px; font-weight: 800;">
+          5% GST Included
+        </span>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <div class="payment-tabs">
+        <button class="payment-tab-btn ${tab === 'upi' ? 'active' : ''}" onclick="App.setPaymentTab('upi')">
+          📱 UPI Test Pay
+        </button>
+        <button class="payment-tab-btn ${tab === 'card' ? 'active' : ''}" onclick="App.setPaymentTab('card')">
+          💳 Card Test Pay
+        </button>
+        <button class="payment-tab-btn ${tab === 'cod' ? 'active' : ''}" onclick="App.setPaymentTab('cod')">
+          💵 Pay on Delivery
+        </button>
+      </div>
+
+      ${tab === 'upi' ? `
+        <!-- UPI Test Mode Simulation -->
+        <div class="upi-qr-box">
+          <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-weight: 700;">
+            Scan Test QR or Click Instant Simulator App
+          </div>
+          
+          <div style="width: 150px; height: 150px; margin: 0 auto 0.85rem auto; background: #000; border: 6px solid #FFF; box-shadow: var(--shadow-sm); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <svg width="134" height="134" viewBox="0 0 100 100" fill="#FFF">
+              <rect x="0" y="0" width="30" height="30" fill="#FFF"/>
+              <rect x="5" y="5" width="20" height="20" fill="#000"/>
+              <rect x="70" y="0" width="30" height="30" fill="#FFF"/>
+              <rect x="75" y="5" width="20" height="20" fill="#000"/>
+              <rect x="0" y="70" width="30" height="30" fill="#FFF"/>
+              <rect x="5" y="75" width="20" height="20" fill="#000"/>
+              <rect x="40" y="40" width="20" height="20" fill="#FFF"/>
+              <rect x="45" y="45" width="10" height="10" fill="#D97706"/>
+              <rect x="35" y="10" width="10" height="20" fill="#FFF"/>
+              <rect x="10" y="40" width="20" height="10" fill="#FFF"/>
+              <rect x="70" y="50" width="20" height="15" fill="#FFF"/>
+              <rect x="45" y="75" width="25" height="15" fill="#FFF"/>
+            </svg>
+          </div>
+
+          <div style="font-size: 0.78rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+            VPA: <strong>companya.direct@icici</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; background: #008643; border-radius: 10px;" onclick="App.processMockPayment('UPI (Google Pay)', 'GPAY_TXN_' + Math.floor(100000 + Math.random() * 900000))">
+            🟢 Simulate Google Pay Approval ➔
+          </button>
+          <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem; background: #5F259F; border-radius: 10px;" onclick="App.processMockPayment('UPI (PhonePe)', 'PHONEPE_TXN_' + Math.floor(100000 + Math.random() * 900000))">
+            🟣 Simulate PhonePe Approval ➔
+          </button>
+          <button class="category-chip" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.86rem; border-radius: 10px;" onclick="App.processMockPayment('UPI (Paytm)', 'PAYTM_TXN_' + Math.floor(100000 + Math.random() * 900000))">
+            🔵 Simulate Paytm UPI Approval ➔
+          </button>
+        </div>
+      ` : tab === 'card' ? `
+        <!-- Card Test Mode Simulation -->
+        <div class="mock-card-visual">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <span style="font-size: 1.4rem;">💳</span>
+            <span style="font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em;">VISA TEST</span>
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; letter-spacing: 0.15em; margin-bottom: 1.25rem;">
+            4242 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4242
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+            <div>
+              <div style="color: #94A3B8; font-size: 0.65rem; text-transform: uppercase;">Card Holder</div>
+              <div style="font-weight: 700;">${this.state.customerName}</div>
+            </div>
+            <div>
+              <div style="color: #94A3B8; font-size: 0.65rem; text-transform: uppercase;">Expires</div>
+              <div style="font-weight: 700;">12 / 28</div>
+            </div>
+            <div>
+              <div style="color: #94A3B8; font-size: 0.65rem; text-transform: uppercase;">CVV</div>
+              <div style="font-weight: 700;">888</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px; background: #2563EB;" onclick="App.processMockPayment('Card (Visa 4242)', 'CARD_AUTH_' + Math.floor(100000 + Math.random() * 900000))">
+          Authorize ₹${totalAmount} Test Card Payment ➔
+        </button>
+      ` : `
+        <!-- Cash On Delivery -->
+        <div style="background: var(--bg-surface); padding: 1.5rem; border-radius: 14px; border: 1.5px solid var(--border-subtle); margin-bottom: 1.25rem; text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💵</div>
+          <h4 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.35rem;">Pay on Delivery (Cash or QR)</h4>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+            Keep exact change or scan the delivery partner's QR code upon arrival.
+          </p>
+        </div>
+
+        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px;" onclick="App.processMockPayment('Cash on Delivery', 'COD_' + Math.floor(100000 + Math.random() * 900000))">
+          Confirm Order with Pay on Delivery (₹${totalAmount}) ➔
+        </button>
+      `}
+    `;
+  },
+
+  async processMockPayment(method, refId) {
+    const body = document.getElementById('payment-modal-body');
+    if (body) {
+      body.innerHTML = `
+        <div style="text-align: center; padding: 3rem 1rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem; animation: kdsPulse 1s infinite;">⚡</div>
+          <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.4rem;">Authorizing Test Transaction...</h3>
+          <p style="font-size: 0.86rem; color: var(--text-muted);">Simulating banking gateway authorization (${method} • ${refId})</p>
+        </div>
+      `;
+    }
+
+    setTimeout(async () => {
+      this.closePaymentModal();
+      if (!this.state.pendingPayment) return;
+      const { totalAmount, subtotal, gst, discount, loyaltyRedeemed } = this.state.pendingPayment;
+      await this.submitOrder(totalAmount, subtotal, gst, discount, loyaltyRedeemed, method, refId);
+    }, 1000);
   },
 
   async applyCoupon() {
@@ -1089,18 +1282,18 @@ export const App = {
     this.renderCheckoutView();
   },
 
-  async submitOrder(totalAmount, subtotal, gstAmount, discountAmount, loyaltyRedeemed) {
+  async submitOrder(totalAmount, subtotal, gstAmount, discountAmount, loyaltyRedeemed, chosenPaymentMethod = 'UPI', transactionRef = '') {
     const btn = document.getElementById('place-order-btn');
     if (btn) {
       btn.disabled = true;
-      btn.textContent = 'Cooking your order...';
+      btn.textContent = 'Confirming your feast...';
     }
 
     const name = document.getElementById('checkout-name')?.value || this.state.customerName;
     const phone = document.getElementById('checkout-phone')?.value || this.state.customerPhone;
     const address = document.getElementById('checkout-address')?.value || 'Kondapur, Hyderabad';
     const dpdpConsent = document.getElementById('dpdp-consent')?.checked;
-    const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'UPI';
+    const paymentMethod = chosenPaymentMethod || document.querySelector('input[name="payment-method"]:checked')?.value || 'UPI';
 
     try {
       const res = await fetch('/api/orders', {
@@ -1115,32 +1308,35 @@ export const App = {
           discount_code: this.state.activeCoupon ? this.state.activeCoupon.code : null,
           loyalty_redeemed: loyaltyRedeemed,
           payment_method: paymentMethod,
+          payment_transaction_id: transactionRef || `TXN_${Date.now()}`,
           dpdp_marketing_consent: dpdpConsent ? 1 : 0
         })
       });
 
       const data = await res.json();
       if (res.ok) {
-        this.showToast(`Order Placed! #${data.order.id}`, 'success');
+        this.showToast(`Order Placed! #${data.order.id} (${paymentMethod} Paid)`, 'success');
+        this.playOrderChime();
         this.state.activeOrderId = data.order.id;
         this.state.cart = [];
         this.state.activeCoupon = null;
         this.state.loyaltyPointsRedeemed = 0;
         this.updateCartBadge();
         await this.fetchLoyalty();
+        await this.fetchOrders();
         this.navigate('tracking');
       } else {
         this.showToast(data.error || 'Failed to place order', 'error');
         if (btn) {
           btn.disabled = false;
-          btn.textContent = 'Place Order in Test Mode ➔';
+          btn.textContent = 'Proceed to Mock Payment ➔';
         }
       }
     } catch (e) {
       this.showToast('Network error placing order', 'error');
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'Place Order in Test Mode ➔';
+        btn.textContent = 'Proceed to Mock Payment ➔';
       }
     }
   },

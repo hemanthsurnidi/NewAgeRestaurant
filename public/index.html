@@ -83,35 +83,13 @@
         </button>
       </nav>
 
-      <!-- Right: Device Simulator Toggle, Cart & Reviewer Dropdown -->
+      <!-- Right: Cart Only (Pure Customer Experience) -->
       <div class="nav-actions">
-        
-        <!-- Mobile / Laptop Viewport Switcher -->
-        <button id="device-toggle-btn" class="device-toggle-btn" onclick="App.toggleDeviceMode()" title="Toggle Mobile / Laptop device view">
-          <span id="device-toggle-icon">📱</span>
-          <span id="device-toggle-label" class="device-label">Mobile</span>
-        </button>
-
-        <!-- Cart Trigger Button -->
         <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
           <span class="cart-icon-wrap">🛍️</span>
           <span class="cart-label">Cart</span>
           <span id="cart-count-badge" class="cart-badge-count">0</span>
         </button>
-
-        <!-- Staff / Reviewer Portals Dropdown (Discrete, Professional) -->
-        <div class="reviewer-portal-wrap" title="Switch role/portal for review">
-          <select id="role-select" class="portal-dropdown" onchange="App.handleRoleChange(this.value)">
-            <option value="customer">👤 Customer View</option>
-            <option value="kitchen_kondapur">🍳 Kitchen KDS (Kondapur)</option>
-            <option value="kitchen_gachibowli">🍳 Kitchen KDS (Gachibowli)</option>
-            <option value="kitchen_kukatpally">🍳 Kitchen KDS (Kukatpally)</option>
-            <option value="admin">📋 Central Menu CMS</option>
-            <option value="analytics">📊 Financial Dashboard</option>
-            <option value="ai_diagnostics">🧠 AI Engine Lab</option>
-          </select>
-        </div>
-
       </div>
     </div>
   </header>
@@ -121,7 +99,124 @@
     <!-- Dynamic views will render here via app.js -->
   </main>
 
+  <!-- FLOATING MOBILE CART PILL (DOCKED INSIDE WRAPPER FOR CLEAN MOBILE DOCKING) -->
+  <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="App.openCartDrawer()">
+    <div class="floating-cart-left">
+      <div class="floating-cart-icon">🛍️</div>
+      <div>
+        <div class="floating-cart-title" id="floating-cart-count">0 Items</div>
+        <div class="floating-cart-price" id="floating-cart-total">₹0</div>
+      </div>
+    </div>
+    <div class="floating-cart-right">
+      <span>View Order</span>
+      <span class="floating-arrow">➔</span>
+    </div>
+  </div>
+
   </div> <!-- /#app-root-wrapper -->
+
+  <!-- FLOATING SIDE REVIEWER PORTAL TRIGGER (DISCRETE OFF-HEADER BUTTON) -->
+  <button id="side-portal-trigger" class="side-portal-trigger" onclick="App.toggleSideDrawer()" title="Reviewer Tools & Role Switcher">
+    <span class="portal-trigger-icon">⚙️</span>
+    <span class="portal-trigger-text">Reviewer Portal</span>
+  </button>
+
+  <!-- SIDE REVIEWER DRAWER (SLIDES IN FROM RIGHT WITHOUT POLLUTING MAIN PAGE) -->
+  <div id="side-portal-backdrop" class="side-portal-backdrop" onclick="App.closeSideDrawer()">
+    <div class="side-portal-panel" onclick="event.stopPropagation()">
+      <div class="side-portal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.25rem;">🛠️</span>
+          <div>
+            <h3 style="font-size: 1.05rem; color: #FFFFFF; margin: 0; font-weight: 800;">Reviewer Controls</h3>
+            <p style="font-size: 0.75rem; color: #94A3B8; margin: 0.15rem 0 0 0;">Switch Personas & Viewport</p>
+          </div>
+        </div>
+        <button class="side-portal-close" onclick="App.closeSideDrawer()">&times;</button>
+      </div>
+
+      <div class="side-portal-body">
+        
+        <!-- Viewport Switcher -->
+        <div class="side-section">
+          <label class="side-section-label">DEVICE VIEWPORT</label>
+          <div class="side-toggle-group">
+            <button id="side-device-laptop" class="side-group-btn active" onclick="App.setDeviceMode('laptop')">
+              💻 Laptop
+            </button>
+            <button id="side-device-mobile" class="side-group-btn" onclick="App.setDeviceMode('mobile')">
+              📱 Mobile
+            </button>
+          </div>
+        </div>
+
+        <!-- Role / Persona Switcher -->
+        <div class="side-section">
+          <label class="side-section-label">ROLE / PERSONA SWITCHER</label>
+          <div class="side-role-list">
+            <button class="side-role-btn active" data-role="customer" onclick="App.switchRoleFromSide('customer')">
+              <span>👤</span> Customer Direct View
+            </button>
+            <button class="side-role-btn" data-role="kitchen_kondapur" onclick="App.switchRoleFromSide('kitchen_kondapur')">
+              <span>🍳</span> Kitchen KDS (Kondapur)
+            </button>
+            <button class="side-role-btn" data-role="kitchen_gachibowli" onclick="App.switchRoleFromSide('kitchen_gachibowli')">
+              <span>🍳</span> Kitchen KDS (Gachibowli)
+            </button>
+            <button class="side-role-btn" data-role="kitchen_kukatpally" onclick="App.switchRoleFromSide('kitchen_kukatpally')">
+              <span>🍳</span> Kitchen KDS (Kukatpally)
+            </button>
+            <button class="side-role-btn" data-role="admin" onclick="App.switchRoleFromSide('admin')">
+              <span>📋</span> Central Menu CMS
+            </button>
+            <button class="side-role-btn" data-role="analytics" onclick="App.switchRoleFromSide('analytics')">
+              <span>📊</span> Financial Dashboard (₹1.14 Cr)
+            </button>
+            <button class="side-role-btn" data-role="party" onclick="App.switchRoleFromSide('party')">
+              <span>🎉</span> Party / Bulk Catering
+            </button>
+            <button class="side-role-btn" data-role="ai_diagnostics" onclick="App.switchRoleFromSide('ai_diagnostics')">
+              <span>🧠</span> AI Engine Diagnostics
+            </button>
+          </div>
+        </div>
+
+        <!-- Demo Testing Shortcuts -->
+        <div class="side-section">
+          <label class="side-section-label">DEMO SHORTCUTS</label>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <button class="side-action-btn" onclick="App.fillDemoCart()">
+              🛍️ Fill Cart with Sample Feast
+            </button>
+            <button class="side-action-btn" onclick="App.simulateLateDelay('WEB-778146')">
+              ⚡ Trigger 10m Delay (#WEB-778146)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE MOCK PAYMENT GATEWAY MODAL (TEST MODE UPI & CARD) -->
+  <div id="payment-modal" class="modal-backdrop" onclick="App.closePaymentModal()">
+    <div class="modal-card" id="payment-modal-card" style="max-width: 480px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
+            🔒 256-BIT TEST GATEWAY • SANDBOX
+          </div>
+          <h3 class="modal-title" style="margin-top: 0.2rem;">Complete Mock Payment</h3>
+        </div>
+        <button class="modal-close-btn" onclick="App.closePaymentModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" id="payment-modal-body">
+        <!-- Rendered dynamically by JS with live amount -->
+      </div>
+    </div>
+  </div>
 
   <!-- SLIDE-OVER CART DRAWER -->
   <div id="cart-drawer-backdrop" class="drawer-backdrop" onclick="App.handleDrawerBackdropClick(event)">
@@ -174,21 +269,6 @@
       <div class="modal-footer" id="custom-modal-footer">
         <!-- Rendered by JS -->
       </div>
-    </div>
-  </div>
-
-  <!-- FLOATING MOBILE CART PILL -->
-  <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="App.openCartDrawer()">
-    <div class="floating-cart-left">
-      <div class="floating-cart-icon">🛍️</div>
-      <div>
-        <div class="floating-cart-title" id="floating-cart-count">0 Items</div>
-        <div class="floating-cart-price" id="floating-cart-total">₹0</div>
-      </div>
-    </div>
-    <div class="floating-cart-right">
-      <span>View Order</span>
-      <span class="floating-arrow">➔</span>
     </div>
   </div>
 
