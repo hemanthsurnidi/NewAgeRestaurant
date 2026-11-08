@@ -1,10 +1,8 @@
 /**
  * Nawabi Zaika / Nizami Biryani - Direct Ordering & KDS Application
+ * World-Class Modern Luxury Hyderabadi Design System (2026 Standard)
  * Complete reactive client with Real-time SSE synchronization,
  * Web Audio synthesizer, and multi-role views
- * 
- * Aesthetic: Minimal Luxury Hyderabadi Design System
- * "Clean layouts, white space, restrained palette, clear type, big food photos"
  */
 
 export const App = {
@@ -16,6 +14,7 @@ export const App = {
     menu: [],
     activeCategory: 'All',
     vegOnly: false,
+    searchQuery: '',
     cart: [],
     activeCoupon: null,
     loyaltyPointsRedeemed: 0,
@@ -212,7 +211,7 @@ export const App = {
     this.state.currentView = viewName;
 
     // Update active tab styling
-    document.querySelectorAll('.role-tab').forEach(tab => {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
       if (tab.dataset.view === viewName) {
         tab.classList.add('active');
       } else {
@@ -284,37 +283,43 @@ export const App = {
     const container = document.getElementById('app-view-container');
     const outlet = this.state.currentOutlet;
 
-    const categories = ['All', 'Dum Biryani', 'Royal Specials', 'Starters & Kebabs', 'Hyderabadi Curries', 'Desserts & Shakes'];
+    const categories = ['All Curations', 'Dum Biryani', 'Royal Specials', 'Starters & Kebabs', 'Hyderabadi Curries', 'Desserts & Shakes'];
     let filtered = this.state.menu;
 
-    if (this.state.activeCategory !== 'All') {
+    if (this.state.activeCategory !== 'All Curations' && this.state.activeCategory !== 'All') {
       filtered = filtered.filter(item => item.category === this.state.activeCategory);
     }
     if (this.state.vegOnly) {
       filtered = filtered.filter(item => item.is_veg === 1);
     }
+    if (this.state.searchQuery && this.state.searchQuery.trim()) {
+      const q = this.state.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(item => item.name.toLowerCase().includes(q) || item.description.toLowerCase().includes(q));
+    }
 
     container.innerHTML = `
-      <!-- Royal Heritage Hero Banner -->
-      <section class="heritage-hero">
-        <div class="hero-tagline">Company A • Hyderabad Direct Ordering</div>
-        <h1 class="hero-heading">Purani Haveli Se Aapke Dastarkhwan Tak</h1>
-        <p class="hero-desc">
-          Authentic Dum Biryanis slow-cooked in sealed copper deghs over wood fire. Direct kitchen dispatch from 
-          <strong>${outlet ? outlet.name : 'Hyderabad'}</strong>. Save 25% delivery app commissions and earn royal reward points!
+      <!-- Luxury Hero Banner -->
+      <section class="hero-luxury-banner">
+        <div class="hero-kicker">
+          <span>👑</span> Company A • Hyderabad Direct Platform • 15% Net Margin Saved
+        </div>
+        <h1 class="hero-headline">The Royal Dum Biryani of Hyderabad.</h1>
+        <p class="hero-lead">
+          Slow wood-fire cooked in sealed copper deghs across 14 outlets & 3 cloud kitchens. Direct dispatch from 
+          <strong>${outlet ? outlet.name : 'Hyderabad'}</strong>. No 25% app middleman fees, 100% authentic recipe.
         </p>
-        <div class="hero-badges-row">
-          <div class="hero-feature-badge">
+        <div class="hero-stats-row">
+          <div class="hero-stat-card">
             <span>🛡️</span> <strong>FSSAI Lic:</strong> ${outlet ? outlet.fssai_license : '13622014000491'}
           </div>
-          <div class="hero-feature-badge">
-            <span>⏱️</span> <strong>AI Prep Time:</strong> ~${outlet ? outlet.min_prep_time_minutes : 25} mins honest estimate
+          <div class="hero-stat-card">
+            <span>⏱️</span> <strong>AI Dynamic Prep:</strong> ~${outlet ? outlet.min_prep_time_minutes : 25}m honest promise
           </div>
-          <div class="hero-feature-badge">
-            <span>🏷️</span> <strong>Transparent:</strong> All prices inclusive of 5% GST
+          <div class="hero-stat-card">
+            <span>🏷️</span> <strong>Zero Markups:</strong> All prices include 5% GST
           </div>
-          <div class="hero-feature-badge">
-            <span>🎁</span> <strong>Loyalty:</strong> 5% cashback on every direct order
+          <div class="hero-stat-card">
+            <span>🎁</span> <strong>Royal Loyalty:</strong> 5% cashback on direct orders
           </div>
         </div>
       </section>
@@ -322,9 +327,9 @@ export const App = {
       <!-- AI Smart Re-Order Suggestions (Strictly Opt-in, never auto-added) -->
       ${this.renderAiReorderBanner()}
 
-      <!-- Sticky Category Bar & Veg Switch -->
-      <div class="category-filter-wrap">
-        <div class="category-scroll-list">
+      <!-- Sticky Category Bar & Search -->
+      <div class="category-filter-bar">
+        <div class="category-chips-list">
           ${categories.map(cat => `
             <button class="category-chip ${this.state.activeCategory === cat ? 'active' : ''}" 
                     onclick="App.setCategory('${cat}')">
@@ -333,10 +338,10 @@ export const App = {
           `).join('')}
         </div>
 
-        <div style="display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
-          <label style="font-size: 0.85rem; font-weight: 700; color: var(--accent-emerald); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
-            <input type="checkbox" ${this.state.vegOnly ? 'checked' : ''} onchange="App.toggleVegFilter(this.checked)" style="accent-color: var(--accent-emerald);">
-            🌱 Pure Veg Only
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <label class="veg-filter-label">
+            <input type="checkbox" class="veg-toggle-input" ${this.state.vegOnly ? 'checked' : ''} onchange="App.toggleVegFilter(this.checked)">
+            <span>🌱 Pure Veg Only</span>
           </label>
         </div>
       </div>
@@ -351,30 +356,30 @@ export const App = {
   renderAiReorderBanner() {
     if (!this.state.aiRecommendations || this.state.aiRecommendations.length === 0) return '';
     return `
-      <div class="ai-reorder-banner">
-        <div class="ai-reorder-header">
-          <div class="ai-reorder-title">
+      <div class="ai-smart-banner">
+        <div class="ai-banner-header">
+          <div class="ai-banner-title">
             <span>✨</span> AI Smart Re-Order Recommendations
           </div>
-          <div class="ai-guarantee-tag">
-            🛡️ Never Auto-Added • 1-Tap Add
+          <div class="ai-guarantee-pill">
+            🛡️ Strictly Opt-In • Never Auto-Added
           </div>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.85rem;">
+        <p class="ai-banner-desc">
           Personalized for <strong>${this.state.customerName}</strong> based on past Hyderabadi culinary orders:
         </p>
-        <div class="ai-reorder-cards">
+        <div class="ai-recommendations-grid">
           ${this.state.aiRecommendations.map(item => `
-            <div class="ai-mini-card">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <img src="${item.image_url}" alt="${item.name}" style="width: 52px; height: 52px; border-radius: 8px; object-fit: cover;">
+            <div class="ai-dish-pill-card">
+              <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <img src="${item.image_url}" alt="${item.name}" class="ai-dish-thumb">
                 <div>
-                  <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main);">${item.name}</div>
-                  <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 600;">${item.rationale || item.badge}</div>
-                  <div style="font-weight: 800; font-size: 0.88rem; color: var(--text-main);">₹${item.base_price}</div>
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">${item.name}</div>
+                  <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 700;">${item.rationale || item.badge}</div>
+                  <div style="font-weight: 800; font-size: 0.92rem; color: var(--text-main); margin-top: 0.15rem;">₹${item.base_price}</div>
                 </div>
               </div>
-              <button class="btn-add-pill" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;" 
+              <button class="btn-add-action" style="padding: 0.35rem 0.9rem; font-size: 0.8rem;" 
                       onclick="App.addToCart('${item.id}', null)">
                 + Add
               </button>
@@ -393,43 +398,43 @@ export const App = {
     return `
       <div class="dish-card ${isOutOfStock ? 'out-of-stock' : ''}" id="card-${item.id}">
         <!-- Big Appetizing Food Image -->
-        <div class="dish-image-wrap">
-          <img src="${item.image_url}" alt="${item.name}" class="dish-image" loading="lazy">
-          <div class="dish-badges-overlay">
-            <div class="diet-mark ${item.is_veg ? 'veg' : 'non-veg'}" title="${item.is_veg ? 'Vegetarian' : 'Non-Vegetarian'}"></div>
-            <div class="spice-tag">🌶️ ${item.spice_level}</div>
-          </div>
-          <div class="dish-prep-time">⏱️ ${item.prep_complexity_minutes}m</div>
-        </div>
-
-        <!-- Clean Scannable Dish Body -->
-        <div class="dish-body">
-          <div class="dish-header-row">
-            <h3 class="dish-name">${item.name}</h3>
-            <span class="dish-price">₹${item.base_price}</span>
+        <div class="dish-card-media">
+          <img src="${item.image_url}" alt="${item.name}" class="dish-card-image" loading="lazy">
+          
+          <div class="dish-badges-left">
+            <div class="diet-badge ${item.is_veg ? 'veg' : 'non-veg'}" title="${item.is_veg ? 'Vegetarian' : 'Non-Vegetarian'}"></div>
+            <div class="dish-spice-pill">🌶️ ${item.spice_level}</div>
           </div>
           
-          <p class="dish-desc">${item.description}</p>
+          <div class="dish-prep-badge">⏱️ ${item.prep_complexity_minutes}m</div>
+        </div>
 
-          <div class="dish-footer-row">
-            <span class="gst-indicator">incl. 5% GST</span>
+        <!-- Scannable Body -->
+        <div class="dish-card-body">
+          <div class="dish-header-row">
+            <h3 class="dish-title">${item.name}</h3>
+            <span class="dish-price-tag">₹${item.base_price}</span>
+          </div>
+          
+          <p class="dish-description">${item.description}</p>
+
+          <div class="dish-footer">
+            <span class="dish-gst-note">incl. 5% GST</span>
             
             ${isOutOfStock ? `
-              <span style="color: var(--accent-crimson); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em;">SOLD OUT</span>
+              <span style="color: var(--accent-rose); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.05em;">SOLD OUT</span>
             ` : cartCount > 0 ? `
-              <div style="display: flex; align-items: center; gap: 0.65rem; background: var(--bg-surface); border: 1.5px solid var(--accent-gold); padding: 0.25rem 0.65rem; border-radius: 8px;">
-                <button style="border: none; background: none; color: var(--accent-gold); font-size: 1.1rem; font-weight: 900; cursor: pointer; padding: 0 0.25rem;" 
-                        onclick="App.quickDecrementItem('${item.id}')">-</button>
-                <strong style="color: var(--text-main); font-size: 0.9rem; min-width: 16px; text-align: center;">${cartCount}</strong>
-                <button style="border: none; background: none; color: var(--accent-gold); font-size: 1.1rem; font-weight: 900; cursor: pointer; padding: 0 0.25rem;" 
-                        onclick="${hasCustomization ? `App.openCustomModal('${item.id}')` : `App.addToCart('${item.id}')`}">+</button>
+              <div class="qty-stepper-box">
+                <button class="qty-step-btn" onclick="App.quickDecrementItem('${item.id}')">-</button>
+                <span class="qty-step-val">${cartCount}</span>
+                <button class="qty-step-btn" onclick="${hasCustomization ? `App.openCustomModal('${item.id}')` : `App.addToCart('${item.id}')`}">+</button>
               </div>
             ` : `
-              <div class="add-btn-wrap">
-                <button class="btn-add-pill" onclick="${hasCustomization ? `App.openCustomModal('${item.id}')` : `App.addToCart('${item.id}')`}">
-                  ADD
+              <div>
+                <button class="btn-add-action" onclick="${hasCustomization ? `App.openCustomModal('${item.id}')` : `App.addToCart('${item.id}')`}">
+                  + ADD
                 </button>
-                ${hasCustomization ? '<div class="customisable-hint">Customisable</div>' : ''}
+                ${hasCustomization ? '<div class="customisable-label">Customisable</div>' : ''}
               </div>
             `}
           </div>
@@ -450,32 +455,23 @@ export const App = {
     this.state.selectedAddOns = [];
 
     const modal = document.getElementById('custom-modal-backdrop');
-    const panel = document.getElementById('custom-modal-panel');
     const title = document.getElementById('custom-modal-title');
     const subtitle = document.getElementById('custom-modal-subtitle');
     const body = document.getElementById('custom-modal-body');
     const footer = document.getElementById('custom-modal-footer');
 
-    if (!modal || !panel || !body || !footer) return;
+    if (!modal || !body || !footer) return;
 
     title.textContent = `Customize ${item.name}`;
-    subtitle.textContent = item.is_veg ? '🌱 Vegetarian • Authentic Dum Preparation' : '🍖 Non-Vegetarian • Authentic Dum Preparation';
+    subtitle.textContent = item.is_veg ? '🌱 Pure Vegetarian • Slow Dum Cooking' : '🍖 Tender Gosht • Slow Dum Cooking';
 
     this.renderCustomModalContents();
-
     modal.classList.add('open');
-    panel.style.transform = 'scale(1)';
-    panel.style.opacity = '1';
   },
 
   closeCustomModal() {
     const modal = document.getElementById('custom-modal-backdrop');
-    const panel = document.getElementById('custom-modal-panel');
     if (modal) modal.classList.remove('open');
-    if (panel) {
-      panel.style.transform = 'scale(0.95)';
-      panel.style.opacity = '0';
-    }
     this.state.customizingItem = null;
   },
 
@@ -493,26 +489,27 @@ export const App = {
     body.innerHTML = `
       <!-- Portions Option -->
       ${item.portions && item.portions.length > 0 ? `
-        <div style="margin-bottom: 1.5rem;">
-          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.65rem; display: flex; justify-content: space-between;">
+        <div style="margin-bottom: 1.75rem;">
+          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
             <span>Choose Portion</span>
-            <span style="font-size: 0.72rem; color: var(--accent-gold); text-transform: uppercase;">Required</span>
+            <span style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">Required</span>
           </div>
-          <div style="background: var(--bg-surface); border-radius: 12px; padding: 0.25rem 0.75rem; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
             ${item.portions.map(p => {
               const isSelected = this.state.selectedPortion && this.state.selectedPortion.id === p.id;
               return `
-                <div class="custom-option-row" onclick="App.selectCustomPortion('${p.id}')">
-                  <div style="display: flex; align-items: center; gap: 0.65rem;">
-                    <input type="radio" name="custom-portion" ${isSelected ? 'checked' : ''} style="accent-color: var(--accent-gold);">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border: 1.5px solid ${isSelected ? 'var(--accent-gold)' : 'var(--border-subtle)'}; background: ${isSelected ? 'var(--accent-gold-subtle)' : '#FFFFFF'}; border-radius: 12px; cursor: pointer; transition: all 0.15s ease;" 
+                     onclick="App.selectCustomPortion('${p.id}')">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="radio" name="custom-portion" ${isSelected ? 'checked' : ''} style="accent-color: var(--accent-gold); width: 18px; height: 18px;">
                     <div>
-                      <strong style="font-size: 0.9rem; color: var(--text-main);">${p.name}</strong>
-                      <div style="font-size: 0.72rem; color: var(--text-muted);">Serves ${p.serves_count} ${p.serves_count > 1 ? 'people' : 'person'}</div>
+                      <strong style="font-size: 0.92rem; color: var(--text-main); display: block;">${p.name}</strong>
+                      <span style="font-size: 0.75rem; color: var(--text-muted);">Serves ${p.serves_count} ${p.serves_count > 1 ? 'people' : 'person'}</span>
                     </div>
                   </div>
-                  <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">
+                  <strong style="font-size: 0.95rem; color: var(--text-main);">
                     ₹${basePrice + p.price_delta}
-                  </span>
+                  </strong>
                 </div>
               `;
             }).join('')}
@@ -523,22 +520,23 @@ export const App = {
       <!-- Add-ons Option -->
       ${item.add_ons && item.add_ons.length > 0 ? `
         <div>
-          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.65rem; display: flex; justify-content: space-between;">
-            <span>Royal Accompaniments & Add-ons</span>
+          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
+            <span>Royal Accompaniments</span>
             <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Optional</span>
           </div>
-          <div style="background: var(--bg-surface); border-radius: 12px; padding: 0.25rem 0.75rem; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
             ${item.add_ons.map(a => {
               const isChecked = this.state.selectedAddOns.some(sa => sa.id === a.id);
               return `
-                <div class="custom-option-row" onclick="App.toggleCustomAddOn('${a.id}')">
-                  <div style="display: flex; align-items: center; gap: 0.65rem;">
-                    <input type="checkbox" ${isChecked ? 'checked' : ''} style="accent-color: var(--accent-gold);">
-                    <strong style="font-size: 0.88rem; color: var(--text-main);">${a.name}</strong>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border: 1.5px solid ${isChecked ? 'var(--accent-gold)' : 'var(--border-subtle)'}; background: ${isChecked ? 'var(--accent-gold-subtle)' : '#FFFFFF'}; border-radius: 12px; cursor: pointer; transition: all 0.15s ease;" 
+                     onclick="App.toggleCustomAddOn('${a.id}')">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} style="accent-color: var(--accent-gold); width: 18px; height: 18px;">
+                    <strong style="font-size: 0.9rem; color: var(--text-main);">${a.name}</strong>
                   </div>
-                  <span style="font-weight: 700; font-size: 0.88rem; color: var(--accent-gold);">
+                  <strong style="font-size: 0.9rem; color: var(--accent-gold);">
                     +₹${a.price}
-                  </span>
+                  </strong>
                 </div>
               `;
             }).join('')}
@@ -548,14 +546,16 @@ export const App = {
     `;
 
     footer.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-        <span style="font-size: 0.85rem; color: var(--text-secondary);">Item Total (incl. 5% GST):</span>
-        <strong style="font-size: 1.35rem; color: var(--text-main);">₹${calculatedTotal}</strong>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.82rem; color: var(--text-muted); display: block;">Total (incl. 5% GST):</span>
+          <strong style="font-size: 1.4rem; color: var(--text-main);">₹${calculatedTotal}</strong>
+        </div>
+        <button class="btn-cart-nav" style="padding: 0.85rem 1.75rem; font-size: 1rem; border-radius: 12px;" 
+                onclick="App.commitCustomModalAdd()">
+          Add to Feast ➔
+        </button>
       </div>
-      <button class="cart-btn-pill" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem; border-radius: 12px;" 
-              onclick="App.commitCustomModalAdd()">
-        Add to Order • ₹${calculatedTotal} ➔
-      </button>
     `;
   },
 
@@ -634,7 +634,7 @@ export const App = {
   },
 
   // --------------------------------------------------------------------------
-  // CART ACTIONS & STATE MANAGEMENT
+  // CART ACTIONS & DRAWER
   // --------------------------------------------------------------------------
   addToCart(itemId) {
     const item = this.state.menu.find(m => m.id === itemId);
@@ -646,17 +646,6 @@ export const App = {
     let portionName = 'Regular';
     let unitPrice = item.base_price;
 
-    const portionSelect = document.getElementById(`portion-${itemId}`);
-    if (portionSelect && item.portions) {
-      const selectedPortionId = portionSelect.value;
-      const portionObj = item.portions.find(p => p.id === selectedPortionId);
-      if (portionObj) {
-        portionName = portionObj.name;
-        unitPrice = item.base_price + portionObj.price_delta;
-      }
-    }
-
-    const selectedAddOns = [];
     const existingIndex = this.state.cart.findIndex(
       ci => ci.item_id === itemId && ci.portion === portionName && (ci.add_ons || []).length === 0
     );
@@ -671,7 +660,7 @@ export const App = {
         quantity: 1,
         unit_price: unitPrice,
         prep_complexity_minutes: item.prep_complexity_minutes,
-        add_ons: selectedAddOns
+        add_ons: []
       });
     }
 
@@ -687,7 +676,7 @@ export const App = {
     const badge = document.getElementById('cart-count-badge');
     if (badge) badge.textContent = totalCount;
 
-    // Floating Cart Bar at the bottom
+    // Floating Cart Bar
     const floatingBar = document.getElementById('floating-cart-bar');
     const floatingCount = document.getElementById('floating-cart-count');
     const floatingTotal = document.getElementById('floating-cart-total');
@@ -725,16 +714,16 @@ export const App = {
 
     if (this.state.cart.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 3rem 1rem;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">🍲</div>
-          <h4 style="color: var(--text-main); font-size: 1.25rem; margin-bottom: 0.5rem;">Your Cart is Empty</h4>
-          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;">
-            Explore our authentic Hyderabadi Dum Biryanis, Shahi Haleem and Kebabs to begin your order.
+        <div style="text-align: center; padding: 4rem 1rem;">
+          <div style="font-size: 3.5rem; margin-bottom: 1rem;">🍲</div>
+          <h4 style="color: var(--text-main); font-size: 1.35rem; margin-bottom: 0.5rem;">Your Cart is Empty</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; max-width: 320px; margin: 0 auto;">
+            Explore our royal Hyderabadi Dum Biryanis, Shahi Haleem and Kebabs to begin your direct feast.
           </p>
         </div>
       `;
       footer.innerHTML = `
-        <button class="cart-btn-pill" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 0.95rem;" onclick="App.closeCartDrawer()">
+        <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1rem; border-radius: 12px;" onclick="App.closeCartDrawer()">
           Browse Menu
         </button>
       `;
@@ -748,18 +737,16 @@ export const App = {
           const itemTotal = item.unit_price * item.quantity;
           subtotal += itemTotal;
           return `
-            <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-surface); padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-surface); padding: 0.85rem 1.1rem; border-radius: 12px; border: 1px solid var(--border-subtle);">
               <div>
                 <strong style="color: var(--text-main); font-size: 0.95rem;">${item.name}</strong>
-                <div style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 600;">${item.portion}</div>
+                <div style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 700;">${item.portion}</div>
                 <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">₹${item.unit_price} x ${item.quantity} = ₹${itemTotal}</div>
               </div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 8px; padding: 0.2rem 0.4rem;">
-                <button style="background: none; color: var(--accent-gold); border: none; font-size: 1.1rem; cursor: pointer; font-weight: 900; padding: 0 0.35rem;" 
-                        onclick="App.changeCartQty(${idx}, -1)">-</button>
-                <span style="font-weight: 800; font-size: 0.9rem; min-width: 18px; text-align: center; color: var(--text-main);">${item.quantity}</span>
-                <button style="background: none; color: var(--accent-gold); border: none; font-size: 1.1rem; cursor: pointer; font-weight: 900; padding: 0 0.35rem;" 
-                        onclick="App.changeCartQty(${idx}, 1)">+</button>
+              <div class="qty-stepper-box" style="background: #FFFFFF;">
+                <button class="qty-step-btn" onclick="App.changeCartQty(${idx}, -1)">-</button>
+                <span class="qty-step-val">${item.quantity}</span>
+                <button class="qty-step-btn" onclick="App.changeCartQty(${idx}, 1)">+</button>
               </div>
             </div>
           `;
@@ -767,22 +754,22 @@ export const App = {
       </div>
     `;
 
-    // GST Inclusive Math
+    // GST Math
     const taxable = subtotal / 1.05;
     const gst = Math.round((subtotal - taxable) * 100) / 100;
 
     footer.innerHTML = `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.88rem; color: var(--text-secondary);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
         <span>Item Total (incl. 5% GST):</span>
-        <span style="color: var(--text-main); font-weight: 800;">₹${subtotal}</span>
+        <strong style="color: var(--text-main); font-size: 1.05rem;">₹${subtotal}</strong>
       </div>
-      <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.78rem; color: var(--text-muted);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--text-muted);">
         <span>Included GST (CGST 2.5% + SGST 2.5%):</span>
         <span>₹${gst}</span>
       </div>
-      <button class="cart-btn-pill" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1rem; border-radius: 12px;" 
+      <button class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1.05rem; border-radius: 14px;" 
               onclick="App.closeCartDrawer(); App.navigate('checkout');">
-        Proceed to Checkout (₹${subtotal}) ➔
+        Proceed to Express Checkout (₹${subtotal}) ➔
       </button>
     `;
   },
@@ -855,39 +842,44 @@ export const App = {
     }
 
     container.innerHTML = `
-      <div style="max-width: 960px; margin: 0 auto;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+      <div style="max-width: 1000px; margin: 0 auto;">
+        
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
           <div>
-            <h2 style="font-size: 1.85rem; color: var(--text-main);">Express Checkout</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Direct order with zero app commission markups</p>
+            <h2 style="font-size: 2rem; color: var(--text-main);">Express Checkout</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Direct order • Zero delivery app commission markups • 5% Royal Cashback
+            </p>
           </div>
           <button class="category-chip" onclick="App.navigate('ordering')">← Back to Menu</button>
         </div>
 
         <!-- AI Honest Delivery Promise Callout -->
-        <div style="background: #FEF3C7; border: 1px solid #FDE68A; border-left: 4px solid var(--accent-gold); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="font-size: 2.2rem;">⏱️</div>
+        <div style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FDE68A; border-left: 5px solid var(--accent-gold); border-radius: 16px; padding: 1.5rem 1.75rem; margin-bottom: 2.25rem; display: flex; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 2.5rem;">⏱️</div>
           <div>
-            <div style="font-weight: 800; font-size: 1.05rem; color: var(--accent-gold);">
+            <div style="font-weight: 800; font-size: 1.15rem; color: var(--accent-gold-hover);">
               AI Promised Delivery Time: ~${honestPrepMinutes} Minutes
             </div>
-            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+            <div style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.25rem;">
               ${prepRationale}
             </div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2rem;">
-          <!-- Left Column: Delivery Address & Payment Method -->
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 390px; gap: 2.25rem;">
+          
+          <!-- Left Column: Delivery & Payment -->
+          <div style="display: flex; flex-direction: column; gap: 1.75rem;">
             
             <!-- Delivery Address Card -->
-            <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-              <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
                 <span>📍</span> Delivery Location (Hyderabad)
               </h3>
               
-              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+              <div style="display: flex; gap: 0.6rem; margin-bottom: 1.25rem;">
                 <button class="category-chip active" type="button" onclick="document.getElementById('checkout-address').value = 'Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084'">
                   Home (Kondapur)
                 </button>
@@ -896,142 +888,141 @@ export const App = {
                 </button>
               </div>
 
-              <textarea id="checkout-address" rows="2" style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.75rem; border-radius: 8px; font-family: inherit; font-size: 0.9rem;" placeholder="Enter complete address, flat/plot, landmark...">Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084</textarea>
+              <textarea id="checkout-address" rows="2" style="width: 100%; margin-bottom: 1rem;" placeholder="Enter complete flat/plot, street, landmark...">Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084</textarea>
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                <input type="text" id="checkout-name" value="${this.state.customerName}" placeholder="Your Full Name" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 8px; font-size: 0.88rem;">
-                <input type="tel" id="checkout-phone" value="${this.state.customerPhone}" placeholder="Phone Number (+91)" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 8px; font-size: 0.88rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <input type="text" id="checkout-name" value="${this.state.customerName}" placeholder="Your Full Name">
+                <input type="tel" id="checkout-phone" value="${this.state.customerPhone}" placeholder="Phone Number (+91)">
               </div>
             </div>
 
-            <!-- DPDP Act 2023 Consent Checkbox -->
-            <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 1.25rem;">
-              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
-                <input type="checkbox" id="dpdp-consent" checked style="accent-color: var(--accent-emerald); width: 20px; height: 20px; margin-top: 2px;">
-                <span style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45;">
+            <!-- DPDP Act 2023 Consent Card -->
+            <div style="background-color: var(--accent-emerald-subtle); border: 1.5px solid #A7F3D0; border-radius: 14px; padding: 1.4rem;">
+              <label style="display: flex; align-items: flex-start; gap: 0.85rem; cursor: pointer;">
+                <input type="checkbox" id="dpdp-consent" checked style="accent-color: var(--accent-emerald); width: 22px; height: 22px; margin-top: 2px;">
+                <span style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;">
                   <strong>DPDP Act 2023 Consent:</strong> I agree to receive transactional order tracking messages via WhatsApp/SMS. I opt-in to direct reward updates and exclusive Nizami Zaika promotions. You can opt out at any time.
                 </span>
               </label>
             </div>
 
             <!-- Test Payment Selection -->
-            <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-              <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.6rem;">
                 <span>💳</span> Test Mode Payment
               </h3>
 
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 0.85rem 1rem; border-radius: 8px; border: 1.5px solid var(--accent-gold); cursor: pointer;">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="radio" name="payment-method" value="UPI" checked style="accent-color: var(--accent-gold);">
+              <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 1rem 1.25rem; border-radius: 12px; border: 2px solid var(--accent-gold); cursor: pointer;">
+                  <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    <input type="radio" name="payment-method" value="UPI" checked style="accent-color: var(--accent-gold); width: 20px; height: 20px;">
                     <div>
-                      <strong style="color: var(--text-main);">UPI Instant Pay (QR / VPA)</strong>
-                      <div style="font-size: 0.75rem; color: var(--text-muted);">GPay, PhonePe, Paytm, BHIM</div>
+                      <strong style="color: var(--text-main); font-size: 0.95rem;">UPI Instant Pay (QR / VPA)</strong>
+                      <div style="font-size: 0.78rem; color: var(--text-muted);">GPay, PhonePe, Paytm, BHIM</div>
                     </div>
                   </div>
-                  <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">Zero Surcharge</span>
+                  <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 800;">Zero Surcharge</span>
                 </label>
 
-                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border-subtle); cursor: pointer;">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="radio" name="payment-method" value="Card" style="accent-color: var(--accent-gold);">
+                <label style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); padding: 1rem 1.25rem; border-radius: 12px; border: 1.5px solid var(--border-subtle); cursor: pointer;">
+                  <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    <input type="radio" name="payment-method" value="Card" style="accent-color: var(--accent-gold); width: 20px; height: 20px;">
                     <div>
-                      <strong style="color: var(--text-main);">Credit / Debit Card (Test Mock)</strong>
-                      <div style="font-size: 0.75rem; color: var(--text-muted);">Visa, Mastercard, RuPay</div>
+                      <strong style="color: var(--text-main); font-size: 0.95rem;">Credit / Debit Card (Test Mock)</strong>
+                      <div style="font-size: 0.78rem; color: var(--text-muted);">Visa, Mastercard, RuPay</div>
                     </div>
                   </div>
-                  <span style="color: var(--text-dim); font-size: 0.75rem;">Instant 4242</span>
+                  <span style="color: var(--text-dim); font-size: 0.75rem; font-weight: 700;">Instant 4242</span>
                 </label>
               </div>
             </div>
 
           </div>
 
-          <!-- Right Column: Order Bill Breakdown & Instant Apply -->
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            
-            <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-              <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-main);">Order Summary</h3>
+          <!-- Right Column: Order Bill Breakdown -->
+          <div>
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm); position: sticky; top: 100px;">
+              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem;">Order Summary</h3>
               
-              <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 220px; overflow-y: auto;">
                 ${this.state.cart.map(i => `
-                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                    <span style="color: var(--text-secondary);">${i.quantity}x ${i.name} (${i.portion})</span>
-                    <span style="font-weight: 700; color: var(--text-main);">₹${i.unit_price * i.quantity}</span>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+                    <span style="color: var(--text-secondary);"><strong style="color: var(--text-main);">${i.quantity}x</strong> ${i.name} (${i.portion})</span>
+                    <strong style="color: var(--text-main);">₹${i.unit_price * i.quantity}</strong>
                   </div>
                 `).join('')}
               </div>
 
               <!-- Coupon Code Box -->
-              <div style="margin-bottom: 1.25rem;">
-                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Coupon Code</label>
+              <div style="margin-bottom: 1.5rem;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem; font-weight: 700;">Coupon Code</label>
                 <div style="display: flex; gap: 0.5rem;">
                   <input type="text" id="coupon-input" value="${this.state.activeCoupon ? this.state.activeCoupon.code : 'DIRECT15'}" 
-                         placeholder="e.g. DIRECT15" style="flex: 1; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 700; text-transform: uppercase;">
-                  <button class="category-chip active" style="padding: 0.5rem 0.85rem;" onclick="App.applyCoupon()">Apply</button>
+                         placeholder="e.g. DIRECT15" style="flex: 1; font-weight: 800; text-transform: uppercase;">
+                  <button class="category-chip active" style="padding: 0.5rem 1rem;" onclick="App.applyCoupon()">Apply</button>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--accent-gold); margin-top: 0.35rem;">
+                <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.35rem; font-weight: 600;">
                   Try <strong>DIRECT15</strong> for 15% off or <strong>NIZAM100</strong> for ₹100 off!
                 </div>
               </div>
 
               <!-- Loyalty Points Redemption -->
-              <div style="background-color: var(--bg-surface); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+              <div style="background-color: var(--bg-surface); padding: 1.1rem; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                  <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent-gold);">👑 Nizami Royalty Balance</span>
-                  <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main);">${this.state.customerLoyaltyBalance} Pts (₹${this.state.customerLoyaltyBalance})</span>
+                  <span style="font-size: 0.86rem; font-weight: 800; color: var(--accent-gold);">👑 Nizami Royalty Balance</span>
+                  <span style="font-size: 0.88rem; font-weight: 800; color: var(--text-main);">${this.state.customerLoyaltyBalance} Pts (₹${this.state.customerLoyaltyBalance})</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                   <input type="range" min="0" max="${maxRedeemable}" value="${validLoyaltyRedeem}" step="10" 
                          style="flex: 1; accent-color: var(--accent-gold);" 
                          oninput="App.setLoyaltyRedeem(this.value)">
-                  <span style="font-weight: 800; color: var(--accent-gold); min-width: 50px; text-align: right;">-₹${validLoyaltyRedeem}</span>
+                  <strong style="color: var(--accent-gold); min-width: 50px; text-align: right;">-₹${validLoyaltyRedeem}</strong>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--accent-emerald); margin-top: 0.35rem;">
+                <div style="font-size: 0.75rem; color: var(--accent-emerald); margin-top: 0.4rem; font-weight: 700;">
                   + You will earn 5% back (₹${Math.round(finalTotal * 0.05)}) upon placing this order!
                 </div>
               </div>
 
-              <!-- Bill Lines -->
-              <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem;">
+              <!-- Bill Breakdown Lines -->
+              <div style="border-top: 1.5px solid var(--border-subtle); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
                 <div style="display: flex; justify-content: space-between; color: var(--text-secondary);">
                   <span>Subtotal:</span>
-                  <span style="font-weight: 600; color: var(--text-main);">₹${subtotal}</span>
+                  <strong style="color: var(--text-main);">₹${subtotal}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.78rem;">
+                <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem;">
                   <span>Incl. 5% GST (Taxable: ₹${Math.round(taxable)}):</span>
                   <span>₹${gst}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; color: var(--accent-emerald); font-weight: 600;">
-                  <span>Direct Delivery Fee (Zero App Markups):</span>
+                <div style="display: flex; justify-content: space-between; color: var(--accent-emerald); font-weight: 700;">
+                  <span>Direct Delivery Fee (Zero App Fees):</span>
                   <span>FREE</span>
                 </div>
                 ${discount > 0 ? `
-                  <div style="display: flex; justify-content: space-between; color: var(--accent-gold); font-weight: 600;">
+                  <div style="display: flex; justify-content: space-between; color: var(--accent-gold); font-weight: 700;">
                     <span>Discount (${this.state.activeCoupon.code}):</span>
                     <span>-₹${Math.round(discount)}</span>
                   </div>
                 ` : ''}
                 ${validLoyaltyRedeem > 0 ? `
-                  <div style="display: flex; justify-content: space-between; color: var(--accent-gold); font-weight: 600;">
+                  <div style="display: flex; justify-content: space-between; color: var(--accent-gold); font-weight: 700;">
                     <span>Royalty Points Redeemed:</span>
                     <span>-₹${validLoyaltyRedeem}</span>
                   </div>
                 ` : ''}
-                <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; font-size: 1.3rem; font-weight: 900; color: var(--text-main);">
+                <div style="display: flex; justify-content: space-between; border-top: 1.5px solid var(--border-subtle); padding-top: 0.85rem; font-size: 1.4rem; font-weight: 900; color: var(--text-main);">
                   <span>Grand Total:</span>
                   <span style="color: var(--accent-gold);">₹${finalTotal}</span>
                 </div>
               </div>
 
               <!-- Place Order Button -->
-              <button id="place-order-btn" class="cart-btn-pill" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1.05rem; border-radius: 12px; margin-top: 1.5rem;" 
+              <button id="place-order-btn" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 1.1rem; font-size: 1.1rem; border-radius: 14px; margin-top: 1.75rem;" 
                       onclick="App.submitOrder(${finalTotal}, ${subtotal}, ${gst}, ${discount}, ${validLoyaltyRedeem})">
                 Place Order in Test Mode ➔
               </button>
             </div>
-
           </div>
+
         </div>
       </div>
     `;
@@ -1136,7 +1127,7 @@ export const App = {
         <div style="text-align: center; padding: 4rem 1rem;">
           <h2 style="color: var(--text-main);">No Active Order Found</h2>
           <p style="color: var(--text-muted); margin-top: 0.5rem;">Place an order from the menu to track live status.</p>
-          <button class="cart-btn-pill" style="margin: 1.5rem auto; display: inline-flex;" onclick="App.navigate('ordering')">Order Now</button>
+          <button class="btn-cart-nav" style="margin: 1.5rem auto; display: inline-flex;" onclick="App.navigate('ordering')">Order Now</button>
         </div>
       `;
       return;
@@ -1153,13 +1144,13 @@ export const App = {
     const isLate = diffMins < 0;
 
     container.innerHTML = `
-      <div style="max-width: 860px; margin: 0 auto;">
+      <div style="max-width: 900px; margin: 0 auto;">
         
         <!-- Order Selector Pills for Reviewer -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <h2 style="font-size: 1.85rem; color: var(--text-main);">Live Order Status</h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">Real-time tracking of kitchen dum preparation and 3PL dispatch</div>
+            <h2 style="font-size: 2rem; color: var(--text-main);">Live Order Status</h2>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">Real-time tracking of kitchen dum preparation and 3PL dispatch</div>
           </div>
           <div style="display: flex; gap: 0.5rem; overflow-x: auto; align-items: center;">
             ${this.state.orders.slice(0, 4).map(o => `
@@ -1167,7 +1158,7 @@ export const App = {
                 #${o.id} (${o.status})
               </button>
             `).join('')}
-            <button class="category-chip" style="background: var(--accent-crimson-light); color: var(--accent-crimson); border-color: var(--accent-crimson); font-weight: 700;" onclick="App.simulateLateDelay('${order.id}')" title="Trigger 10+ min delay to inspect auto-apology and compensation">
+            <button class="category-chip" style="background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose); font-weight: 800;" onclick="App.simulateLateDelay('${order.id}')" title="Trigger 10+ min delay to inspect auto-apology and compensation">
               ⚡ Test 10m Late Trigger
             </button>
           </div>
@@ -1175,13 +1166,13 @@ export const App = {
 
         <!-- 10-Minute Late Apology Compensation Alert Banner -->
         ${order.late_alert_triggered ? `
-          <div style="background: #FEF2F2; border: 1.5px solid #F87171; border-left: 4px solid #EF4444; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-            <div style="font-size: 2.2rem;">🎁</div>
+          <div style="background: #FEF2F2; border: 2px solid #F87171; border-left: 6px solid #EF4444; border-radius: 16px; padding: 1.5rem 1.75rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 2.75rem;">🎁</div>
             <div>
-              <div style="font-weight: 800; font-size: 1.05rem; color: #991B1B;">
+              <div style="font-weight: 800; font-size: 1.15rem; color: #991B1B;">
                 Honest Delay Apology: ₹50 Royalty Credit Issued
               </div>
-              <div style="font-size: 0.85rem; color: #7F1D1D; margin-top: 0.2rem;">
+              <div style="font-size: 0.88rem; color: #7F1D1D; margin-top: 0.25rem;">
                 This order encountered peak wood-fire dum degh load at ${order.outlet_name}. We have automatically credited ₹50 to your account for trusting us directly.
               </div>
             </div>
@@ -1189,31 +1180,31 @@ export const App = {
         ` : ''}
 
         <!-- Main Tracking Card -->
-        <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-card);">
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 20px; padding: 2.25rem; margin-bottom: 2.5rem; box-shadow: var(--shadow-md);">
           
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; border-bottom: 1.5px solid var(--border-subtle); padding-bottom: 1.5rem;">
             <div>
-              <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-gold); font-weight: 800;">Direct Order Tracker</span>
-              <h3 style="font-size: 1.7rem; color: var(--text-main); margin-top: 0.2rem;">#${order.id}</h3>
-              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+              <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-gold); font-weight: 800;">Direct Order Tracker</span>
+              <h3 style="font-size: 2rem; color: var(--text-main); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">#${order.id}</h3>
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.35rem;">
                 Outlet: <strong>${order.outlet_name}</strong> • FSSAI: ${order.fssai_license || '13622014000491'}
               </div>
             </div>
 
             <div style="text-align: right;">
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Honest Promised Arrival:</div>
-              <div style="font-size: 1.4rem; font-weight: 900; color: ${isLate ? '#EF4444' : 'var(--accent-gold)'};">
+              <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Honest Promised Arrival:</div>
+              <div style="font-size: 1.6rem; font-weight: 900; color: ${isLate ? 'var(--accent-rose)' : 'var(--accent-gold)'}; font-family: 'JetBrains Mono', monospace;">
                 ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
               </div>
-              <div style="font-size: 0.78rem; font-weight: 700; color: ${isLate ? '#EF4444' : 'var(--accent-emerald)'};" id="tracking-countdown">
+              <div style="font-size: 0.85rem; font-weight: 800; color: ${isLate ? 'var(--accent-rose)' : 'var(--accent-emerald)'};" id="tracking-countdown">
                 ${isLate ? `Late by ${Math.abs(diffMins)} mins` : `${diffMins} mins remaining`}
               </div>
             </div>
           </div>
 
           <!-- Step-by-Step Progress Timeline -->
-          <div style="display: flex; justify-content: space-between; position: relative; margin: 2.5rem 0 2rem 0;">
-            <div style="position: absolute; top: 18px; left: 20px; right: 20px; height: 3px; background: var(--border-subtle); z-index: 1;"></div>
+          <div style="display: flex; justify-content: space-between; position: relative; margin: 3rem 0 2.5rem 0;">
+            <div style="position: absolute; top: 22px; left: 30px; right: 30px; height: 4px; background: var(--border-subtle); z-index: 1;"></div>
             
             ${[
               { stage: 'PLACED', label: 'Accepted', icon: '📝' },
@@ -1225,11 +1216,11 @@ export const App = {
               const isDone = currentStageIdx >= idx;
               const isCurrent = currentStageIdx === idx;
               return `
-                <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px;">
-                  <div style="width: 40px; height: 40px; border-radius: 50%; background: ${isDone ? 'var(--text-main)' : '#FFFFFF'}; color: ${isDone ? '#FFFFFF' : 'var(--text-dim)'}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: ${isCurrent ? '0 0 0 4px var(--accent-gold-light)' : 'var(--shadow-subtle)'}; border: 2px solid ${isDone ? 'var(--text-main)' : 'var(--border-subtle)'};">
+                <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 90px;">
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: ${isDone ? 'var(--text-main)' : '#FFFFFF'}; color: ${isDone ? '#FFFFFF' : 'var(--text-dim)'}; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; box-shadow: ${isCurrent ? '0 0 0 5px var(--accent-gold-light)' : 'var(--shadow-sm)'}; border: 2.5px solid ${isDone ? 'var(--text-main)' : 'var(--border-subtle)'};">
                     ${step.icon}
                   </div>
-                  <div style="font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem; text-align: center; color: ${isDone ? 'var(--text-main)' : 'var(--text-dim)'};">
+                  <div style="font-size: 0.82rem; font-weight: 800; margin-top: 0.65rem; text-align: center; color: ${isDone ? 'var(--text-main)' : 'var(--text-dim)'};">
                     ${step.label}
                   </div>
                 </div>
@@ -1238,17 +1229,17 @@ export const App = {
           </div>
 
           <!-- Order Items Breakdown -->
-          <div style="background-color: var(--bg-surface); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border-subtle);">
-            <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 0.75rem;">Order Package Contents</div>
-            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+          <div style="background-color: var(--bg-surface); border-radius: 14px; padding: 1.5rem; border: 1.5px solid var(--border-subtle);">
+            <div style="font-size: 0.9rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Order Package Contents</div>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
               ${order.items.map(it => `
-                <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.92rem;">
                   <span style="color: var(--text-secondary);"><strong style="color: var(--text-main);">${it.quantity}x</strong> ${it.name} ${it.portion ? `(${it.portion})` : ''}</span>
-                  <span style="color: var(--text-main); font-weight: 700;">₹${(it.unit_price || 0) * (it.quantity || 1)}</span>
+                  <strong style="color: var(--text-main);">₹${(it.unit_price || 0) * (it.quantity || 1)}</strong>
                 </div>
               `).join('')}
             </div>
-            <div style="border-top: 1px solid var(--border-subtle); margin-top: 0.75rem; padding-top: 0.75rem; display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800;">
+            <div style="border-top: 1.5px solid var(--border-subtle); margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 900;">
               <span style="color: var(--text-main);">Total Paid (incl. 5% GST):</span>
               <span style="color: var(--accent-gold);">₹${order.total_amount}</span>
             </div>
@@ -1257,24 +1248,24 @@ export const App = {
         </div>
 
         <!-- WhatsApp / SMS Notification Live Simulator -->
-        <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h3 style="font-size: 1.15rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 20px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.2rem; color: var(--text-main); display: flex; align-items: center; gap: 0.6rem;">
               <span>📱</span> Simulated WhatsApp Notification to Customer
             </h3>
-            <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 9999px; font-weight: 700;">
+            <span style="background: var(--accent-emerald-light); color: var(--accent-emerald); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 800;">
               DPDP 2023 Verified Opt-In
             </span>
           </div>
 
-          <div style="background-color: #0B141A; border: 1px solid #222E35; border-radius: 12px; padding: 1.25rem; font-family: -apple-system, system-ui, sans-serif;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-              <span style="background: #25D366; color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.8rem;">✓</span>
-              <strong style="color: #E9EDEF; font-size: 0.95rem;">Nawabi Zaika Official Verified</strong>
-              <span style="color: #8696A0; font-size: 0.75rem; margin-left: auto;">Today ${new Date(order.placed_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+          <div style="background-color: #0B141A; border: 1px solid #222E35; border-radius: 14px; padding: 1.5rem; font-family: -apple-system, system-ui, sans-serif;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+              <span style="background: #25D366; color: #000; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem;">✓</span>
+              <strong style="color: #E9EDEF; font-size: 1rem;">Nawabi Zaika Official Verified</strong>
+              <span style="color: #8696A0; font-size: 0.78rem; margin-left: auto;">Today ${new Date(order.placed_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             
-            <div style="background-color: #202C33; color: #E9EDEF; border-radius: 8px; padding: 0.85rem; font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap;">
+            <div style="background-color: #202C33; color: #E9EDEF; border-radius: 10px; padding: 1.1rem; font-size: 0.92rem; line-height: 1.6; white-space: pre-wrap;">
 Adab *${order.customer_name}*! Your direct order *#${order.id}* from *${order.outlet_name}* is *${order.status}*.
 
 📦 *Items:* ${order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
@@ -1335,7 +1326,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const diffMins = Math.ceil((promised.getTime() - Date.now()) / 60000);
     if (diffMins < 0) {
       el.textContent = `Late by ${Math.abs(diffMins)} mins`;
-      el.style.color = 'var(--accent-crimson)';
+      el.style.color = 'var(--accent-rose)';
     } else {
       el.textContent = `${diffMins} mins remaining`;
       el.style.color = 'var(--accent-emerald)';
@@ -1366,18 +1357,18 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
         <!-- Industrial KDS Header -->
         <div class="kds-header">
           <div class="kds-title-group">
-            <span class="kds-badge-live">LIVE KDS</span>
+            <span class="kds-live-badge">LIVE KDS</span>
             <div>
               <div class="kds-outlet-name">${filter === 'all' ? 'All Hyderabad Kitchens (Central Hub)' : currentOutlet.name}</div>
-              <div style="color: #94A3B8; font-size: 0.85rem;">
+              <div class="kds-outlet-meta">
                 FSSAI Lic: ${currentOutlet.fssai_license} • 2-Metre High Contrast Tablet Display
               </div>
             </div>
           </div>
 
           <!-- Outlet Selector & Audio Button -->
-          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-            <select class="role-switcher-select" style="font-size: 1rem; padding: 0.6rem 1rem;" 
+          <div style="display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap;">
+            <select class="role-dropdown" style="font-size: 1rem; padding: 0.65rem 1.1rem; background: #1E293B; color: #FFF; border-color: #334155;" 
                     onchange="App.setKdsOutlet(this.value)">
               <option value="out-kondapur" ${filter === 'out-kondapur' ? 'selected' : ''}>Kondapur Flagship</option>
               <option value="out-gachibowli-ck" ${filter === 'out-gachibowli-ck' ? 'selected' : ''}>Gachibowli Cloud Kitchen</option>
@@ -1415,7 +1406,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
               <span>⚠️ CRITICAL LATE ALERT:</span>
               <span>${criticalLateOrders.length} Order(s) exceeded promised time by 10+ minutes!</span>
             </div>
-            <div style="font-weight: 700; font-size: 0.95rem;">
+            <div style="font-weight: 800; font-size: 1.05rem;">
               Manager Notified • Auto Customer Apology Dispatched
             </div>
           </div>
@@ -1424,10 +1415,10 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
         <!-- KDS Ticket Cards Grid -->
         <div class="kds-grid">
           ${kdsOrders.length === 0 ? `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: #12181C; border-radius: 12px; border: 2px dashed #2B3A44;">
-              <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
-              <h3 style="font-size: 1.5rem; color: #FFFFFF;">All Clear! Kitchen Queue Up to Date</h3>
-              <p style="color: #94A3B8; margin-top: 0.5rem;">New direct customer orders will automatically appear and play sound chime.</p>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 5rem 2rem; background: #0F172A; border-radius: 16px; border: 2px dashed #334155;">
+              <div style="font-size: 3.5rem; margin-bottom: 1rem;">✨</div>
+              <h3 style="font-size: 1.6rem; color: #FFFFFF;">All Clear! Kitchen Queue Up to Date</h3>
+              <p style="color: #94A3B8; margin-top: 0.5rem; font-size: 1.05rem;">New direct customer orders will automatically appear and play sound chime.</p>
             </div>
           ` : kdsOrders.map(order => this.renderKdsCard(order)).join('')}
         </div>
@@ -1470,7 +1461,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
         <div class="kds-card-header">
           <div>
             <div class="kds-order-number">#${order.id}</div>
-            <div style="font-size: 0.8rem; color: #94A3B8;">Placed: ${placed.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} • ${elapsedMins}m Elapsed</div>
+            <div class="kds-order-meta">Placed: ${placed.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} • ${elapsedMins}m Elapsed</div>
           </div>
           <div class="kds-timer-badge ${timerClass}">
             ${timerText}
@@ -1580,18 +1571,18 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const outlet = this.state.currentOutlet;
 
     container.innerHTML = `
-      <div style="max-width: 1100px; margin: 0 auto;">
+      <div style="max-width: 1160px; margin: 0 auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
           <div>
-            <h2 style="font-size: 1.85rem; color: var(--text-main);">Central Menu CMS & Real-Time Stock</h2>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">
+            <h2 style="font-size: 2rem; color: var(--text-main);">Central Menu CMS & Real-Time Stock</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
               Manage prices across Hyderabad, time-based menus, and pause out-of-stock items ("86 item") in real time.
             </p>
           </div>
           
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <label style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Active Outlet:</label>
-            <select class="role-switcher-select" onchange="App.switchOutlet(this.value)">
+          <div style="display: flex; gap: 0.85rem; align-items: center;">
+            <label style="font-size: 0.88rem; color: var(--text-secondary); font-weight: 700;">Active Outlet:</label>
+            <select class="role-dropdown" onchange="App.switchOutlet(this.value)">
               ${this.state.outlets.map(o => `
                 <option value="${o.id}" ${o.id === outlet.id ? 'selected' : ''}>${o.name}</option>
               `).join('')}
@@ -1599,39 +1590,39 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
           </div>
         </div>
 
-        <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-card);">
-          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
-              <tr style="background-color: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary);">
-                <th style="padding: 1rem;">Item Name</th>
-                <th style="padding: 1rem;">Category</th>
-                <th style="padding: 1rem;">Base Price (incl 5% GST)</th>
-                <th style="padding: 1rem;">Time Rule</th>
-                <th style="padding: 1rem;">Prep Weight</th>
-                <th style="padding: 1rem; text-align: right;">Live Stock Status</th>
+              <tr style="background-color: var(--bg-surface); border-bottom: 1.5px solid var(--border-subtle); color: var(--text-secondary);">
+                <th style="padding: 1.1rem;">Item Name</th>
+                <th style="padding: 1.1rem;">Category</th>
+                <th style="padding: 1.1rem;">Base Price (incl 5% GST)</th>
+                <th style="padding: 1.1rem;">Time Rule</th>
+                <th style="padding: 1.1rem;">Prep Weight</th>
+                <th style="padding: 1.1rem; text-align: right;">Live Stock Status</th>
               </tr>
             </thead>
             <tbody>
               ${this.state.menu.map(item => `
                 <tr style="border-bottom: 1px solid var(--border-subtle);">
-                  <td style="padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <img src="${item.image_url}" alt="${item.name}" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;">
+                  <td style="padding: 1.1rem; display: flex; align-items: center; gap: 0.85rem;">
+                    <img src="${item.image_url}" alt="${item.name}" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;">
                     <div>
-                      <strong style="color: var(--text-main);">${item.name}</strong>
-                      <div style="font-size: 0.75rem; color: var(--text-muted);">${item.is_veg ? '🌱 Veg' : '🍖 Non-Veg'} • ${item.spice_level}</div>
+                      <strong style="color: var(--text-main); font-size: 0.95rem;">${item.name}</strong>
+                      <div style="font-size: 0.78rem; color: var(--text-muted);">${item.is_veg ? '🌱 Veg' : '🍖 Non-Veg'} • ${item.spice_level}</div>
                     </div>
                   </td>
-                  <td style="padding: 1rem; color: var(--text-secondary);">${item.category}</td>
-                  <td style="padding: 1rem; font-weight: 800; color: var(--text-main);">₹${item.base_price}</td>
-                  <td style="padding: 1rem;">
-                    <span style="background: var(--accent-gold-light); color: var(--accent-gold); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+                  <td style="padding: 1.1rem; color: var(--text-secondary); font-weight: 600;">${item.category}</td>
+                  <td style="padding: 1.1rem; font-weight: 800; color: var(--text-main);">₹${item.base_price}</td>
+                  <td style="padding: 1.1rem;">
+                    <span style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.78rem; font-weight: 800;">
                       ${item.time_based_tag}
                     </span>
                   </td>
-                  <td style="padding: 1rem; color: var(--text-muted);">${item.prep_complexity_minutes} mins</td>
-                  <td style="padding: 1rem; text-align: right;">
+                  <td style="padding: 1.1rem; color: var(--text-muted); font-weight: 600;">${item.prep_complexity_minutes} mins</td>
+                  <td style="padding: 1.1rem; text-align: right;">
                     <button class="category-chip ${item.is_available ? 'active' : ''}" 
-                            style="padding: 0.35rem 0.85rem; font-size: 0.78rem; ${!item.is_available ? 'background: var(--accent-crimson-light); color: var(--accent-crimson); border-color: var(--accent-crimson);' : ''}"
+                            style="padding: 0.4rem 1rem; font-size: 0.82rem; ${!item.is_available ? 'background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);' : ''}"
                             onclick="App.toggleItemStock('${item.id}', ${!item.is_available})">
                       ${item.is_available ? '🟢 Available' : '🔴 Paused (86)'}
                     </button>
@@ -1684,81 +1675,84 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     if (!summary) return;
 
     container.innerHTML = `
-      <div style="max-width: 1100px; margin: 0 auto;">
+      <div style="max-width: 1160px; margin: 0 auto;">
         
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
           <div>
-            <h2 style="font-size: 1.85rem; color: var(--text-main);">Direct Ordering Economics & Financial Health</h2>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">
+            <h2 style="font-size: 2rem; color: var(--text-main);">Direct Ordering Economics & Financial Health</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
               Company A, Hyderabad • Tracking ₹1.14 Crore Annual Commission Savings & Customer Retention
             </p>
           </div>
-          <div class="hero-feature-badge" style="background: var(--accent-gold-light); color: var(--accent-gold); font-weight: 800;">
+          <div style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 800; font-size: 0.84rem;">
             HQ EXECUTIVE VIEW
           </div>
         </div>
 
         <!-- 4 Hero Metric Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2.75rem;">
           
-          <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-            <div style="font-size: 0.78rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Net Direct Margin Saved</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-emerald); margin: 0.35rem 0;">₹${summary.commissions_saved.toLocaleString('en-IN')}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">15 points net margin gain vs delivery apps</div>
+          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Net Direct Margin Saved</div>
+            <div style="font-size: 2.4rem; font-weight: 900; color: var(--accent-emerald); margin: 0.4rem 0; font-family: 'JetBrains Mono', monospace;">₹${summary.commissions_saved.toLocaleString('en-IN')}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">15 points net margin gain vs delivery apps</div>
           </div>
 
-          <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-            <div style="font-size: 0.78rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">App Commission Avoided</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--text-main); margin: 0.35rem 0;">₹${summary.app_fees_avoided.toLocaleString('en-IN')}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">27% fees not paid to Swiggy/Zomato</div>
+          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">App Commission Avoided</div>
+            <div style="font-size: 2.4rem; font-weight: 900; color: var(--text-main); margin: 0.4rem 0; font-family: 'JetBrains Mono', monospace;">₹${summary.app_fees_avoided.toLocaleString('en-IN')}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">27% fees not paid to Swiggy/Zomato</div>
           </div>
 
-          <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-            <div style="font-size: 0.78rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Projected Annual Savings</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-gold); margin: 0.35rem 0;">${summary.projected_annual_savings}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">Target: ₹95.04L retail + ₹19.44L party orders</div>
+          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Projected Annual Savings</div>
+            <div style="font-size: 2.4rem; font-weight: 900; color: var(--accent-gold); margin: 0.4rem 0; font-family: 'JetBrains Mono', monospace;">${summary.projected_annual_savings}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">Target: ₹95.04L retail + ₹19.44L party orders</div>
           </div>
 
-          <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-            <div style="font-size: 0.78rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Direct Repeat Rate</div>
-            <div style="font-size: 2.2rem; font-weight: 900; color: #2563EB; margin: 0.35rem 0;">${summary.repeat_customer_rate}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">Total Cancellations: <strong>${summary.total_cancellations || 0} (${summary.cancellation_rate || '0.0%'})</strong></div>
+          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 0.8rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Direct Repeat Rate</div>
+            <div style="font-size: 2.4rem; font-weight: 900; color: #2563EB; margin: 0.4rem 0; font-family: 'JetBrains Mono', monospace;">${summary.repeat_customer_rate}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">Total Cancellations: <strong>${summary.total_cancellations || 0} (${summary.cancellation_rate || '0.0%'})</strong></div>
           </div>
 
         </div>
 
         <!-- Outlet Performance Leaderboard -->
-        <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-card);">
-          <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 1.15rem; color: var(--text-main);">Hyderabad Outlets Leaderboard (14 Outlets + 3 Cloud Kitchens)</h3>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Sorted by Direct Order Volume</span>
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+          <div style="padding: 1.4rem 1.75rem; border-bottom: 1.5px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.25rem; color: var(--text-main);">Hyderabad Outlets Leaderboard (14 Outlets + 3 Cloud Kitchens)</h3>
+            <span style="font-size: 0.84rem; color: var(--text-muted);">Sorted by Direct Order Volume</span>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
             <thead>
               <tr style="background-color: var(--bg-surface); color: var(--text-secondary);">
-                <th style="padding: 1rem;">Outlet Name</th>
-                <th style="padding: 1rem;">Type</th>
-                <th style="padding: 1rem;">Direct Orders</th>
-                <th style="padding: 1rem;">Revenue (₹)</th>
-                <th style="padding: 1rem;">Avg AI Prep</th>
-                <th style="padding: 1rem;">Cancellations</th>
-                <th style="padding: 1rem; text-align: right;">Late Incidents</th>
+                <th style="padding: 1.1rem;">Outlet Name</th>
+                <th style="padding: 1.1rem;">Type</th>
+                <th style="padding: 1.1rem;">Direct Orders</th>
+                <th style="padding: 1.1rem;">Revenue (₹)</th>
+                <th style="padding: 1.1rem;">Avg AI Prep</th>
+                <th style="padding: 1.1rem;">Cancellations</th>
+                <th style="padding: 1.1rem; text-align: right;">Late Incidents</th>
               </tr>
             </thead>
             <tbody>
-              ${summary.outlets.map(o => `
+              ${summary.outlets.map((o, idx) => `
                 <tr style="border-bottom: 1px solid var(--border-subtle);">
-                  <td style="padding: 1rem; font-weight: 700; color: var(--text-main);">${o.name}</td>
-                  <td style="padding: 1rem; color: var(--text-muted);">${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Dine-in Flagship'}</td>
-                  <td style="padding: 1rem; color: var(--text-secondary); font-weight: 600;">${o.order_count}</td>
-                  <td style="padding: 1rem; font-weight: 800; color: var(--accent-gold);">₹${o.revenue.toLocaleString('en-IN')}</td>
-                  <td style="padding: 1rem; color: var(--text-secondary);">~${Math.round(o.avg_prep_time || 25)} mins</td>
-                  <td style="padding: 1rem; color: ${o.cancellations > 0 ? 'var(--accent-crimson)' : 'var(--text-muted)'}; font-weight: 700;">
+                  <td style="padding: 1.1rem; font-weight: 700; color: var(--text-main);">
+                    <span style="color: var(--text-muted); font-size: 0.8rem; margin-right: 0.5rem;">#${idx + 1}</span>
+                    ${o.name}
+                  </td>
+                  <td style="padding: 1.1rem; color: var(--text-muted);">${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Dine-in Flagship'}</td>
+                  <td style="padding: 1.1rem; color: var(--text-secondary); font-weight: 700;">${o.order_count}</td>
+                  <td style="padding: 1.1rem; font-weight: 800; color: var(--accent-gold);">₹${o.revenue.toLocaleString('en-IN')}</td>
+                  <td style="padding: 1.1rem; color: var(--text-secondary);">~${Math.round(o.avg_prep_time || 25)} mins</td>
+                  <td style="padding: 1.1rem; color: ${o.cancellations > 0 ? 'var(--accent-rose)' : 'var(--text-muted)'}; font-weight: 700;">
                     ${o.cancellations || 0}
                   </td>
-                  <td style="padding: 1rem; text-align: right; color: ${o.late_orders > 0 ? 'var(--accent-crimson)' : 'var(--accent-emerald)'}; font-weight: 800;">
+                  <td style="padding: 1.1rem; text-align: right; color: ${o.late_orders > 0 ? 'var(--accent-rose)' : 'var(--accent-emerald)'}; font-weight: 800;">
                     ${o.late_orders > 0 ? `⚠️ ${o.late_orders}` : '✓ 0'}
                   </td>
                 </tr>
@@ -1786,104 +1780,98 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     }
 
     container.innerHTML = `
-      <div style="max-width: 960px; margin: 0 auto;">
+      <div style="max-width: 1040px; margin: 0 auto;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
           <div>
-            <h2 style="font-size: 1.85rem; color: var(--text-main);">Royal Party & Bulk Catering Desk</h2>
-            <p style="color: var(--text-muted); font-size: 0.85rem;">
+            <h2 style="font-size: 2rem; color: var(--text-main);">Royal Party & Bulk Catering Desk</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
               Direct catering for 15 to 500+ guests. Fresh copper deghs prepared with minimum 24-48 hours notice.
             </p>
           </div>
-          <span class="hero-feature-badge" style="background: var(--accent-gold-light); color: var(--accent-gold); font-weight: 800;">
+          <div style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 800; font-size: 0.84rem;">
             ⚡ Saves ₹19.44 Lakh Phone Leakage
-          </span>
+          </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.25rem;">
           
           <!-- Booking Form -->
-          <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-            <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1.25rem;">Place a Bulk Catering Request</h3>
+          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem;">Place a Bulk Catering Request</h3>
             
             <form id="party-form" onsubmit="App.submitPartyOrder(event)">
-              <div style="margin-bottom: 1rem;">
-                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Guest Count (Min. 15 guests)</label>
-                <input type="number" id="party-guests" min="15" max="500" value="30" required 
-                       style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px;">
+              <div style="margin-bottom: 1.1rem;">
+                <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Guest Count (Min. 15 guests)</label>
+                <input type="number" id="party-guests" min="15" max="500" value="30" required style="width: 100%;">
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.1rem;">
                 <div>
-                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Event Date</label>
-                  <input type="date" id="party-date" required 
-                         style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px;">
+                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Event Date (Min 24h Notice)</label>
+                  <input type="date" id="party-date" required style="width: 100%;">
                 </div>
                 <div>
-                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Serving Time</label>
-                  <input type="time" id="party-time" value="13:00" required 
-                         style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px;">
+                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Serving Time</label>
+                  <input type="time" id="party-time" value="13:00" required style="width: 100%;">
                 </div>
               </div>
 
-              <div style="margin-bottom: 1rem;">
-                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Preparation Kitchen</label>
-                <select id="party-outlet" class="role-switcher-select" style="width: 100%; padding: 0.65rem;">
+              <div style="margin-bottom: 1.1rem;">
+                <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Preparation Kitchen</label>
+                <select id="party-outlet" class="role-dropdown" style="width: 100%;">
                   ${this.state.outlets.map(o => `
                     <option value="${o.id}">${o.name}</option>
                   `).join('')}
                 </select>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <input type="text" id="party-name" placeholder="Host Name" value="${this.state.customerName}" required
-                       style="background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px;">
-                <input type="tel" id="party-phone" placeholder="Contact Phone" value="${this.state.customerPhone}" required
-                       style="background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.1rem;">
+                <input type="text" id="party-name" placeholder="Host Name" value="${this.state.customerName}" required>
+                <input type="tel" id="party-phone" placeholder="Contact Phone" value="${this.state.customerPhone}" required>
               </div>
 
-              <div style="margin-bottom: 1rem;">
-                <textarea id="party-reqs" rows="3" placeholder="Menu items required (e.g. 5x Mutton Biryani Family Packs, 2x Haleem Handis, Double Ka Meetha...)" required
-                          style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.65rem; border-radius: 6px; font-family: inherit; font-size: 0.85rem;"></textarea>
+              <div style="margin-bottom: 1.25rem;">
+                <textarea id="party-reqs" rows="3" placeholder="Menu items required (e.g. 5x Mutton Biryani Family Packs, 2x Haleem Handis, Double Ka Meetha...)" required style="width: 100%;"></textarea>
               </div>
 
-              <button type="submit" class="cart-btn-pill" style="width: 100%; justify-content: center; padding: 0.85rem; border-radius: 10px;">
+              <button type="submit" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.95rem; border-radius: 12px;">
                 Submit for Catering Confirmation ➔
               </button>
             </form>
           </div>
 
           <!-- Existing Party Orders & Manager Desk -->
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <h3 style="font-size: 1.15rem; color: var(--text-main);">Active Party Requests</h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <h3 style="font-size: 1.2rem; color: var(--text-main);">Active Party Requests</h3>
             
             ${partyList.map(p => `
-              <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.25rem; box-shadow: var(--shadow-card);">
+              <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-sm);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
                   <div>
-                    <strong style="color: var(--text-main); font-size: 1rem;">${p.customer_name}</strong>
-                    <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 600;">Event: ${p.event_date} at ${p.event_time} • ${p.guest_count} Guests</div>
+                    <strong style="color: var(--text-main); font-size: 1.05rem;">${p.customer_name}</strong>
+                    <div style="font-size: 0.82rem; color: var(--accent-gold); font-weight: 700;">Event: ${p.event_date} at ${p.event_time} • ${p.guest_count} Guests</div>
                   </div>
-                  <span style="background: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald-light)' : 'var(--accent-gold-light)'}; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-gold)'}; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 800;">
+                  <span style="background: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald-light)' : 'var(--accent-gold-light)'}; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-gold-hover)'}; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 800;">
                     ${p.status}
                   </span>
                 </div>
-                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                <div style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 0.85rem; line-height: 1.5;">
                   ${p.requirements_text}
                 </div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                  <span>Assigned Kitchen: <strong>${p.outlet_name}</strong> • Est: ₹${p.estimated_budget}</span>
+                <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 0.65rem; display: flex; justify-content: space-between; align-items: center;">
+                  <span>Kitchen: <strong>${p.outlet_name}</strong> • Est: ₹${p.estimated_budget}</span>
                   ${p.status === 'PENDING_REVIEW' ? `
-                    <div style="display: flex; gap: 0.35rem;">
-                      <button class="cart-btn-pill" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: var(--accent-emerald); color: #FFF; border-radius: 6px;" onclick="App.updatePartyStatus('${p.id}', 'CONFIRMED')">
+                    <div style="display: flex; gap: 0.45rem;">
+                      <button class="btn-cart-nav" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; background: var(--accent-emerald); border-radius: 6px;" onclick="App.updatePartyStatus('${p.id}', 'CONFIRMED')">
                         ✓ Confirm
                       </button>
-                      <button class="category-chip" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; background: var(--accent-crimson-light); color: var(--accent-crimson); border-color: var(--accent-crimson);" onclick="App.updatePartyStatus('${p.id}', 'REJECTED')">
+                      <button class="category-chip" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);" onclick="App.updatePartyStatus('${p.id}', 'REJECTED')">
                         ✕ Decline
                       </button>
                     </div>
                   ` : `
-                    <span style="font-size: 0.72rem; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-crimson)'}; font-weight: 700;">
+                    <span style="font-size: 0.78rem; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 800;">
                       ${p.manager_notes || p.status}
                     </span>
                   `}
@@ -1897,7 +1885,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
       </div>
     `;
 
-    // Set minimum date to tomorrow (24h advance notice)
+    // Minimum date tomorrow
     setTimeout(() => {
       const dateInput = document.getElementById('party-date');
       if (dateInput) {
@@ -1975,44 +1963,44 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
   renderAiLabView() {
     const container = document.getElementById('app-view-container');
     container.innerHTML = `
-      <div style="max-width: 900px; margin: 0 auto;">
+      <div style="max-width: 960px; margin: 0 auto;">
         
         <div style="margin-bottom: 2rem;">
-          <h2 style="font-size: 1.85rem; color: var(--text-main);">AI Dynamic Prep-Time Engine Diagnostics</h2>
-          <p style="color: var(--text-muted); font-size: 0.85rem;">
+          <h2 style="font-size: 2rem; color: var(--text-main);">AI Dynamic Prep-Time Engine Diagnostics</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
             Interactive simulator of Company A's dynamic kitchen load estimation algorithm and edge-case handlers.
           </p>
         </div>
 
         <!-- Formula Callout -->
-        <div style="background-color: #FFFFFF; border: 1.5px solid var(--accent-gold); border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-card);">
-          <h3 style="font-size: 1.15rem; color: var(--accent-gold); margin-bottom: 0.75rem;">Dynamic Queue & Floor Formula</h3>
-          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.95rem; color: var(--text-main); line-height: 1.6;">
+        <div style="background: #FFFFFF; border: 2px solid var(--accent-gold); border-radius: 16px; padding: 1.75rem; margin-bottom: 2.25rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.2rem; color: var(--accent-gold-hover); margin-bottom: 0.85rem;">Dynamic Queue & Floor Formula</h3>
+          <div style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.1rem; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; color: var(--text-main); line-height: 1.6;">
             Raw_AI_Prep = Max(Item_Complexity) + 0.28 * Sum(Secondary_Items) + (Active_Kitchen_Pots * 2.2 * Peak_Multiplier)<br>
             <strong style="color: var(--accent-gold);">Honest_Promised_Time = Max(Raw_AI_Prep, Outlet_Minimum_Prep_Floor)</strong>
           </div>
-          <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem;">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.85rem;">
             Enforces the strict rule from the brief: promised time is honest, never under-promises, and handles the 1,200 orders/hr Friday/Sunday dinner peaks.
           </div>
         </div>
 
         <!-- Interactive Simulator Widget -->
-        <div style="background-color: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-card);">
-          <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1.25rem;">Live Parameter Experimentation</h3>
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.5rem;">Live Parameter Experimentation</h3>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; margin-bottom: 1.75rem;">
             <div>
-              <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; font-weight: 600;">
+              <label style="font-size: 0.88rem; color: var(--text-secondary); display: block; margin-bottom: 0.6rem; font-weight: 700;">
                 Active Kitchen Pots in Queue: <strong id="sim-pots-val" style="color: var(--accent-gold);">3</strong>
               </label>
               <input type="range" id="sim-pots" min="0" max="25" value="3" style="width: 100%; accent-color: var(--accent-gold);" oninput="App.updateAiSim()">
             </div>
 
             <div>
-              <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.5rem; font-weight: 600;">
+              <label style="font-size: 0.88rem; color: var(--text-secondary); display: block; margin-bottom: 0.6rem; font-weight: 700;">
                 Time of Day Peak Factor:
               </label>
-              <select id="sim-peak" class="role-switcher-select" style="width: 100%;" onchange="App.updateAiSim()">
+              <select id="sim-peak" class="role-dropdown" style="width: 100%;" onchange="App.updateAiSim()">
                 <option value="1.0">Normal Hours (1.0x)</option>
                 <option value="1.15">Lunch Rush 12-3 PM (1.15x)</option>
                 <option value="1.25">Weekday Dinner 7-10 PM (1.25x)</option>
@@ -2022,7 +2010,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
           </div>
 
           <!-- Output Box -->
-          <div id="sim-output" style="background-color: var(--bg-surface); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
+          <div id="sim-output" style="background-color: var(--bg-surface); padding: 1.4rem; border-radius: 12px; border: 1px solid var(--border-subtle);">
             <!-- Live calculated by updateAiSim -->
           </div>
         </div>
@@ -2039,7 +2027,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     if (potVal) potVal.textContent = pots;
 
     // Simulate 1 Family Biryani (18m) + 1 Double Ka Meetha (4m)
-    const basePrep = 18 + (4 * 0.28); // ~19.1 mins
+    const basePrep = 18 + (4 * 0.28);
     const queueWait = pots * 2.2 * peak;
     const rawAi = Math.ceil(basePrep + queueWait);
     const outletFloor = 25; // Kondapur floor
@@ -2048,19 +2036,19 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const out = document.getElementById('sim-output');
     if (out) {
       out.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.85rem;">
           <div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Calculated Honest Promised Time:</div>
-            <div style="font-size: 2rem; font-weight: 900; color: var(--accent-gold);">${finalHonest} Minutes</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Calculated Honest Promised Time:</div>
+            <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent-gold); font-family: 'JetBrains Mono', monospace;">${finalHonest} Minutes</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 0.8rem; color: var(--text-muted);">Constraint Applied:</div>
-            <div style="font-size: 1rem; font-weight: 800; color: ${rawAi < outletFloor ? 'var(--accent-gold)' : 'var(--accent-emerald)'};">
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Constraint Applied:</div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: ${rawAi < outletFloor ? 'var(--accent-gold)' : 'var(--accent-emerald)'};">
               ${rawAi < outletFloor ? 'BUMPED TO OUTLET FLOOR (25m)' : 'DRIVEN BY AI LOAD ESTIMATE'}
             </div>
           </div>
         </div>
-        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">
+        <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
           Raw AI: <strong>${rawAi}m</strong> (Food Prep ${Math.round(basePrep)}m + Queue Wait ${Math.round(queueWait)}m under ${peak}x rush factor).
           ${finalHonest >= 35 ? '⚠️ High load alert: Suggesting customer order before 20:00 to avoid dinner surge.' : 'Normal delivery timeline.'}
         </div>
@@ -2078,10 +2066,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     if (!modal || !panel || !list) return;
 
     this.renderOutletList(this.state.outlets);
-
     modal.classList.add('open');
-    panel.style.transform = 'scale(1)';
-    panel.style.opacity = '1';
   },
 
   renderOutletList(outletArray) {
@@ -2089,26 +2074,26 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     if (!list) return;
 
     list.innerHTML = `
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem;">
         <input type="text" id="outlet-search-input" placeholder="Search area (e.g. Kondapur, Gachibowli, Kukatpally...)" 
                oninput="App.filterOutlets(this.value)"
-               style="flex: 1; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 0.55rem 0.75rem; border-radius: 6px; font-size: 0.85rem;">
-        <button class="category-chip active" style="padding: 0.55rem 0.85rem; font-size: 0.82rem;" onclick="App.autoDetectNearestOutlet()">
+               style="flex: 1;">
+        <button class="category-chip active" style="padding: 0.55rem 1rem;" onclick="App.autoDetectNearestOutlet()">
           📍 Auto-Detect
         </button>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 52vh; overflow-y: auto; padding-right: 0.25rem;">
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 52vh; overflow-y: auto; padding-right: 0.25rem;">
         ${outletArray.map(o => `
-          <div style="background: ${o.id === this.state.currentOutlet.id ? 'var(--bg-surface)' : '#FFFFFF'}; border: 1.5px solid ${o.id === this.state.currentOutlet.id ? 'var(--accent-gold)' : 'var(--border-subtle)'}; padding: 0.85rem 1rem; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;" 
+          <div style="background: ${o.id === this.state.currentOutlet.id ? 'var(--accent-gold-subtle)' : '#FFFFFF'}; border: 1.5px solid ${o.id === this.state.currentOutlet.id ? 'var(--accent-gold)' : 'var(--border-subtle)'}; padding: 1rem 1.25rem; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;" 
                onclick="App.switchOutlet('${o.id}')">
             <div>
-              <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${o.name}</div>
-              <div style="font-size: 0.78rem; color: var(--text-muted);">${o.address}</div>
-              <div style="font-size: 0.72rem; color: var(--accent-gold); margin-top: 0.2rem; font-weight: 600;">
+              <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;">${o.name}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">${o.address}</div>
+              <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.35rem; font-weight: 700;">
                 FSSAI Lic: ${o.fssai_license} • Delivery Radius: ${o.delivery_radius_km} km • Min Prep: ${o.min_prep_time_minutes}m
               </div>
             </div>
-            <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.15)' : 'var(--accent-emerald-light)'}; color: ${o.is_cloud_kitchen ? '#2563EB' : 'var(--accent-emerald)'}; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700; white-space: nowrap;">
+            <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.12)' : 'var(--accent-emerald-light)'}; color: ${o.is_cloud_kitchen ? '#2563EB' : 'var(--accent-emerald)'}; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 800; white-space: nowrap;">
               ${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Flagship Dine-in'}
             </span>
           </div>
@@ -2133,12 +2118,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
 
   closeOutletModal() {
     const modal = document.getElementById('outlet-modal');
-    const panel = document.getElementById('outlet-modal-panel');
     if (modal) modal.classList.remove('open');
-    if (panel) {
-      panel.style.transform = 'scale(0.95)';
-      panel.style.opacity = '0';
-    }
   },
 
   handleModalBackdropClick(e) {
@@ -2167,8 +2147,8 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
-      <span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
-      <span style="font-size: 0.88rem; font-weight: 600;">${message}</span>
+      <span style="font-size: 1.1rem;">${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
+      <span style="font-size: 0.9rem; font-weight: 700;">${message}</span>
     `;
     container.appendChild(toast);
     setTimeout(() => {

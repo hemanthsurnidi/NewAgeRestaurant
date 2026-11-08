@@ -3,172 +3,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nawabi Zaika | Nizami Biryani Direct Platform</title>
+  <title>Nawabi Zaika — Royal Hyderabadi Direct Ordering & KDS</title>
   
-  <!-- Regal Google Fonts -->
+  <!-- Modern Luxury Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   
-  <!-- Lucide Icons via unpkg -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/kds.css">
 </head>
-<body>
+<body class="theme-light">
 
-  <!-- Top App Bar -->
+  <!-- TOP EXECUTIVE ANNOUNCEMENT / WORKSPACE BAR -->
+  <aside class="top-announcement-bar">
+    <div class="announcement-inner">
+      <div class="announcement-tag">
+        <span class="live-dot"></span>
+        <span>Company A • Hyderabad Direct Platform</span>
+      </div>
+      <div class="announcement-text">
+        🎉 <strong>Save 15% Net Margin:</strong> Zero 3rd-party app commissions • Real-time Outlet KDS • 5% Direct Cashback
+      </div>
+      <div class="announcement-stats">
+        <span>Target: <strong>₹1.14 Cr/yr Savings</strong></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN STICKY HEADER -->
   <header class="header-nav">
     <div class="nav-container">
+      
       <!-- Brand Logo -->
       <a class="brand-wrap" onclick="App.navigate('ordering')">
-        <div class="brand-crest">👑</div>
-        <div>
+        <div class="brand-crest">
+          <span>👑</span>
+        </div>
+        <div class="brand-info">
           <div class="brand-title">Nawabi Zaika</div>
-          <div class="brand-subtitle">Royal Hyderabadi Dastarkhwan</div>
+          <div class="brand-subtitle">Purani Haveli Se Dastarkhwan Tak</div>
         </div>
       </a>
 
-      <!-- Outlet Selector Pill with FSSAI -->
-      <div class="outlet-selector-pill" onclick="App.openOutletModal()">
-        <span>📍</span>
-        <div>
+      <!-- Outlet Selector Pill -->
+      <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet">
+        <span class="pulse-ring">📍</span>
+        <div class="outlet-pill-text">
           <strong id="nav-outlet-name">Kondapur Flagship</strong>
-          <span style="color: var(--text-dim); margin-left: 0.35rem;" id="nav-outlet-fssai">(FSSAI: 13622014000491)</span>
+          <span class="outlet-fssai" id="nav-outlet-fssai">(FSSAI: 13622014000491)</span>
         </div>
-        <span style="font-size: 0.75rem; color: var(--gold-400);">▼</span>
-      </div>
+        <span class="chevron-icon">▾</span>
+      </button>
 
-      <!-- Nav Actions & Role Switcher -->
+      <!-- Right Navigation Actions -->
       <div class="nav-actions">
-        <!-- Reviewer Quick Role Switcher -->
-        <select id="role-select" class="role-switcher-select" onchange="App.handleRoleChange(this.value)">
-          <option value="customer">👤 Customer View (Rahul Verma)</option>
-          <option value="kitchen_kondapur">🍳 Kitchen KDS: Kondapur Flagship</option>
-          <option value="kitchen_gachibowli">🍳 Kitchen KDS: Gachibowli Cloud Kitchen</option>
-          <option value="kitchen_kukatpally">🍳 Kitchen KDS: Kukatpally KPHB</option>
-          <option value="admin">🏢 Central Menu CMS & Ops HQ</option>
-          <option value="analytics">📊 Financial Dashboard (₹1.14 Cr Savings)</option>
-          <option value="party">🎉 Party & Bulk Catering Desk</option>
-          <option value="ai_diagnostics">🧠 AI Prep-Time Engine Lab</option>
-        </select>
+        
+        <!-- Modern Segmented Workspace / Role Switcher -->
+        <div class="role-selector-wrap">
+          <select id="role-select" class="role-dropdown" onchange="App.handleRoleChange(this.value)">
+            <option value="customer">👤 Customer View (Rahul Verma)</option>
+            <option value="kitchen_kondapur">🍳 Kitchen KDS: Kondapur Flagship</option>
+            <option value="kitchen_gachibowli">🍳 Kitchen KDS: Gachibowli Cloud Kitchen</option>
+            <option value="kitchen_kukatpally">🍳 Kitchen KDS: Kukatpally KPHB</option>
+            <option value="admin">📋 Central Menu CMS</option>
+            <option value="analytics">📊 Financial Dashboard (₹1.14 Cr)</option>
+            <option value="party">🎉 Party / Bulk Catering</option>
+            <option value="ai_diagnostics">🧠 AI Prep-Time Engine</option>
+          </select>
+        </div>
 
-        <!-- Cart Button Pill -->
-        <button id="cart-button" class="cart-btn-pill" onclick="App.openCartDrawer()">
-          <span>🛍️</span>
-          <span>Cart</span>
-          <span id="cart-count-badge" class="cart-badge">0</span>
+        <!-- Cart Trigger Button -->
+        <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
+          <span class="cart-icon-wrap">🛍️</span>
+          <span class="cart-label">Feast</span>
+          <span id="cart-count-badge" class="cart-badge-count">0</span>
         </button>
+
       </div>
     </div>
   </header>
 
-  <!-- Secondary Role Navigation Bar -->
+  <!-- MODERN ROLE / SECTION NAVIGATION TABS -->
   <nav class="role-nav-bar">
-    <div class="role-tab active" data-view="ordering" onclick="App.navigate('ordering')">
-      <span>🍲</span> Direct Order Menu
-    </div>
-    <div class="role-tab" data-view="kds" onclick="App.navigate('kds')">
-      <span>🍳</span> Kitchen Display (KDS)
-    </div>
-    <div class="role-tab" data-view="tracking" onclick="App.navigate('tracking')">
-      <span>📍</span> Live Order Tracking
-    </div>
-    <div class="role-tab" data-view="cms" onclick="App.navigate('cms')">
-      <span>📋</span> Central Menu CMS
-    </div>
-    <div class="role-tab" data-view="analytics" onclick="App.navigate('analytics')">
-      <span>📊</span> ₹1.14 Cr Savings & Dashboard
-    </div>
-    <div class="role-tab" data-view="party" onclick="App.navigate('party')">
-      <span>🎉</span> Party / Bulk Catering
-    </div>
-    <div class="role-tab" data-view="ai_lab" onclick="App.navigate('ai_lab')">
-      <span>🧠</span> AI Engine Lab
+    <div class="nav-scroll-container">
+      <button class="nav-tab active" data-view="ordering" onclick="App.navigate('ordering')">
+        <span>🍲</span> Direct Menu
+      </button>
+      <button class="nav-tab" data-view="kds" onclick="App.navigate('kds')">
+        <span>🍳</span> Kitchen KDS
+      </button>
+      <button class="nav-tab" data-view="tracking" onclick="App.navigate('tracking')">
+        <span>📍</span> Live Tracker
+      </button>
+      <button class="nav-tab" data-view="cms" onclick="App.navigate('cms')">
+        <span>📋</span> Central Menu CMS
+      </button>
+      <button class="nav-tab" data-view="analytics" onclick="App.navigate('analytics')">
+        <span>📊</span> Financial Dashboard
+      </button>
+      <button class="nav-tab" data-view="party" onclick="App.navigate('party')">
+        <span>🎉</span> Party / Bulk Catering
+      </button>
+      <button class="nav-tab" data-view="ai_lab" onclick="App.navigate('ai_lab')">
+        <span>🧠</span> AI Engine Lab
+      </button>
     </div>
   </nav>
 
-  <!-- Main View Container -->
+  <!-- MAIN DYNAMIC CONTENT CONTAINER -->
   <main class="main-content" id="app-view-container">
-    <!-- Dynamic views render here -->
+    <!-- Dynamic views will render here via app.js -->
   </main>
 
-  <!-- Slide-Over Cart Drawer -->
+  <!-- SLIDE-OVER CART DRAWER -->
   <div id="cart-drawer-backdrop" class="drawer-backdrop" onclick="App.handleDrawerBackdropClick(event)">
     <div class="drawer-panel" onclick="event.stopPropagation()">
       <div class="drawer-header">
-        <h3 class="drawer-title">Your Nizami Feast</h3>
+        <div class="drawer-header-title">
+          <h3>Your Nizami Feast</h3>
+          <p>Fresh wood-fire preparation direct from kitchen</p>
+        </div>
         <button class="drawer-close-btn" onclick="App.closeCartDrawer()">&times;</button>
       </div>
       <div class="drawer-body" id="cart-drawer-items">
-        <!-- Rendered by JavaScript -->
+        <!-- Rendered by JS -->
       </div>
       <div class="drawer-footer" id="cart-drawer-footer">
-        <!-- Rendered by JavaScript -->
+        <!-- Rendered by JS -->
       </div>
     </div>
   </div>
 
-  <!-- Outlet Selector Modal -->
-  <div id="outlet-modal" class="drawer-backdrop" style="justify-content: center; align-items: center;" onclick="App.handleModalBackdropClick(event)">
-    <div class="drawer-panel" style="max-width: 600px; height: auto; max-height: 85vh; border-radius: 16px; transform: scale(0.95); opacity: 0; transition: all 0.2s;" id="outlet-modal-panel" onclick="event.stopPropagation()">
-      <div class="drawer-header">
-        <h3 class="drawer-title">Select Hyderabad Outlet</h3>
-        <button class="drawer-close-btn" onclick="App.closeOutletModal()">&times;</button>
-      </div>
-      <div class="drawer-body" style="padding: 1.25rem;">
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
-          Company A operates 14 dine-in outlets and 3 cloud kitchens across Hyderabad. Select your delivery kitchen:
-        </p>
-        <div id="outlet-selection-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <!-- Rendered by JS -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Customization Modal (Portions & Add-ons) -->
-  <div id="custom-modal-backdrop" class="drawer-backdrop" style="justify-content: center; align-items: center;" onclick="App.closeCustomModal()">
-    <div class="drawer-panel custom-modal-panel" style="width: 100%; max-width: 480px; height: auto; max-height: 90vh; border-radius: 20px; transform: scale(0.95); opacity: 0; transition: all 0.2s;" id="custom-modal-panel" onclick="event.stopPropagation()">
-      <div class="drawer-header">
+  <!-- OUTLET SELECTION MODAL -->
+  <div id="outlet-modal" class="modal-backdrop" onclick="App.handleModalBackdropClick(event)">
+    <div class="modal-card" id="outlet-modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-header">
         <div>
-          <h3 class="drawer-title" id="custom-modal-title">Customize Dish</h3>
-          <div style="font-size: 0.8rem; color: var(--text-muted);" id="custom-modal-subtitle">Choose portion & accompaniments</div>
+          <h3 class="modal-title">Select Hyderabad Outlet</h3>
+          <p class="modal-subtitle">14 Dine-in Outlets & 3 Cloud Kitchens with Dedicated KDS</p>
         </div>
-        <button class="drawer-close-btn" onclick="App.closeCustomModal()">&times;</button>
+        <button class="modal-close-btn" onclick="App.closeOutletModal()">&times;</button>
       </div>
-      <div class="drawer-body" id="custom-modal-body" style="padding: 1.5rem;">
-        <!-- Rendered by JS -->
-      </div>
-      <div class="drawer-footer" id="custom-modal-footer">
+      <div class="modal-body" id="outlet-selection-list">
         <!-- Rendered by JS -->
       </div>
     </div>
   </div>
 
-  <!-- Floating Mobile/Desktop Cart Bar -->
+  <!-- DISH CUSTOMIZATION MODAL (PORTIONS & ADD-ONS) -->
+  <div id="custom-modal-backdrop" class="modal-backdrop" onclick="App.closeCustomModal()">
+    <div class="modal-card custom-modal-card" id="custom-modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="custom-modal-title">Customize Dish</h3>
+          <p class="modal-subtitle" id="custom-modal-subtitle">Portions, Spice & Royal Accompaniments</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeCustomModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="custom-modal-body">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" id="custom-modal-footer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING MOBILE CART PILL -->
   <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="App.openCartDrawer()">
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
-      <span style="font-size: 1.3rem;">🛍️</span>
+    <div class="floating-cart-left">
+      <div class="floating-cart-icon">🛍️</div>
       <div>
-        <strong id="floating-cart-count" style="font-size: 0.95rem;">0 Items</strong>
-        <span style="color: #A8A29E; margin: 0 0.35rem;">•</span>
-        <span id="floating-cart-total" style="font-weight: 800; color: #F59E0B;">₹0</span>
+        <div class="floating-cart-title" id="floating-cart-count">0 Items</div>
+        <div class="floating-cart-price" id="floating-cart-total">₹0</div>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; font-size: 0.92rem;">
-      <span>View Feast</span>
-      <span>➔</span>
+    <div class="floating-cart-right">
+      <span>View Order</span>
+      <span class="floating-arrow">➔</span>
     </div>
   </div>
 
-  <!-- Toast Notifications Container -->
-  <div id="toast-container"></div>
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
 
-  <!-- Main Application Script -->
+  <!-- MAIN SCRIPT -->
   <script type="module" src="/js/app.js"></script>
 </body>
 </html>
-

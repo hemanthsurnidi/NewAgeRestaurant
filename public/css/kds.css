@@ -1,77 +1,89 @@
 /* ==========================================================================
-   KITCHEN DISPLAY SYSTEM (KDS) - INDUSTRIAL TABLET STYLESHEET
+   KITCHEN DISPLAY SYSTEM (KDS) - MODERN INDUSTRIAL TABLET STYLESHEET
    Optimized for 2-metre readability in hot, noisy Hyderabadi kitchens
    High contrast, color-coded urgency, large touch targets
    ========================================================================== */
 
 .kds-container {
-  background-color: #05080A;
+  background-color: #070A0F;
   min-height: calc(100vh - 120px);
-  padding: 1.5rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 1.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #F8FAFC;
 }
 
-/* KDS Header Bar */
+/* KDS Control Header */
 .kds-header {
-  background-color: #0F1418;
-  border: 2px solid #243038;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
+  background-color: #0F172A;
+  border: 1.5px solid #1E293B;
+  border-radius: 16px;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
 .kds-title-group {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
-.kds-badge-live {
+.kds-live-badge {
   background-color: #10B981;
   color: #000000;
   font-weight: 900;
   font-size: 0.85rem;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 6px;
   letter-spacing: 0.08em;
-  animation: pulseLive 2s infinite;
+  animation: kdsPulse 2s infinite;
 }
 
-@keyframes pulseLive {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@keyframes kdsPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.95); }
 }
 
 .kds-outlet-name {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: #FFFFFF;
+  letter-spacing: -0.01em;
 }
 
+.kds-outlet-meta {
+  color: #94A3B8;
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+/* KDS Metrics Strip */
 .kds-metrics-strip {
   display: flex;
-  gap: 1.25rem;
+  gap: 1rem;
   align-items: center;
 }
 
 .kds-metric-box {
-  background-color: #172026;
-  border: 1px solid #2B3A44;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  background-color: #1E293B;
+  border: 1px solid #334155;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
   text-align: center;
+  min-width: 90px;
 }
 
 .kds-metric-val {
-  font-size: 1.5rem;
+  font-size: 1.65rem;
   font-weight: 900;
   color: #F59E0B;
   line-height: 1.1;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .kds-metric-label {
@@ -80,169 +92,198 @@
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.05em;
+  margin-top: 0.2rem;
 }
 
-/* Sound Alert Toggle */
+/* Sound Alert Toggle Button */
 .kds-audio-btn {
   background-color: #1E293B;
-  border: 2px solid #334155;
+  border: 1.5px solid #334155;
   color: #F8FAFC;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
-  padding: 0.6rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .kds-audio-btn.enabled {
-  background-color: #047857;
+  background-color: #065F46;
   border-color: #10B981;
   color: #FFFFFF;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
 }
 
-/* Critical Delay Banner */
+/* Critical Delay Alert Banner */
 .kds-critical-banner {
-  background: linear-gradient(90deg, #7F1D1D 0%, #DC2626 50%, #7F1D1D 100%);
+  background: linear-gradient(90deg, #7F1D1D 0%, #B91C1C 50%, #7F1D1D 100%);
   border: 3px solid #EF4444;
   color: #FFFFFF;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.75rem;
+  border-radius: 14px;
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
-  animation: criticalFlash 1.5s infinite;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: 0 0 35px rgba(220, 38, 38, 0.5);
+  animation: kdsFlash 1.5s infinite;
 }
 
-@keyframes criticalFlash {
+@keyframes kdsFlash {
   0%, 100% { border-color: #EF4444; }
-  50% { border-color: #FCA5A5; }
+  50% { border-color: #FECACA; }
 }
 
 .kds-critical-text {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 900;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* KDS Ticket Grid - 2 Metre Readability */
+/* KDS Ticket Cards Grid (2-Metre Readability) */
 .kds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .kds-card {
-  background-color: #12181C;
-  border-radius: 14px;
-  border: 4px solid #334155;
+  background-color: #0F172A;
+  border-radius: 16px;
+  border: 3px solid #334155;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease;
 }
 
-/* Status Color Codings */
+.kds-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Color Urgency Indicators */
 .kds-card.status-on-time {
-  border-color: #10B981; /* Green: On schedule */
+  border-color: #10B981;
+  border-top-width: 8px;
 }
 
 .kds-card.status-due-soon {
-  border-color: #F59E0B; /* Amber: Due in < 10 mins */
+  border-color: #F59E0B;
+  border-top-width: 8px;
 }
 
 .kds-card.status-late {
-  border-color: #EF4444; /* Red: Overdue */
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+  border-color: #EF4444;
+  border-top-width: 8px;
 }
 
 .kds-card.status-critical-10m {
-  border-color: #FF0000;
-  animation: criticalPulseCard 1.2s infinite;
+  border-color: #DC2626;
+  border-top-width: 10px;
+  box-shadow: 0 0 25px rgba(220, 38, 38, 0.6);
+  animation: kdsCardPulse 1.5s infinite;
 }
 
-@keyframes criticalPulseCard {
-  0%, 100% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.6); }
-  50% { box-shadow: 0 0 8px rgba(255, 0, 0, 0.2); }
+@keyframes kdsCardPulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(220, 38, 38, 0.6); }
+  50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.9); }
 }
 
-/* KDS Card Header */
+/* Card Header */
 .kds-card-header {
-  padding: 1rem 1.25rem;
-  background-color: #192126;
-  border-bottom: 2px solid #2B3A44;
+  padding: 1.25rem 1.4rem;
+  background-color: #1E293B;
+  border-bottom: 2px solid #334155;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .kds-order-number {
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 900;
   color: #FFFFFF;
+  letter-spacing: -0.01em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.kds-order-meta {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  margin-top: 0.15rem;
+}
+
+/* Urgency Timer Badge */
+.kds-timer-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 900;
+  font-size: 1.25rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
   letter-spacing: -0.02em;
 }
 
-.kds-timer-badge {
-  font-size: 1.2rem;
-  font-weight: 900;
-  padding: 0.35rem 0.85rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.timer-green {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border: 1.5px solid #10B981;
 }
 
-.timer-green { background-color: rgba(16, 185, 129, 0.2); color: #10B981; border: 1.5px solid #10B981; }
-.timer-amber { background-color: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1.5px solid #F59E0B; }
-.timer-red { background-color: rgba(239, 68, 68, 0.25); color: #FF4D4D; border: 2px solid #FF4D4D; }
+.timer-amber {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+  border: 1.5px solid #F59E0B;
+}
 
-/* KDS Card Body - Clear high contrast item typography */
+.timer-red {
+  background-color: rgba(239, 68, 68, 0.25);
+  color: #F87171;
+  border: 1.5px solid #EF4444;
+}
+
+/* Card Body - Large Items for 2m Readability */
 .kds-card-body {
-  padding: 1.25rem;
+  padding: 1.4rem;
   flex: 1;
 }
 
 .kds-items-list {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .kds-item-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.85rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px dashed #2B3A44;
-}
-
-.kds-item-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  gap: 1rem;
+  background-color: #172033;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #28354D;
 }
 
 .kds-qty-bubble {
-  background-color: #F59E0B;
-  color: #000000;
-  font-size: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
   font-weight: 900;
-  min-width: 44px;
-  height: 44px;
+  color: #F59E0B;
+  background: #0F172A;
+  padding: 0.25rem 0.65rem;
   border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  min-width: 44px;
+  text-align: center;
+  border: 1.5px solid #334155;
 }
 
 .kds-item-details {
@@ -250,95 +291,103 @@
 }
 
 .kds-item-name {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #FFFFFF;
   line-height: 1.2;
 }
 
 .kds-portion-label {
-  font-size: 1rem;
-  color: #94A3B8;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #38BDF8;
   margin-top: 0.2rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .kds-item-addons {
-  font-size: 0.9rem;
-  color: #10B981;
+  font-size: 0.82rem;
+  color: #FBBF24;
+  margin-top: 0.25rem;
   font-weight: 600;
-  margin-top: 0.2rem;
 }
 
-/* KDS Customer Info Strip */
+/* Customer Strip */
 .kds-customer-strip {
-  background-color: #172026;
-  padding: 0.65rem 1.25rem;
-  font-size: 0.85rem;
-  color: #94A3B8;
+  padding: 0.85rem 1.4rem;
+  background-color: #131D31;
+  border-top: 1px solid #233049;
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #2B3A44;
-  border-bottom: 1px solid #2B3A44;
+  font-size: 0.88rem;
+  color: #94A3B8;
 }
 
-/* KDS Action Buttons - Massive Finger Friendly */
+.kds-customer-strip strong {
+  color: #FFFFFF;
+}
+
+/* Large Touch Target Action Buttons */
 .kds-card-actions {
-  padding: 1rem 1.25rem;
-  background-color: #192126;
-  display: flex;
+  padding: 1rem 1.4rem;
+  background-color: #0F172A;
+  border-top: 2px solid #1E293B;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 0.75rem;
 }
 
 .kds-stage-btn {
-  flex: 1;
-  font-size: 1.15rem;
-  font-weight: 900;
-  padding: 0.85rem 1rem;
-  border-radius: 10px;
   border: none;
+  font-weight: 900;
+  font-size: 1.15rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
   cursor: pointer;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  transition: transform 0.1s ease, filter 0.15s ease;
-}
-
-.kds-stage-btn:hover {
-  filter: brightness(1.15);
-  transform: translateY(-2px);
 }
 
 .kds-btn-prep {
-  background-color: #F59E0B;
-  color: #000000;
+  background-color: #EA580C;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
 }
+.kds-btn-prep:hover { background-color: #C2410C; }
 
 .kds-btn-ready {
-  background-color: #10B981;
-  color: #000000;
+  background-color: #059669;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
 }
+.kds-btn-ready:hover { background-color: #047857; }
 
 .kds-btn-handover {
-  background-color: #3B82F6;
+  background-color: #2563EB;
   color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
 }
+.kds-btn-handover:hover { background-color: #1D4ED8; }
 
 .kds-override-btn {
-  background-color: #334155;
-  color: #F1F5F9;
-  border: 1px solid #475569;
-  padding: 0.85rem 1rem;
-  border-radius: 10px;
+  background-color: #1E293B;
+  border: 1.5px solid #475569;
+  color: #F8FAFC;
+  font-weight: 800;
+  font-size: 0.92rem;
+  padding: 0 1.1rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.95rem;
+  transition: all 0.15s ease;
 }
 
 .kds-override-btn:hover {
-  background-color: #475569;
+  background-color: #334155;
+  border-color: #94A3B8;
 }
-
