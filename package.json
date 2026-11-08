@@ -1,0 +1,24 @@
+{
+  "name": "nizami-biryani-direct",
+  "version": "1.0.0",
+  "description": "Nawabi Zaika / Nizami Biryani direct ordering platform with real-time Kitchen Display System (KDS), Central Menu CMS, and AI Dynamic Prep-Time Estimation",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/*.test.js",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [
+    "food-tech",
+    "kds",
+    "direct-ordering",
+    "ai-prep-time",
+    "hyderabad-biryani",
+    "sqlite",
+    "real-time-sse"
+  ],
+  "author": "Hemanth Surnidi <hemanthsurnidi20095@gmail.com>",
+  "license": "MIT"
+}
