@@ -540,13 +540,26 @@ export function updatePartyOrderStatus(id, status, notes = '') {
   return db.prepare('SELECT * FROM party_orders WHERE id = ?').get(id);
 }
 
+export function cancelOrderRecord(orderId, reason = 'Customer requested cancellation') {
+  db.prepare(`
+    UPDATE orders SET
+      status = 'CANCELLED',
+      cancellation_reason = ?
+    WHERE id = ?
+  `).run(reason, orderId);
+  return getOrderById(orderId);
+}
+
 export function getAnalyticsSummary() {
   const totalOrdersRow = db.prepare('SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as total_rev FROM orders').get();
+  const cancellationsRow = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'CANCELLED'").get();
+
   const outletBreakdown = db.prepare(`
     SELECT out.id, out.name, out.is_cloud_kitchen,
            COUNT(o.id) as order_count,
            COALESCE(SUM(o.total_amount), 0) as revenue,
            COALESCE(AVG(o.ai_prep_estimate_minutes), 0) as avg_prep_time,
+           SUM(CASE WHEN o.status = 'CANCELLED' THEN 1 ELSE 0 END) as cancellations,
            SUM(CASE WHEN o.late_alert_triggered = 1 THEN 1 ELSE 0 END) as late_orders
     FROM outlets out
     LEFT JOIN orders o ON out.id = o.outlet_id
@@ -565,6 +578,8 @@ export function getAnalyticsSummary() {
   return {
     total_orders: totalOrdersRow.count,
     total_revenue: totalRev,
+    total_cancellations: cancellationsRow ? cancellationsRow.count : 0,
+    cancellation_rate: totalOrdersRow.count > 0 ? ((cancellationsRow.count / totalOrdersRow.count) * 100).toFixed(1) + '%' : '0.0%',
     commissions_saved: Math.round(commissionsSaved),
     app_fees_avoided: Math.round(legacyAppFeesAvoided),
     outlets: outletBreakdown,

@@ -39,3 +39,4 @@ test('DPDP Act 2023: Marketing consent explicitly stored with user order', () =>
   assert.ok(order);
   assert.equal(order.dpdp_marketing_consent, 1, 'Consent flag must be stored in database');
 });
+

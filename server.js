@@ -22,6 +22,7 @@ import {
   getAllPartyOrders,
   updatePartyOrderStatus,
   getAnalyticsSummary,
+  cancelOrderRecord,
   db
 } from './database.js';
 import {
@@ -376,6 +377,36 @@ export const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { order: updated, notification });
     }
 
+    // Cancel Order Endpoint
+    if (pathname.includes('/api/orders/') && pathname.endsWith('/cancel') && req.method === 'PATCH') {
+      const parts = pathname.split('/');
+      const orderId = parts[3];
+      const body = await parseJsonBody(req);
+      const { reason = 'Cancelled by user' } = body;
+
+      const updated = cancelOrderRecord(orderId, reason);
+      broadcastSSE('ORDER_STATUS_CHANGED', { order: updated });
+      return sendJson(res, 200, { order: updated });
+    }
+
+    // Simulate 10-Minute Delay Trigger (For Reviewer Inspection of Edge-Case)
+    if (pathname.includes('/api/orders/') && pathname.endsWith('/simulate-late') && req.method === 'POST') {
+      const parts = pathname.split('/');
+      const orderId = parts[3];
+
+      db.prepare(`
+        UPDATE orders SET
+          late_alert_triggered = 1,
+          promised_at = datetime('now', '-12 minutes')
+        WHERE id = ?
+      `).run(orderId);
+
+      const updated = getOrderById(orderId);
+      const notification = generateNotificationPreview(updated, 'LATE_COMPENSATION_ALERT', { diff_minutes: 12 });
+      broadcastSSE('ORDER_LATE_ALERT', { order: updated, lateness: { diff_minutes: 12, is_severely_late: true }, notification });
+      return sendJson(res, 200, { order: updated, notification });
+    }
+
     // Kitchen Manager Prep Time Override
     if (pathname.includes('/api/orders/') && pathname.endsWith('/override') && req.method === 'PATCH') {
       const parts = pathname.split('/');
@@ -547,3 +578,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`=======================================================`);
   });
 }
+

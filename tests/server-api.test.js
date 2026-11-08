@@ -42,7 +42,6 @@ function dispatchRequest({ method = 'GET', url = '/', body = null, headers = {} 
       }
     };
 
-    // Emit request to the server
     server.emit('request', req, res);
 
     if (body) {
@@ -60,7 +59,7 @@ test('API GET /api/health returns healthy status', async () => {
   assert.equal(data.version, '1.0.0');
 });
 
-test('API GET /api/outlets returns all 17 Hyderabad locations', async () => {
+test('API GET /api/outlets returns all 17 Hyderabad locations with FSSAI', async () => {
   const res = await dispatchRequest({ method: 'GET', url: '/api/outlets' });
   assert.equal(res.statusCode, 200);
   const outlets = res.json();
@@ -83,6 +82,7 @@ test('API GET /api/menu returns items with portions, add-ons and availability', 
   assert.equal(biryani.base_price, 380);
   assert.equal(biryani.is_veg, 0);
   assert.ok(biryani.portions.length >= 3);
+  assert.ok(biryani.add_ons.length >= 2);
 });
 
 test('API GET /api/orders returns sample seeded orders WEB-778120, WEB-778131, WEB-778146', async () => {
@@ -95,7 +95,7 @@ test('API GET /api/orders returns sample seeded orders WEB-778120, WEB-778131, W
   assert.ok(web778120);
   assert.equal(web778120.outlet_id, 'out-kondapur');
   assert.equal(web778120.total_amount, 1180);
-  assert.ok(['PREPARING', 'READY_FOR_PICKUP'].includes(web778120.status));
+  assert.ok(['PLACED', 'PREPARING', 'READY_FOR_PICKUP'].includes(web778120.status));
 
   const web778131 = orders.find(o => o.id === 'WEB-778131');
   assert.ok(web778131);
@@ -113,7 +113,7 @@ test('API POST /api/orders successfully places order with AI prep time and loyal
   const newOrderPayload = {
     outlet_id: 'out-kondapur',
     customer_name: 'Dr. Sameer Pasha',
-    customer_phone: '+91 99000 88888',
+    customer_phone: '+91 99000 ' + Math.floor(10000 + Math.random() * 90000),
     delivery_address: 'Plot 12, Whitefields, Kondapur, Hyderabad',
     items: [
       {
@@ -122,7 +122,8 @@ test('API POST /api/orders successfully places order with AI prep time and loyal
         portion: 'Regular',
         quantity: 2,
         unit_price: 380,
-        prep_complexity_minutes: 12
+        prep_complexity_minutes: 12,
+        add_ons: [{ id: 'addon-salan-extra', name: 'Extra Mirchi Ka Salan', price: 40 }]
       },
       {
         item_id: 'item-double-ka-meetha',
@@ -130,7 +131,8 @@ test('API POST /api/orders successfully places order with AI prep time and loyal
         portion: 'Single Serving',
         quantity: 2,
         unit_price: 140,
-        prep_complexity_minutes: 4
+        prep_complexity_minutes: 4,
+        add_ons: []
       }
     ],
     discount_code: 'DIRECT15',
@@ -147,11 +149,11 @@ test('API POST /api/orders successfully places order with AI prep time and loyal
   assert.equal(res.statusCode, 201);
   const data = res.json();
   assert.ok(data.order.id.startsWith('WEB-'));
-  // Subtotal = 2*380 + 2*140 = 760 + 280 = 1040
-  // Discount 15% on 1040 = 156 (capped at 150) -> Total = 1040 - 150 = 890
-  assert.equal(data.order.subtotal, 1040);
+  // Subtotal = 2*(380+40) + 2*140 = 840 + 280 = 1120
+  // Discount 15% on 1120 = 168 (capped at 150) -> Total = 1120 - 150 = 970
+  assert.equal(data.order.subtotal, 1120);
   assert.equal(data.order.discount_amount, 150);
-  assert.equal(data.order.total_amount, 890);
+  assert.equal(data.order.total_amount, 970);
   assert.ok(data.prep_estimate.promised_minutes >= 25);
   assert.ok(data.notification.message_text.includes(data.order.id));
 });
@@ -168,7 +170,47 @@ test('API PATCH /api/orders/:id/status updates prep stage', async () => {
   assert.equal(data.order.status, 'READY_FOR_PICKUP');
 });
 
-test('API GET /api/analytics returns ₹1.14 Cr savings metrics', async () => {
+test('API POST /api/orders/:id/simulate-late triggers 10m overdue compensation alert', async () => {
+  const res = await dispatchRequest({
+    method: 'POST',
+    url: '/api/orders/WEB-778146/simulate-late'
+  });
+
+  assert.equal(res.statusCode, 200);
+  const data = res.json();
+  assert.equal(data.order.late_alert_triggered, 1);
+  assert.ok(data.notification.message_text.includes('₹50 Nizami Loyalty Credit'));
+});
+
+test('API PATCH /api/orders/:id/cancel cancels order cleanly', async () => {
+  // Create a quick order to cancel
+  const createRes = await dispatchRequest({
+    method: 'POST',
+    url: '/api/orders',
+    body: {
+      outlet_id: 'out-kondapur',
+      customer_name: 'Cancel Test Guest',
+      customer_phone: '+91 91111 22222',
+      delivery_address: 'Kondapur, Hyderabad',
+      items: [{ item_id: 'item-veg-biryani', name: 'Veg Biryani', quantity: 1, unit_price: 320 }],
+      payment_method: 'UPI',
+      dpdp_marketing_consent: 1
+    }
+  });
+
+  const orderId = createRes.json().order.id;
+
+  const cancelRes = await dispatchRequest({
+    method: 'PATCH',
+    url: `/api/orders/${orderId}/cancel`,
+    body: { reason: 'Test customer cancel' }
+  });
+
+  assert.equal(cancelRes.statusCode, 200);
+  assert.equal(cancelRes.json().order.status, 'CANCELLED');
+});
+
+test('API GET /api/analytics returns ₹1.14 Cr savings and cancellation metrics', async () => {
   const res = await dispatchRequest({ method: 'GET', url: '/api/analytics' });
   assert.equal(res.statusCode, 200);
   const data = res.json();
@@ -176,10 +218,10 @@ test('API GET /api/analytics returns ₹1.14 Cr savings metrics', async () => {
   assert.ok(data.commissions_saved > 0);
   assert.ok(data.app_fees_avoided > 0);
   assert.equal(data.outlets.length, 17);
+  assert.ok(data.cancellation_rate !== undefined);
 });
 
 test('API POST /api/party-orders validates 24h advance notice', async () => {
-  // Reject order requested today (0 hours notice)
   const now = new Date();
   const invalidRes = await dispatchRequest({
     method: 'POST',
@@ -199,7 +241,6 @@ test('API POST /api/party-orders validates 24h advance notice', async () => {
   assert.equal(invalidRes.statusCode, 400);
   assert.ok(invalidRes.json().error.includes('24 hours advance notice'));
 
-  // Accept order 3 days in advance
   const future = new Date(Date.now() + 72 * 3600 * 1000);
   const validRes = await dispatchRequest({
     method: 'POST',

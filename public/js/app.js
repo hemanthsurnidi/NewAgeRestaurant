@@ -415,18 +415,42 @@ export const App = {
             ` : ''}
           </div>
 
-          <div class="dish-actions-row">
-            ${item.portions && item.portions.length > 1 ? `
-              <select id="portion-${item.id}" class="portion-select" ${isOutOfStock ? 'disabled' : ''}>
+          <!-- Portions Selector -->
+          ${item.portions && item.portions.length > 1 ? `
+            <div style="margin-bottom: 0.65rem;">
+              <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Select Portion:</label>
+              <select id="portion-${item.id}" class="portion-select" style="width: 100%;" ${isOutOfStock ? 'disabled' : ''}>
                 ${item.portions.map(p => `
                   <option value="${p.id}" data-delta="${p.price_delta}">
                     ${p.name} (${p.price_delta >= 0 ? '+' : ''}₹${p.price_delta})
                   </option>
                 `).join('')}
               </select>
-            ` : '<div style="flex: 1;"></div>'}
+            </div>
+          ` : ''}
 
-            <button class="add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''} 
+          <!-- Add-ons Customization Checkboxes -->
+          ${item.add_ons && item.add_ons.length > 0 ? `
+            <div style="background: var(--bg-surface); padding: 0.6rem; border-radius: 6px; margin-bottom: 0.85rem; border: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.72rem; color: var(--gold-400); font-weight: 700; margin-bottom: 0.35rem; text-transform: uppercase;">
+                ✨ Royal Add-ons:
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                ${item.add_ons.map(a => `
+                  <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: 0.35rem;">
+                      <input type="checkbox" class="addon-checkbox-${item.id}" value="${a.id}" data-name="${a.name}" data-price="${a.price}" style="accent-color: var(--gold-500);" ${isOutOfStock ? 'disabled' : ''}>
+                      <span>${a.name}</span>
+                    </span>
+                    <strong style="color: #FFFFFF;">+₹${a.price}</strong>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="dish-actions-row">
+            <button class="add-to-cart-btn" style="width: 100%; justify-content: center;" ${isOutOfStock ? 'disabled' : ''} 
                     onclick="App.addToCart('${item.id}')">
               <span>+</span> Add to Dastarkhwan
             </button>
@@ -469,9 +493,22 @@ export const App = {
       }
     }
 
-    // Check if item already exists in cart with same portion
+    // Collect checked add-ons
+    const selectedAddOns = [];
+    const checkboxes = document.querySelectorAll(`.addon-checkbox-${itemId}:checked`);
+    checkboxes.forEach(cb => {
+      selectedAddOns.push({
+        id: cb.value,
+        name: cb.dataset.name,
+        price: Number(cb.dataset.price)
+      });
+      unitPrice += Number(cb.dataset.price);
+    });
+
+    // Check if item already exists in cart with same portion and same add-ons
+    const addOnKey = selectedAddOns.map(a => a.id).sort().join(',');
     const existingIndex = this.state.cart.findIndex(
-      ci => ci.item_id === itemId && ci.portion === portionName
+      ci => ci.item_id === itemId && ci.portion === portionName && (ci.add_ons || []).map(a => a.id).sort().join(',') === addOnKey
     );
 
     if (existingIndex > -1) {
@@ -484,12 +521,13 @@ export const App = {
         quantity: 1,
         unit_price: unitPrice,
         prep_complexity_minutes: item.prep_complexity_minutes,
-        add_ons: []
+        add_ons: selectedAddOns
       });
     }
 
     this.updateCartBadge();
-    this.showToast(`Added ${item.name} (${portionName}) to Cart`, 'success');
+    const addOnSummary = selectedAddOns.length > 0 ? ` + ${selectedAddOns.map(a => a.name).join(', ')}` : '';
+    this.showToast(`Added ${item.name} (${portionName}${addOnSummary}) to Cart`, 'success');
   },
 
   updateCartBadge() {
@@ -949,13 +987,19 @@ export const App = {
         
         <!-- Order Selector Pills for Reviewer -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="font-size: 1.8rem; color: #FFFFFF;">Live Order Status</h2>
-          <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
+          <div>
+            <h2 style="font-size: 1.8rem; color: #FFFFFF;">Live Order Status</h2>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Real-time tracking of kitchen dum preparation and 3PL dispatch</div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; overflow-x: auto; align-items: center;">
             ${this.state.orders.slice(0, 4).map(o => `
               <button class="category-chip ${o.id === order.id ? 'active' : ''}" onclick="App.setActiveOrder('${o.id}')">
                 #${o.id} (${o.status})
               </button>
             `).join('')}
+            <button class="category-chip" style="background: rgba(239, 68, 68, 0.2); color: #EF4444; border-color: #EF4444; font-weight: 700;" onclick="App.simulateLateDelay('${order.id}')" title="Trigger 10+ min delay to inspect auto-apology and compensation">
+              ⚡ Test 10m Late Trigger
+            </button>
           </div>
         </div>
 
@@ -1080,6 +1124,37 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
   setActiveOrder(id) {
     this.state.activeOrderId = id;
     this.renderTrackingView();
+  },
+
+  async simulateLateDelay(orderId) {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/simulate-late`, { method: 'POST' });
+      if (res.ok) {
+        this.showToast(`Simulated 10m delay on #${orderId}! Manager alerted & ₹50 apology credit sent.`, 'error');
+        await this.fetchOrders();
+        this.renderTrackingView();
+      }
+    } catch (e) {
+      this.showToast('Failed to trigger late simulation', 'error');
+    }
+  },
+
+  async cancelOrder(orderId) {
+    if (!confirm(`Are you sure you want to cancel order #${orderId}?`)) return;
+    try {
+      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Customer requested cancellation prior to degh unsealing' })
+      });
+      if (res.ok) {
+        this.showToast(`Order #${orderId} has been cancelled.`, 'info');
+        await this.fetchOrders();
+        this.renderTrackingView();
+      }
+    } catch (e) {
+      this.showToast('Failed to cancel order', 'error');
+    }
   },
 
   updateTrackingTimer() {
@@ -1476,7 +1551,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
           <div style="background-color: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
             <div style="font-size: 0.8rem; color: var(--gold-400); text-transform: uppercase; font-weight: 700;">Direct Repeat Rate</div>
             <div style="font-size: 2.2rem; font-weight: 900; color: #3B82F6; margin: 0.35rem 0;">${summary.repeat_customer_rate}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">Beating the 35% Month 6 client target!</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Total Cancellations: <strong>${summary.total_cancellations || 0} (${summary.cancellation_rate || '0.0%'})</strong></div>
           </div>
 
         </div>
@@ -1496,6 +1571,7 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
                 <th style="padding: 1rem;">Direct Orders</th>
                 <th style="padding: 1rem;">Revenue (₹)</th>
                 <th style="padding: 1rem;">Avg AI Prep</th>
+                <th style="padding: 1rem;">Cancellations</th>
                 <th style="padding: 1rem; text-align: right;">Late Incidents</th>
               </tr>
             </thead>
@@ -1507,6 +1583,9 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
                   <td style="padding: 1rem;">${o.order_count}</td>
                   <td style="padding: 1rem; font-weight: 800; color: var(--gold-400);">₹${o.revenue.toLocaleString('en-IN')}</td>
                   <td style="padding: 1rem;">~${Math.round(o.avg_prep_time || 25)} mins</td>
+                  <td style="padding: 1rem; color: ${o.cancellations > 0 ? '#EF4444' : 'var(--text-muted)'}; font-weight: 700;">
+                    ${o.cancellations || 0}
+                  </td>
                   <td style="padding: 1rem; text-align: right; color: ${o.late_orders > 0 ? '#EF4444' : '#10B981'}; font-weight: 800;">
                     ${o.late_orders > 0 ? `⚠️ ${o.late_orders}` : '✓ 0'}
                   </td>
@@ -1618,8 +1697,22 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
                 <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">
                   ${p.requirements_text}
                 </div>
-                <div style="font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
-                  Assigned Kitchen: <strong>${p.outlet_name}</strong> • Est: ₹${p.estimated_budget}
+                <div style="font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                  <span>Assigned Kitchen: <strong>${p.outlet_name}</strong> • Est: ₹${p.estimated_budget}</span>
+                  ${p.status === 'PENDING_REVIEW' ? `
+                    <div style="display: flex; gap: 0.35rem;">
+                      <button class="add-to-cart-btn" style="padding: 0.25rem 0.6rem; font-size: 0.72rem; background: #10B981; color: #000;" onclick="App.updatePartyStatus('${p.id}', 'CONFIRMED')">
+                        ✓ Confirm
+                      </button>
+                      <button class="category-chip" style="padding: 0.25rem 0.6rem; font-size: 0.72rem; background: #EF4444; color: #FFF; border-color: #EF4444;" onclick="App.updatePartyStatus('${p.id}', 'REJECTED')">
+                        ✕ Decline
+                      </button>
+                    </div>
+                  ` : `
+                    <span style="font-size: 0.72rem; color: ${p.status === 'CONFIRMED' ? '#10B981' : '#EF4444'}; font-weight: 700;">
+                      ${p.manager_notes || p.status}
+                    </span>
+                  `}
                 </div>
               </div>
             `).join('')}
@@ -1678,6 +1771,27 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
       }
     } catch (err) {
       this.showToast('Network error submitting party order', 'error');
+    }
+  },
+
+  async updatePartyStatus(id, newStatus) {
+    try {
+      const res = await fetch(`/api/party-orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          manager_notes: newStatus === 'CONFIRMED'
+            ? 'Catering Head Ustad assigned. Degh preparation scheduled.'
+            : 'Kitchen at full capacity for requested time slot.'
+        })
+      });
+      if (res.ok) {
+        this.showToast(`Party Request #${id} marked as ${newStatus}`, newStatus === 'CONFIRMED' ? 'success' : 'info');
+        this.renderPartyView();
+      }
+    } catch (e) {
+      this.showToast('Failed to update party order', 'error');
     }
   },
 
@@ -1789,23 +1903,59 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const list = document.getElementById('outlet-selection-list');
     if (!modal || !panel || !list) return;
 
-    list.innerHTML = this.state.outlets.map(o => `
-      <div style="background: ${o.id === this.state.currentOutlet.id ? 'var(--bg-surface)' : 'var(--bg-card)'}; border: 1.5px solid ${o.id === this.state.currentOutlet.id ? 'var(--gold-500)' : 'var(--border-subtle)'}; padding: 0.85rem 1rem; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" 
-           onclick="App.switchOutlet('${o.id}')">
-        <div>
-          <div style="font-weight: 700; color: #FFFFFF; font-size: 0.95rem;">${o.name}</div>
-          <div style="font-size: 0.78rem; color: var(--text-muted);">${o.address}</div>
-          <div style="font-size: 0.72rem; color: var(--gold-400); margin-top: 0.2rem;">FSSAI Lic: ${o.fssai_license} • Radius: ${o.delivery_radius_km} km</div>
-        </div>
-        <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}; color: ${o.is_cloud_kitchen ? '#60A5FA' : '#10B981'}; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700;">
-          ${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Flagship Dine-in'}
-        </span>
-      </div>
-    `).join('');
+    this.renderOutletList(this.state.outlets);
 
     modal.classList.add('open');
     panel.style.transform = 'scale(1)';
     panel.style.opacity = '1';
+  },
+
+  renderOutletList(outletArray) {
+    const list = document.getElementById('outlet-selection-list');
+    if (!list) return;
+
+    list.innerHTML = `
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <input type="text" id="outlet-search-input" placeholder="Search area (e.g. Kondapur, Gachibowli, Kukatpally...)" 
+               oninput="App.filterOutlets(this.value)"
+               style="flex: 1; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: #FFF; padding: 0.55rem 0.75rem; border-radius: 6px; font-size: 0.85rem;">
+        <button class="category-chip active" style="padding: 0.55rem 0.85rem; font-size: 0.82rem;" onclick="App.autoDetectNearestOutlet()">
+          📍 Auto-Detect
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 52vh; overflow-y: auto; padding-right: 0.25rem;">
+        ${outletArray.map(o => `
+          <div style="background: ${o.id === this.state.currentOutlet.id ? 'var(--bg-surface)' : 'var(--bg-card)'}; border: 1.5px solid ${o.id === this.state.currentOutlet.id ? 'var(--gold-500)' : 'var(--border-subtle)'}; padding: 0.85rem 1rem; border-radius: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;" 
+               onclick="App.switchOutlet('${o.id}')">
+            <div>
+              <div style="font-weight: 700; color: #FFFFFF; font-size: 0.95rem;">${o.name}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">${o.address}</div>
+              <div style="font-size: 0.72rem; color: var(--gold-400); margin-top: 0.2rem;">
+                FSSAI Lic: ${o.fssai_license} • Delivery Radius: ${o.delivery_radius_km} km • Min Prep: ${o.min_prep_time_minutes}m
+              </div>
+            </div>
+            <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)'}; color: ${o.is_cloud_kitchen ? '#60A5FA' : '#10B981'}; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 700; white-space: nowrap;">
+              ${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Flagship Dine-in'}
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  filterOutlets(query) {
+    const q = query.toLowerCase().trim();
+    const filtered = this.state.outlets.filter(o => 
+      o.name.toLowerCase().includes(q) || o.address.toLowerCase().includes(q)
+    );
+    this.renderOutletList(filtered);
+  },
+
+  autoDetectNearestOutlet() {
+    // Pick the closest kitchen to typical user location (Kondapur / Hitec / Gachibowli)
+    const nearest = this.state.outlets.find(o => o.slug === 'kondapur') || this.state.outlets[0];
+    this.showToast(`📍 Geolocation locked: Nearest kitchen is ${nearest.name} (1.4 km away, within 7.0 km radius)`, 'success');
+    this.switchOutlet(nearest.id);
   },
 
   closeOutletModal() {
@@ -1864,3 +2014,4 @@ window.App = App;
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
+

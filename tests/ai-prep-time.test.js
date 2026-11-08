@@ -9,14 +9,16 @@ import { calculateDynamicPrepTime, evaluateOrderLateness, getCustomerReorderReco
 import { getOutletById } from '../database.js';
 
 test('AI Prep-Time: Respects outlet minimum floor constraint', () => {
-  const outlet = getOutletById('out-kondapur');
+  const outlet = getOutletById('out-attapur');
   assert.equal(outlet.min_prep_time_minutes, 25);
 
   // Quick single item with small complexity (e.g. Double Ka Meetha = 4 min prep)
   const items = [{ name: 'Double Ka Meetha', prep_complexity_minutes: 4, quantity: 1 }];
-  const result = calculateDynamicPrepTime('out-kondapur', items, new Date('2026-11-08T15:00:00Z'));
+  // Wednesday 10 AM (zero rush)
+  const quietDate = new Date('2026-11-04T10:00:00+05:30');
+  const result = calculateDynamicPrepTime('out-attapur', items, quietDate);
 
-  // Raw AI estimate is low, but promised time MUST be at least the outlet minimum floor (25 mins)
+  // Raw AI estimate is low (4m), but promised time MUST equal the outlet minimum floor (25 mins)
   assert.ok(result.raw_ai_estimate_minutes < 25, `Raw estimate was ${result.raw_ai_estimate_minutes}`);
   assert.equal(result.promised_minutes, 25, 'Honest promised time must equal outlet minimum floor');
   assert.equal(result.is_constrained_by_outlet_min, true);
@@ -84,3 +86,4 @@ test('AI Customer Re-order: Never auto-adds items to cart and respects history',
   assert.ok(recommendations.recommendations.length > 0);
   assert.equal(recommendations.never_auto_add_guarantee, true, 'Guarantees recommendations are strictly opt-in');
 });
+
