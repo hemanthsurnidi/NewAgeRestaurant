@@ -58,6 +58,30 @@
 
 .kds-outlet-meta {
   color: #94A3B8;
+  font-size: 0.88rem;
+  margin-top: 0.15rem;
+}
+
+.kds-exit-btn {
+  background: #1E293B;
+  color: #F8FAFC;
+  border: 1.5px solid #334155;
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.kds-exit-btn:hover {
+  background: #334155;
+  border-color: #D97706;
+  color: #FBBF24;
+}
   font-size: 0.85rem;
   margin-top: 0.15rem;
 }

@@ -16,7 +16,7 @@
 </head>
 <body class="theme-light">
 
-  <!-- TOP EXECUTIVE ANNOUNCEMENT / WORKSPACE BAR -->
+  <!-- TOP EXECUTIVE ANNOUNCEMENT STRIP -->
   <aside class="top-announcement-bar">
     <div class="announcement-inner">
       <div class="announcement-tag">
@@ -24,7 +24,7 @@
         <span>Company A • Hyderabad Direct Platform</span>
       </div>
       <div class="announcement-text">
-        🎉 <strong>Save 15% Net Margin:</strong> Zero 3rd-party app commissions • Real-time Outlet KDS • 5% Direct Cashback
+        🎉 <strong>Save 15% Net Margin:</strong> Direct orders bypass 25% app fees • Real-time KDS • 5% Direct Cashback
       </div>
       <div class="announcement-stats">
         <span>Target: <strong>₹1.14 Cr/yr Savings</strong></span>
@@ -32,11 +32,11 @@
     </div>
   </aside>
 
-  <!-- MAIN STICKY HEADER -->
-  <header class="header-nav">
+  <!-- MAIN STICKY CUSTOMER HEADER -->
+  <header class="header-nav" id="main-header">
     <div class="nav-container">
       
-      <!-- Brand Logo -->
+      <!-- Left: Brand Logo -->
       <a class="brand-wrap" onclick="App.navigate('ordering')">
         <div class="brand-crest">
           <span>👑</span>
@@ -47,7 +47,7 @@
         </div>
       </a>
 
-      <!-- Outlet Selector Pill -->
+      <!-- Center: Outlet Selector Pill -->
       <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet">
         <span class="pulse-ring">📍</span>
         <div class="outlet-pill-text">
@@ -57,60 +57,39 @@
         <span class="chevron-icon">▾</span>
       </button>
 
-      <!-- Right Navigation Actions -->
+      <!-- Center-Right: Clean Customer Navigation Links -->
+      <nav class="customer-nav-links">
+        <a class="cust-nav-link active" id="link-menu" onclick="App.navigate('ordering')">Direct Menu</a>
+        <a class="cust-nav-link" id="link-party" onclick="App.navigate('party')">Party Catering</a>
+        <a class="cust-nav-link" id="link-tracking" onclick="App.navigate('tracking')">Track Order</a>
+      </nav>
+
+      <!-- Right: Cart & Reviewer / Staff Portal Dropdown -->
       <div class="nav-actions">
         
-        <!-- Modern Segmented Workspace / Role Switcher -->
-        <div class="role-selector-wrap">
-          <select id="role-select" class="role-dropdown" onchange="App.handleRoleChange(this.value)">
-            <option value="customer">👤 Customer View (Rahul Verma)</option>
-            <option value="kitchen_kondapur">🍳 Kitchen KDS: Kondapur Flagship</option>
-            <option value="kitchen_gachibowli">🍳 Kitchen KDS: Gachibowli Cloud Kitchen</option>
-            <option value="kitchen_kukatpally">🍳 Kitchen KDS: Kukatpally KPHB</option>
-            <option value="admin">📋 Central Menu CMS</option>
-            <option value="analytics">📊 Financial Dashboard (₹1.14 Cr)</option>
-            <option value="party">🎉 Party / Bulk Catering</option>
-            <option value="ai_diagnostics">🧠 AI Prep-Time Engine</option>
-          </select>
-        </div>
-
         <!-- Cart Trigger Button -->
         <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
           <span class="cart-icon-wrap">🛍️</span>
-          <span class="cart-label">Feast</span>
+          <span class="cart-label">Cart</span>
           <span id="cart-count-badge" class="cart-badge-count">0</span>
         </button>
+
+        <!-- Staff / Reviewer Portals Dropdown (Discrete, Professional) -->
+        <div class="reviewer-portal-wrap" title="Switch role/portal for review">
+          <select id="role-select" class="portal-dropdown" onchange="App.handleRoleChange(this.value)">
+            <option value="customer">👤 Customer View</option>
+            <option value="kitchen_kondapur">🍳 Kitchen KDS (Kondapur)</option>
+            <option value="kitchen_gachibowli">🍳 Kitchen KDS (Gachibowli)</option>
+            <option value="kitchen_kukatpally">🍳 Kitchen KDS (Kukatpally)</option>
+            <option value="admin">📋 Central Menu CMS</option>
+            <option value="analytics">📊 Financial Dashboard</option>
+            <option value="ai_diagnostics">🧠 AI Engine Lab</option>
+          </select>
+        </div>
 
       </div>
     </div>
   </header>
-
-  <!-- MODERN ROLE / SECTION NAVIGATION TABS -->
-  <nav class="role-nav-bar">
-    <div class="nav-scroll-container">
-      <button class="nav-tab active" data-view="ordering" onclick="App.navigate('ordering')">
-        <span>🍲</span> Direct Menu
-      </button>
-      <button class="nav-tab" data-view="kds" onclick="App.navigate('kds')">
-        <span>🍳</span> Kitchen KDS
-      </button>
-      <button class="nav-tab" data-view="tracking" onclick="App.navigate('tracking')">
-        <span>📍</span> Live Tracker
-      </button>
-      <button class="nav-tab" data-view="cms" onclick="App.navigate('cms')">
-        <span>📋</span> Central Menu CMS
-      </button>
-      <button class="nav-tab" data-view="analytics" onclick="App.navigate('analytics')">
-        <span>📊</span> Financial Dashboard
-      </button>
-      <button class="nav-tab" data-view="party" onclick="App.navigate('party')">
-        <span>🎉</span> Party / Bulk Catering
-      </button>
-      <button class="nav-tab" data-view="ai_lab" onclick="App.navigate('ai_lab')">
-        <span>🧠</span> AI Engine Lab
-      </button>
-    </div>
-  </nav>
 
   <!-- MAIN DYNAMIC CONTENT CONTAINER -->
   <main class="main-content" id="app-view-container">

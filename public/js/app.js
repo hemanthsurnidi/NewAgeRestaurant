@@ -210,14 +210,17 @@ export const App = {
   navigate(viewName) {
     this.state.currentView = viewName;
 
-    // Update active tab styling
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      if (tab.dataset.view === viewName) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
+    // Update customer nav link active state
+    document.querySelectorAll('.cust-nav-link').forEach(link => link.classList.remove('active'));
+    if (viewName === 'ordering') {
+      document.getElementById('link-menu')?.classList.add('active');
+      const roleSelect = document.getElementById('role-select');
+      if (roleSelect) roleSelect.value = 'customer';
+    } else if (viewName === 'party') {
+      document.getElementById('link-party')?.classList.add('active');
+    } else if (viewName === 'tracking') {
+      document.getElementById('link-tracking')?.classList.add('active');
+    }
 
     const container = document.getElementById('app-view-container');
     if (!container) return;
@@ -1368,6 +1371,10 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
 
           <!-- Outlet Selector & Audio Button -->
           <div style="display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap;">
+            <button class="kds-exit-btn" onclick="App.navigate('ordering')" title="Return to customer menu">
+              ← Exit to Customer Menu
+            </button>
+
             <select class="role-dropdown" style="font-size: 1rem; padding: 0.65rem 1.1rem; background: #1E293B; color: #FFF; border-color: #334155;" 
                     onchange="App.setKdsOutlet(this.value)">
               <option value="out-kondapur" ${filter === 'out-kondapur' ? 'selected' : ''}>Kondapur Flagship</option>
@@ -1581,6 +1588,9 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
           </div>
           
           <div style="display: flex; gap: 0.85rem; align-items: center;">
+            <button class="btn-return-customer" onclick="App.navigate('ordering')">
+              ← Exit to Customer Menu
+            </button>
             <label style="font-size: 0.88rem; color: var(--text-secondary); font-weight: 700;">Active Outlet:</label>
             <select class="role-dropdown" onchange="App.switchOutlet(this.value)">
               ${this.state.outlets.map(o => `
@@ -1685,8 +1695,13 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
               Company A, Hyderabad • Tracking ₹1.14 Crore Annual Commission Savings & Customer Retention
             </p>
           </div>
-          <div style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 800; font-size: 0.84rem;">
-            HQ EXECUTIVE VIEW
+          <div style="display: flex; gap: 0.85rem; align-items: center;">
+            <button class="btn-return-customer" onclick="App.navigate('ordering')">
+              ← Exit to Customer Menu
+            </button>
+            <div style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 800; font-size: 0.84rem;">
+              HQ EXECUTIVE VIEW
+            </div>
           </div>
         </div>
 
@@ -1965,11 +1980,16 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     container.innerHTML = `
       <div style="max-width: 960px; margin: 0 auto;">
         
-        <div style="margin-bottom: 2rem;">
-          <h2 style="font-size: 2rem; color: var(--text-main);">AI Dynamic Prep-Time Engine Diagnostics</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
-            Interactive simulator of Company A's dynamic kitchen load estimation algorithm and edge-case handlers.
-          </p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <div>
+            <h2 style="font-size: 2rem; color: var(--text-main);">AI Dynamic Prep-Time Engine Diagnostics</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+              Interactive simulator of Company A's dynamic kitchen load estimation algorithm and edge-case handlers.
+            </p>
+          </div>
+          <button class="btn-return-customer" onclick="App.navigate('ordering')">
+            ← Exit to Customer Menu
+          </button>
         </div>
 
         <!-- Formula Callout -->
