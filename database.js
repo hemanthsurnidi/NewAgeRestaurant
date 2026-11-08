@@ -21,8 +21,10 @@ if (!fs.existsSync(dataDir)) {
 const dbPath = path.join(dataDir, 'nizami.db');
 export const db = new DatabaseSync(dbPath);
 
-// Enable foreign keys and WAL mode for high concurrency
+// Enable foreign keys, WAL mode, and busy timeout for high concurrency
 db.exec('PRAGMA foreign_keys = ON;');
+db.exec('PRAGMA journal_mode = WAL;');
+db.exec('PRAGMA busy_timeout = 5000;');
 
 export function initDatabase() {
   db.exec(`
