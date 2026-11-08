@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nawabi Zaika — Royal Hyderabadi Direct Ordering & KDS</title>
+  <title>Company A — Hyderabad Biryani & Direct Ordering KDS</title>
   
   <!-- Modern Luxury Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,41 +32,66 @@
     </div>
   </aside>
 
+  <!-- APP ROOT WRAPPER (Supports seamless Laptop & Mobile Viewport simulation) -->
+  <div id="app-root-wrapper">
+
   <!-- MAIN STICKY CUSTOMER HEADER -->
   <header class="header-nav" id="main-header">
     <div class="nav-container">
       
-      <!-- Left: Brand Logo -->
-      <a class="brand-wrap" onclick="App.navigate('ordering')">
-        <div class="brand-crest">
-          <span>👑</span>
-        </div>
-        <div class="brand-info">
-          <div class="brand-title">Nawabi Zaika</div>
-          <div class="brand-subtitle">Purani Haveli Se Dastarkhwan Tak</div>
-        </div>
-      </a>
+      <!-- Left: Brand Logo & Optional Back Button -->
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button id="header-back-btn" class="header-back-btn" onclick="App.navigate('ordering')" style="display: none;" title="Back to menu">
+          ← Back
+        </button>
+
+        <a class="brand-wrap" onclick="App.navigate('ordering')">
+          <div class="brand-crest">
+            <span>👑</span>
+          </div>
+          <div class="brand-info">
+            <div class="brand-title">Company A</div>
+            <div class="brand-subtitle">Hyderabad Biryani & Curries</div>
+          </div>
+        </a>
+      </div>
 
       <!-- Center: Outlet Selector Pill -->
       <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet">
         <span class="pulse-ring">📍</span>
         <div class="outlet-pill-text">
+          <div class="outlet-pill-kicker">DELIVERING FROM</div>
           <strong id="nav-outlet-name">Kondapur Flagship</strong>
-          <span class="outlet-fssai" id="nav-outlet-fssai">(FSSAI: 13622014000491)</span>
+          <span class="outlet-fssai" id="nav-outlet-fssai">(FSSAI: 13622014000491 • 7 km radius)</span>
         </div>
         <span class="chevron-icon">▾</span>
       </button>
 
-      <!-- Center-Right: Clean Customer Navigation Links -->
-      <nav class="customer-nav-links">
-        <a class="cust-nav-link active" id="link-menu" onclick="App.navigate('ordering')">Direct Menu</a>
-        <a class="cust-nav-link" id="link-party" onclick="App.navigate('party')">Party Catering</a>
-        <a class="cust-nav-link" id="link-tracking" onclick="App.navigate('tracking')">Track Order</a>
+      <!-- Center-Right: Tactile Segmented Pill Navigation Links -->
+      <nav class="customer-nav-links" id="main-nav-links">
+        <button class="cust-nav-link active" id="link-menu" onclick="App.navigate('ordering')">
+          <span class="nav-link-icon">🍲</span>
+          <span>Direct Menu</span>
+        </button>
+        <button class="cust-nav-link" id="link-party" onclick="App.navigate('party')">
+          <span class="nav-link-icon">🎉</span>
+          <span>Party Catering</span>
+        </button>
+        <button class="cust-nav-link" id="link-tracking" onclick="App.navigate('tracking')">
+          <span class="nav-link-icon">📍</span>
+          <span>Track Order</span>
+        </button>
       </nav>
 
-      <!-- Right: Cart & Reviewer / Staff Portal Dropdown -->
+      <!-- Right: Device Simulator Toggle, Cart & Reviewer Dropdown -->
       <div class="nav-actions">
         
+        <!-- Mobile / Laptop Viewport Switcher -->
+        <button id="device-toggle-btn" class="device-toggle-btn" onclick="App.toggleDeviceMode()" title="Toggle Mobile / Laptop device view">
+          <span id="device-toggle-icon">📱</span>
+          <span id="device-toggle-label" class="device-label">Mobile</span>
+        </button>
+
         <!-- Cart Trigger Button -->
         <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
           <span class="cart-icon-wrap">🛍️</span>
@@ -96,12 +121,14 @@
     <!-- Dynamic views will render here via app.js -->
   </main>
 
+  </div> <!-- /#app-root-wrapper -->
+
   <!-- SLIDE-OVER CART DRAWER -->
   <div id="cart-drawer-backdrop" class="drawer-backdrop" onclick="App.handleDrawerBackdropClick(event)">
     <div class="drawer-panel" onclick="event.stopPropagation()">
       <div class="drawer-header">
         <div class="drawer-header-title">
-          <h3>Your Nizami Feast</h3>
+          <h3>Your Direct Feast</h3>
           <p>Fresh wood-fire preparation direct from kitchen</p>
         </div>
         <button class="drawer-close-btn" onclick="App.closeCartDrawer()">&times;</button>

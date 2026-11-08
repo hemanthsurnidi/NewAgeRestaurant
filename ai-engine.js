@@ -229,7 +229,7 @@ export function getCustomerReorderRecommendations(phone, outletId) {
  */
 export function generateNotificationPreview(order, eventType, extraPayload = {}) {
   const outlet = getOutletById(order.outlet_id);
-  const outletName = outlet ? outlet.name : 'Nawabi Zaika';
+  const outletName = outlet ? outlet.name : 'Company A';
   const customerName = order.customer_name || 'Valued Guest';
 
   let messageText = '';
@@ -237,11 +237,11 @@ export function generateNotificationPreview(order, eventType, extraPayload = {})
 
   switch (eventType) {
     case 'ORDER_PLACED':
-      messageText = `✨ *Nawabi Zaika (${outletName})*\n\nAdab ${customerName}! Your order *#${order.id}* has been accepted directly by our kitchen.\n\n📦 *Items:* ${order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}\n💰 *Total:* ₹${order.total_amount} (Incl. 5% GST)\n⏱️ *Honest Promised Time:* ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n📍 *FSSAI Lic:* ${outlet ? outlet.fssai_license : '13622014000491'}\nLive tracking: https://nawabi-zaika.isocode.in/track/${order.id}`;
+      messageText = `✨ *Company A (${outletName})*\n\nHello ${customerName}! Your order *#${order.id}* has been accepted directly by our kitchen.\n\n📦 *Items:* ${order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}\n💰 *Total:* ₹${order.total_amount} (Incl. 5% GST)\n⏱️ *Honest Promised Time:* ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n📍 *FSSAI Lic:* ${outlet ? outlet.fssai_license : '13622014000491'}\nLive tracking: https://order.company-a.isocode.in/track/${order.id}`;
       break;
 
     case 'PREPARING':
-      messageText = `🔥 *Nawabi Zaika Kitchen Update*\n\nChef Mohammed has unsealed the copper degh for order *#${order.id}*. Your biryani is cooking on gentle dum.\n\nEstimated ready by ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}.`;
+      messageText = `🔥 *Company A Kitchen Update*\n\nChef Mohammed has unsealed the copper degh for order *#${order.id}*. Your biryani is cooking on gentle dum.\n\nEstimated ready by ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}.`;
       break;
 
     case 'READY_FOR_PICKUP':
@@ -253,11 +253,11 @@ export function generateNotificationPreview(order, eventType, extraPayload = {})
       break;
 
     case 'LATE_COMPENSATION_ALERT':
-      messageText = `⚠️ *Honest Delay Apology from Nizami Zaika*\n\nAdab ${customerName}. Due to peak kitchen load at ${outletName}, order *#${order.id}* is running ~${extraPayload.diff_minutes || 10} minutes behind our promise.\n\nWe value your trust: *₹50 Nizami Loyalty Credit* has been credited to your phone number for your next direct feast. Thank you for your patience!`;
+      messageText = `⚠️ *Honest Delay Apology from Company A*\n\nDear ${customerName}. Due to peak kitchen load at ${outletName}, order *#${order.id}* is running ~${extraPayload.diff_minutes || 10} minutes behind our promise.\n\nWe value your trust: *₹50 Direct Loyalty Credit* has been credited to your phone number for your next direct feast. Thank you for your patience!`;
       break;
 
     default:
-      messageText = `Nawabi Zaika: Status update for order #${order.id}: ${order.status}`;
+      messageText = `Company A: Status update for order #${order.id}: ${order.status}`;
   }
 
   return {

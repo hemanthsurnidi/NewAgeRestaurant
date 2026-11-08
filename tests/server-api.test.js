@@ -179,7 +179,7 @@ test('API POST /api/orders/:id/simulate-late triggers 10m overdue compensation a
   assert.equal(res.statusCode, 200);
   const data = res.json();
   assert.equal(data.order.late_alert_triggered, 1);
-  assert.ok(data.notification.message_text.includes('₹50 Nizami Loyalty Credit'));
+  assert.ok(data.notification.message_text.includes('₹50 Direct Loyalty Credit'));
 });
 
 test('API PATCH /api/orders/:id/cancel cancels order cleanly', async () => {

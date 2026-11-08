@@ -36,7 +36,7 @@ export const App = {
   audioCtx: null,
 
   async init() {
-    console.log('⚡ Initializing Nawabi Zaika Direct Platform...');
+    console.log('⚡ Initializing Company A Direct Platform...');
     await this.fetchOutlets();
     await this.fetchMenu();
     await this.fetchOrders();
@@ -201,7 +201,28 @@ export const App = {
     const nameEl = document.getElementById('nav-outlet-name');
     const fssaiEl = document.getElementById('nav-outlet-fssai');
     if (nameEl) nameEl.textContent = this.state.currentOutlet.name;
-    if (fssaiEl) fssaiEl.textContent = `(FSSAI: ${this.state.currentOutlet.fssai_license})`;
+    if (fssaiEl) fssaiEl.textContent = `(FSSAI: ${this.state.currentOutlet.fssai_license} • 7 km radius)`;
+  },
+
+  // --------------------------------------------------------------------------
+  // DEVICE SIMULATOR TOGGLE (LAPTOP VS MOBILE VIEWPORT)
+  // --------------------------------------------------------------------------
+  toggleDeviceMode() {
+    const isMobile = document.body.classList.toggle('device-mode-mobile');
+    const btn = document.getElementById('device-toggle-btn');
+    const icon = document.getElementById('device-toggle-icon');
+    const label = document.getElementById('device-toggle-label');
+    if (isMobile) {
+      if (btn) btn.classList.add('active');
+      if (icon) icon.textContent = '💻';
+      if (label) label.textContent = 'Laptop';
+      this.showToast('📱 Switched to Mobile Viewport Simulator', 'info');
+    } else {
+      if (btn) btn.classList.remove('active');
+      if (icon) icon.textContent = '📱';
+      if (label) label.textContent = 'Mobile';
+      this.showToast('💻 Switched to Full Laptop Viewport', 'info');
+    }
   },
 
   // --------------------------------------------------------------------------
@@ -209,6 +230,12 @@ export const App = {
   // --------------------------------------------------------------------------
   navigate(viewName) {
     this.state.currentView = viewName;
+
+    // Header Back button visibility
+    const backBtn = document.getElementById('header-back-btn');
+    if (backBtn) {
+      backBtn.style.display = (viewName === 'ordering') ? 'none' : 'inline-flex';
+    }
 
     // Update customer nav link active state
     document.querySelectorAll('.cust-nav-link').forEach(link => link.classList.remove('active'));
@@ -904,7 +931,7 @@ export const App = {
               <label style="display: flex; align-items: flex-start; gap: 0.85rem; cursor: pointer;">
                 <input type="checkbox" id="dpdp-consent" checked style="accent-color: var(--accent-emerald); width: 22px; height: 22px; margin-top: 2px;">
                 <span style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.5;">
-                  <strong>DPDP Act 2023 Consent:</strong> I agree to receive transactional order tracking messages via WhatsApp/SMS. I opt-in to direct reward updates and exclusive Nizami Zaika promotions. You can opt out at any time.
+                  <strong>DPDP Act 2023 Consent:</strong> I agree to receive transactional order tracking messages via WhatsApp/SMS. I opt-in to direct reward updates and exclusive Company A promotions. You can opt out at any time.
                 </span>
               </label>
             </div>
@@ -972,7 +999,7 @@ export const App = {
               <!-- Loyalty Points Redemption -->
               <div style="background-color: var(--bg-surface); padding: 1.1rem; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                  <span style="font-size: 0.86rem; font-weight: 800; color: var(--accent-gold);">👑 Nizami Royalty Balance</span>
+                  <span style="font-size: 0.86rem; font-weight: 800; color: var(--accent-gold);">👑 Direct Loyalty Balance</span>
                   <span style="font-size: 0.88rem; font-weight: 800; color: var(--text-main);">${this.state.customerLoyaltyBalance} Pts (₹${this.state.customerLoyaltyBalance})</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -1149,11 +1176,14 @@ export const App = {
     container.innerHTML = `
       <div style="max-width: 900px; margin: 0 auto;">
         
-        <!-- Order Selector Pills for Reviewer -->
+        <!-- Header & Back Button -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <h2 style="font-size: 2rem; color: var(--text-main);">Live Order Status</h2>
-            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">Real-time tracking of kitchen dum preparation and 3PL dispatch</div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="header-back-btn" onclick="App.navigate('ordering')">← Back to Menu</button>
+            <div>
+              <h2 style="font-size: 2rem; color: var(--text-main);">Live Order Status</h2>
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.2rem;">Real-time tracking of kitchen dum preparation and 3PL dispatch</div>
+            </div>
           </div>
           <div style="display: flex; gap: 0.5rem; overflow-x: auto; align-items: center;">
             ${this.state.orders.slice(0, 4).map(o => `
@@ -1264,7 +1294,7 @@ export const App = {
           <div style="background-color: #0B141A; border: 1px solid #222E35; border-radius: 14px; padding: 1.5rem; font-family: -apple-system, system-ui, sans-serif;">
             <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
               <span style="background: #25D366; color: #000; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem;">✓</span>
-              <strong style="color: #E9EDEF; font-size: 1rem;">Nawabi Zaika Official Verified</strong>
+              <strong style="color: #E9EDEF; font-size: 1rem;">Company A Direct Verified</strong>
               <span style="color: #8696A0; font-size: 0.78rem; margin-left: auto;">Today ${new Date(order.placed_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             
@@ -1276,7 +1306,7 @@ Adab *${order.customer_name}*! Your direct order *#${order.id}* from *${order.ou
 ⏱️ *Honest Promised Time:* ${new Date(order.promised_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
 📍 *FSSAI Lic:* ${order.fssai_license || '13622014000491'}
 
-Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
+Live tracker: https://order.company-a.isocode.in/track/${order.id}
             </div>
           </div>
         </div>
@@ -1787,120 +1817,258 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const container = document.getElementById('app-view-container');
     let partyList = [];
 
+    this.state.partyViewTab = this.state.partyViewTab || 'request';
+    this.state.partySelectedItems = this.state.partySelectedItems || {
+      'bulk-chicken-biryani': 3,
+      'bulk-mutton-haleem': 2,
+      'bulk-double-meetha': 2
+    };
+
     try {
       const res = await fetch('/api/party-orders');
       partyList = await res.json();
+      this.state.partyOrders = partyList;
     } catch (e) {
       console.warn('Failed to fetch party orders:', e);
     }
 
+    const bulkItemsCatalog = [
+      { id: 'bulk-chicken-biryani', name: 'Royal Chicken Dum Biryani Handi', serves: 6, price: 900, is_veg: false, image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&q=80' },
+      { id: 'bulk-mutton-biryani', name: 'Nizami Mutton Dum Biryani Handi', serves: 6, price: 1200, is_veg: false, image: 'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=300&q=80' },
+      { id: 'bulk-veg-biryani', name: 'Hyderabadi Subz Veg Biryani Handi', serves: 6, price: 640, is_veg: true, image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=300&q=80' },
+      { id: 'bulk-mutton-haleem', name: 'Shahi Mutton Haleem Handi (Desi Ghee)', serves: 5, price: 1050, is_veg: false, image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&q=80' },
+      { id: 'bulk-mirchi-salan', name: 'Mirchi Ka Salan Party Degh', serves: 10, price: 250, is_veg: true, image: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=300&q=80' },
+      { id: 'bulk-double-meetha', name: 'Double Ka Meetha Royal Tray', serves: 8, price: 420, is_veg: true, image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300&q=80' }
+    ];
+
+    // Calculate totals
+    let calculatedGuests = 0;
+    let calculatedCost = 0;
+    let selectedSummary = [];
+
+    for (const bItem of bulkItemsCatalog) {
+      const qty = this.state.partySelectedItems[bItem.id] || 0;
+      if (qty > 0) {
+        calculatedGuests += qty * bItem.serves;
+        calculatedCost += qty * bItem.price;
+        selectedSummary.push(`${qty}x ${bItem.name}`);
+      }
+    }
+
     container.innerHTML = `
-      <div style="max-width: 1040px; margin: 0 auto;">
+      <div style="max-width: 1080px; margin: 0 auto;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-          <div>
-            <h2 style="font-size: 2rem; color: var(--text-main);">Royal Party & Bulk Catering Desk</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
-              Direct catering for 15 to 500+ guests. Fresh copper deghs prepared with minimum 24-48 hours notice.
-            </p>
+        <!-- Top Back Bar & Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="header-back-btn" onclick="App.navigate('ordering')">
+              ← Back to Menu
+            </button>
+            <div>
+              <h2 style="font-size: 2rem; color: var(--text-main);">Party & Bulk Catering Desk</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.15rem;">
+                Direct wood-fire copper degh catering for 15 to 500+ guests. Fresh preparation with min 24h notice.
+              </p>
+            </div>
           </div>
           <div style="background: var(--accent-gold-light); color: var(--accent-gold-hover); padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 800; font-size: 0.84rem;">
             ⚡ Saves ₹19.44 Lakh Phone Leakage
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.25rem;">
-          
-          <!-- Booking Form -->
-          <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
-            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 1.25rem;">Place a Bulk Catering Request</h3>
-            
-            <form id="party-form" onsubmit="App.submitPartyOrder(event)">
-              <div style="margin-bottom: 1.1rem;">
-                <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Guest Count (Min. 15 guests)</label>
-                <input type="number" id="party-guests" min="15" max="500" value="30" required style="width: 100%;">
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.1rem;">
-                <div>
-                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Event Date (Min 24h Notice)</label>
-                  <input type="date" id="party-date" required style="width: 100%;">
-                </div>
-                <div>
-                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Serving Time</label>
-                  <input type="time" id="party-time" value="13:00" required style="width: 100%;">
-                </div>
-              </div>
-
-              <div style="margin-bottom: 1.1rem;">
-                <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Preparation Kitchen</label>
-                <select id="party-outlet" class="role-dropdown" style="width: 100%;">
-                  ${this.state.outlets.map(o => `
-                    <option value="${o.id}">${o.name}</option>
-                  `).join('')}
-                </select>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.1rem;">
-                <input type="text" id="party-name" placeholder="Host Name" value="${this.state.customerName}" required>
-                <input type="tel" id="party-phone" placeholder="Contact Phone" value="${this.state.customerPhone}" required>
-              </div>
-
-              <div style="margin-bottom: 1.25rem;">
-                <textarea id="party-reqs" rows="3" placeholder="Menu items required (e.g. 5x Mutton Biryani Family Packs, 2x Haleem Handis, Double Ka Meetha...)" required style="width: 100%;"></textarea>
-              </div>
-
-              <button type="submit" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.95rem; border-radius: 12px;">
-                Submit for Catering Confirmation ➔
-              </button>
-            </form>
-          </div>
-
-          <!-- Existing Party Orders & Manager Desk -->
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            <h3 style="font-size: 1.2rem; color: var(--text-main);">Active Party Requests</h3>
-            
-            ${partyList.map(p => `
-              <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                  <div>
-                    <strong style="color: var(--text-main); font-size: 1.05rem;">${p.customer_name}</strong>
-                    <div style="font-size: 0.82rem; color: var(--accent-gold); font-weight: 700;">Event: ${p.event_date} at ${p.event_time} • ${p.guest_count} Guests</div>
-                  </div>
-                  <span style="background: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald-light)' : 'var(--accent-gold-light)'}; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-gold-hover)'}; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 800;">
-                    ${p.status}
-                  </span>
-                </div>
-                <div style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 0.85rem; line-height: 1.5;">
-                  ${p.requirements_text}
-                </div>
-                <div style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 0.65rem; display: flex; justify-content: space-between; align-items: center;">
-                  <span>Kitchen: <strong>${p.outlet_name}</strong> • Est: ₹${p.estimated_budget}</span>
-                  ${p.status === 'PENDING_REVIEW' ? `
-                    <div style="display: flex; gap: 0.45rem;">
-                      <button class="btn-cart-nav" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; background: var(--accent-emerald); border-radius: 6px;" onclick="App.updatePartyStatus('${p.id}', 'CONFIRMED')">
-                        ✓ Confirm
-                      </button>
-                      <button class="category-chip" style="padding: 0.35rem 0.85rem; font-size: 0.78rem; background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);" onclick="App.updatePartyStatus('${p.id}', 'REJECTED')">
-                        ✕ Decline
-                      </button>
-                    </div>
-                  ` : `
-                    <span style="font-size: 0.78rem; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 800;">
-                      ${p.manager_notes || p.status}
-                    </span>
-                  `}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
+        <!-- Sub-Tabs: Request New Catering vs Active Requests -->
+        <div class="party-nav-tabs">
+          <button class="party-tab-btn ${this.state.partyViewTab === 'request' ? 'active' : ''}" onclick="App.setPartyTab('request')">
+            <span>📝</span> Request Bulk Catering
+          </button>
+          <button class="party-tab-btn ${this.state.partyViewTab === 'active' ? 'active' : ''}" onclick="App.setPartyTab('active')">
+            <span>📋</span> My Active Bulk Requests (${partyList.length})
+          </button>
         </div>
+
+        ${this.state.partyViewTab === 'request' ? `
+          <!-- TAB 1: INTERACTIVE REQUEST BUILDER -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+            
+            <!-- Left Column: Interactive Menu Item Selector -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.15rem; color: var(--text-main);">1. Select Dishes & Handis</h3>
+                <span style="font-size: 0.78rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">Direct Kitchen Quality</span>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                ${bulkItemsCatalog.map(item => {
+                  const qty = this.state.partySelectedItems[item.id] || 0;
+                  return `
+                    <div class="party-item-card">
+                      <img src="${item.image}" alt="${item.name}" class="party-item-img" onerror="this.src='https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&q=80'">
+                      <div class="party-item-info">
+                        <div class="party-item-title">${item.is_veg ? '🌱' : '🍖'} ${item.name}</div>
+                        <div class="party-item-serves">Feeds ~${item.serves} guests per handi</div>
+                        <div class="party-item-price">₹${item.price} <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal;">(incl 5% GST)</span></div>
+                      </div>
+                      <div class="party-stepper-wrap">
+                        <button type="button" class="party-step-btn" onclick="App.updatePartyItemQty('${item.id}', -1)">-</button>
+                        <span class="party-step-val">${qty}</span>
+                        <button type="button" class="party-step-btn" onclick="App.updatePartyItemQty('${item.id}', 1)">+</button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Portion Coverage Meter -->
+              <div class="party-portion-meter">
+                <div>
+                  <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">Live Portion Estimator</div>
+                  <div style="font-size: 1.1rem; font-weight: 900; color: var(--text-main); margin-top: 0.2rem;">
+                    Feeds ~<span id="party-serves-count">${calculatedGuests}</span> Guests
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Calculated from selected handi portions</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;">Estimated Subtotal</div>
+                  <div style="font-size: 1.35rem; font-weight: 900; color: var(--accent-emerald);">
+                    ₹<span id="party-cost-val">${calculatedCost.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">Incl. 5% GST & transport</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Event Details & Instructions -->
+            <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 1.25rem;">2. Event & Delivery Details</h3>
+              
+              <form id="party-form" onsubmit="App.submitPartyOrder(event)">
+                <div style="margin-bottom: 1rem;">
+                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Target Guest Count (Min. 15 guests)</label>
+                  <input type="number" id="party-guests" min="15" max="1000" value="30" required style="width: 100%;" oninput="App.onPartyGuestCountChange(this.value)">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+                  <div>
+                    <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Event Date (Min 24h Notice)</label>
+                    <input type="date" id="party-date" required style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Serving Time</label>
+                    <input type="time" id="party-time" value="13:00" required style="width: 100%;">
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Preparation Kitchen (Hyderabad)</label>
+                  <select id="party-outlet" class="role-dropdown" style="width: 100%;">
+                    ${this.state.outlets.map(o => `
+                      <option value="${o.id}" ${o.id === this.state.currentOutlet.id ? 'selected' : ''}>${o.name} (${o.address})</option>
+                    `).join('')}
+                  </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1rem;">
+                  <div>
+                    <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Host Name</label>
+                    <input type="text" id="party-name" placeholder="Host Name" value="${this.state.customerName}" required style="width: 100%;">
+                  </div>
+                  <div>
+                    <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Contact Phone</label>
+                    <input type="tel" id="party-phone" placeholder="+91 98490 12345" value="${this.state.customerPhone}" required style="width: 100%;">
+                  </div>
+                </div>
+
+                <!-- Textarea for Additional Instructions -->
+                <div style="margin-bottom: 1.25rem;">
+                  <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700;">Additional Instructions & Dietary Requests</label>
+                  <textarea id="party-instructions" rows="3" placeholder="e.g. Mild spice for children, deliver in sealed copper deghs with serving ladles, extra mirchi ka salan..." style="width: 100%;"></textarea>
+                </div>
+
+                <button type="submit" class="btn-cart-nav" style="width: 100%; justify-content: center; padding: 0.95rem; border-radius: 12px; font-size: 0.95rem;">
+                  Submit Bulk Catering Request ➔
+                </button>
+              </form>
+            </div>
+
+          </div>
+        ` : `
+          <!-- TAB 2: MY ACTIVE BULK REQUESTS (CUSTOMER & CATERING MANAGER VIEW) -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-size: 1.25rem; color: var(--text-main);">Your Bulk & Party Order Requests</h3>
+              <button class="header-back-btn" onclick="App.setPartyTab('request')">
+                + Place Another Request
+              </button>
+            </div>
+
+            ${partyList.length === 0 ? `
+              <div style="text-align: center; padding: 4rem 1rem; background: #FFFFFF; border-radius: 16px; border: 1.5px solid var(--border-subtle);">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+                <h4 style="font-size: 1.2rem; color: var(--text-main);">No Party Orders Yet</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.35rem;">Use the booking form to reserve direct copper degh catering for 15+ guests.</p>
+                <button class="btn-cart-nav" style="margin: 1.25rem auto 0 auto; display: inline-flex;" onclick="App.setPartyTab('request')">
+                  Start Catering Request
+                </button>
+              </div>
+            ` : `
+              <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                ${partyList.map(p => `
+                  <div style="background: #FFFFFF; border: 1.5px solid var(--border-subtle); border-radius: 16px; padding: 1.6rem; box-shadow: var(--shadow-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                      <div>
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                          <strong style="color: var(--text-main); font-size: 1.15rem;">#${p.id}</strong>
+                          <span style="font-size: 0.88rem; color: var(--text-secondary); font-weight: 700;">• Host: ${p.customer_name}</span>
+                        </div>
+                        <div style="font-size: 0.84rem; color: var(--accent-gold); font-weight: 700; margin-top: 0.2rem;">
+                          📅 Event: ${p.event_date} at ${p.event_time} • 👥 ${p.guest_count} Guests
+                        </div>
+                      </div>
+                      <span style="background: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald-light)' : p.status === 'REJECTED' ? 'var(--accent-rose-light)' : 'var(--accent-gold-light)'}; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : p.status === 'REJECTED' ? 'var(--accent-rose)' : 'var(--accent-gold-hover)'}; font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 800;">
+                        ${p.status === 'PENDING_REVIEW' ? '⏳ UNDER REVIEW BY CATERING HEAD' : p.status === 'CONFIRMED' ? '✅ CONFIRMED & CHEF ASSIGNED' : p.status}
+                      </span>
+                    </div>
+
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 0.95rem 1.1rem; margin-bottom: 1rem; font-size: 0.88rem; line-height: 1.6; color: var(--text-main);">
+                      <strong>Selected Items / Reqs:</strong> ${p.requirements_text}
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem; flex-wrap: wrap; gap: 0.75rem;">
+                      <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Kitchen: <strong>${p.outlet_name || 'Hyderabad Flagship'}</strong> • Est Quote: <strong style="color: var(--accent-emerald); font-size: 1rem;">₹${Number(p.estimated_budget).toLocaleString('en-IN')}</strong> (incl 5% GST)
+                      </div>
+
+                      <div style="display: flex; gap: 0.6rem; align-items: center;">
+                        ${p.status === 'PENDING_REVIEW' ? `
+                          <!-- Manager Review Desk Actions -->
+                          <div style="display: flex; gap: 0.45rem;">
+                            <button class="btn-cart-nav" style="padding: 0.4rem 0.9rem; font-size: 0.8rem; background: var(--accent-emerald); border-radius: 8px;" onclick="App.updatePartyStatus('${p.id}', 'CONFIRMED')">
+                              ✓ Manager Confirm
+                            </button>
+                            <button class="category-chip" style="padding: 0.4rem 0.9rem; font-size: 0.8rem; background: var(--accent-rose-light); color: var(--accent-rose); border-color: var(--accent-rose);" onclick="App.updatePartyStatus('${p.id}', 'REJECTED')">
+                              ✕ Decline
+                            </button>
+                          </div>
+                        ` : `
+                          <span style="font-size: 0.82rem; color: ${p.status === 'CONFIRMED' ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 800;">
+                            ${p.manager_notes || p.status}
+                          </span>
+                        `}
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+
+          </div>
+        `}
 
       </div>
     `;
 
-    // Minimum date tomorrow
+    // Ensure date picker has tomorrow as minimum (24h rule)
     setTimeout(() => {
       const dateInput = document.getElementById('party-date');
       if (dateInput) {
@@ -1912,6 +2080,23 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     }, 50);
   },
 
+  setPartyTab(tab) {
+    this.state.partyViewTab = tab;
+    this.renderPartyView();
+  },
+
+  updatePartyItemQty(itemId, delta) {
+    this.state.partySelectedItems = this.state.partySelectedItems || {};
+    const current = this.state.partySelectedItems[itemId] || 0;
+    const next = Math.max(0, current + delta);
+    this.state.partySelectedItems[itemId] = next;
+    this.renderPartyView();
+  },
+
+  onPartyGuestCountChange(count) {
+    // dynamically can adjust recommendations
+  },
+
   async submitPartyOrder(e) {
     e.preventDefault();
     const guests = document.getElementById('party-guests')?.value;
@@ -1920,7 +2105,36 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const outletId = document.getElementById('party-outlet')?.value;
     const name = document.getElementById('party-name')?.value;
     const phone = document.getElementById('party-phone')?.value;
-    const reqs = document.getElementById('party-reqs')?.value;
+    const instructions = document.getElementById('party-instructions')?.value || '';
+
+    // Calculate chosen dishes
+    const bulkItemsCatalog = [
+      { id: 'bulk-chicken-biryani', name: 'Royal Chicken Dum Biryani Handi', serves: 6, price: 900 },
+      { id: 'bulk-mutton-biryani', name: 'Nizami Mutton Dum Biryani Handi', serves: 6, price: 1200 },
+      { id: 'bulk-veg-biryani', name: 'Hyderabadi Subz Veg Biryani Handi', serves: 6, price: 640 },
+      { id: 'bulk-mutton-haleem', name: 'Shahi Mutton Haleem Handi (Desi Ghee)', serves: 5, price: 1050 },
+      { id: 'bulk-mirchi-salan', name: 'Mirchi Ka Salan Party Degh', serves: 10, price: 250 },
+      { id: 'bulk-double-meetha', name: 'Double Ka Meetha Royal Tray', serves: 8, price: 420 }
+    ];
+
+    let itemsChosen = [];
+    let calculatedCost = 0;
+
+    for (const bItem of bulkItemsCatalog) {
+      const qty = this.state.partySelectedItems[bItem.id] || 0;
+      if (qty > 0) {
+        itemsChosen.push(`${qty}x ${bItem.name}`);
+        calculatedCost += qty * bItem.price;
+      }
+    }
+
+    if (itemsChosen.length === 0) {
+      this.showToast('Please select at least 1 menu item or handi for your party!', 'error');
+      return;
+    }
+
+    const fullReqsText = `${itemsChosen.join(', ')}.${instructions ? ` Special Instructions: ${instructions}` : ''}`;
+    const finalBudget = calculatedCost > 0 ? calculatedCost : Number(guests) * 550;
 
     try {
       const res = await fetch('/api/party-orders', {
@@ -1934,14 +2148,15 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
           event_time: time,
           guest_count: Number(guests),
           outlet_id: outletId,
-          requirements_text: reqs,
-          estimated_budget: Number(guests) * 550
+          requirements_text: fullReqsText,
+          estimated_budget: finalBudget
         })
       });
 
       const data = await res.json();
       if (res.ok) {
-        this.showToast(`Party Request #${data.id} Submitted!`, 'success');
+        this.showToast(`Party Request #${data.id} Submitted Successfully!`, 'success');
+        this.state.partyViewTab = 'active';
         this.renderPartyView();
       } else {
         this.showToast(data.error || 'Failed to submit party order', 'error');
@@ -2093,33 +2308,81 @@ Live tracker: https://nawabi-zaika.isocode.in/track/${order.id}
     const list = document.getElementById('outlet-selection-list');
     if (!list) return;
 
+    this.state.outletModalFilter = this.state.outletModalFilter || 'all';
+    let displayed = outletArray;
+    if (this.state.outletModalFilter === 'dine_in') {
+      displayed = displayed.filter(o => !o.is_cloud_kitchen);
+    } else if (this.state.outletModalFilter === 'cloud_kitchen') {
+      displayed = displayed.filter(o => o.is_cloud_kitchen);
+    }
+
     list.innerHTML = `
-      <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem;">
-        <input type="text" id="outlet-search-input" placeholder="Search area (e.g. Kondapur, Gachibowli, Kukatpally...)" 
+      <!-- Location Filter Tabs -->
+      <div class="modal-outlet-tabs">
+        <button class="modal-outlet-tab-btn ${this.state.outletModalFilter === 'all' ? 'active' : ''}" onclick="App.setOutletFilter('all')">
+          All Kitchens (${this.state.outlets.length})
+        </button>
+        <button class="modal-outlet-tab-btn ${this.state.outletModalFilter === 'dine_in' ? 'active' : ''}" onclick="App.setOutletFilter('dine_in')">
+          Dine-In Outlets (14)
+        </button>
+        <button class="modal-outlet-tab-btn ${this.state.outletModalFilter === 'cloud_kitchen' ? 'active' : ''}" onclick="App.setOutletFilter('cloud_kitchen')">
+          Cloud Kitchens (3)
+        </button>
+      </div>
+
+      <!-- Search & Auto-Detect Row -->
+      <div style="display: flex; gap: 0.6rem; margin-bottom: 1.1rem;">
+        <input type="text" id="outlet-search-input" placeholder="Search area (e.g. Kondapur, Gachibowli, Kukatpally, Jubilee Hills...)" 
                oninput="App.filterOutlets(this.value)"
-               style="flex: 1;">
-        <button class="category-chip active" style="padding: 0.55rem 1rem;" onclick="App.autoDetectNearestOutlet()">
+               style="flex: 1; padding: 0.75rem 1rem;">
+        <button class="btn-cart-nav" style="padding: 0.65rem 1.1rem; border-radius: 10px; font-size: 0.84rem; background: var(--text-main);" onclick="App.autoDetectNearestOutlet()">
           📍 Auto-Detect
         </button>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 52vh; overflow-y: auto; padding-right: 0.25rem;">
-        ${outletArray.map(o => `
-          <div style="background: ${o.id === this.state.currentOutlet.id ? 'var(--accent-gold-subtle)' : '#FFFFFF'}; border: 1.5px solid ${o.id === this.state.currentOutlet.id ? 'var(--accent-gold)' : 'var(--border-subtle)'}; padding: 1rem 1.25rem; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease;" 
-               onclick="App.switchOutlet('${o.id}')">
-            <div>
-              <div style="font-weight: 800; color: var(--text-main); font-size: 1rem;">${o.name}</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">${o.address}</div>
-              <div style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.35rem; font-weight: 700;">
-                FSSAI Lic: ${o.fssai_license} • Delivery Radius: ${o.delivery_radius_km} km • Min Prep: ${o.min_prep_time_minutes}m
+
+      <!-- Outlets Cards List -->
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 52vh; overflow-y: auto; padding-right: 0.25rem;">
+        ${displayed.map(o => {
+          const isSelected = o.id === this.state.currentOutlet.id;
+          return `
+            <div style="background: ${isSelected ? 'var(--accent-gold-subtle)' : '#FFFFFF'}; border: 1.5px solid ${isSelected ? 'var(--accent-gold)' : 'var(--border-subtle)'}; padding: 1.1rem 1.25rem; border-radius: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.15s ease; box-shadow: ${isSelected ? '0 2px 8px rgba(217, 119, 6, 0.12)' : 'none'};" 
+                 onclick="App.switchOutlet('${o.id}')">
+              <div style="flex: 1; margin-right: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <span style="font-weight: 800; color: var(--text-main); font-size: 1.05rem;">${o.name}</span>
+                  ${isSelected ? '<span style="background: var(--accent-gold); color: #FFF; font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 800;">CURRENT SELECTION</span>' : ''}
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">${o.address}</div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 0.45rem; flex-wrap: wrap;">
+                  <span style="font-size: 0.75rem; color: var(--accent-gold-hover); font-weight: 700;">
+                    🛡️ FSSAI: ${o.fssai_license}
+                  </span>
+                  <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700;">
+                    ⚡ 7 km Delivery Radius
+                  </span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700;">
+                    ⏱️ ~${o.min_prep_time_minutes}m Prep Floor
+                  </span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.12)' : 'var(--accent-emerald-light)'}; color: ${o.is_cloud_kitchen ? '#2563EB' : 'var(--accent-emerald)'}; font-size: 0.76rem; padding: 0.35rem 0.7rem; border-radius: 8px; font-weight: 800; white-space: nowrap; display: inline-block;">
+                  ${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Flagship Dine-in'}
+                </span>
+                <div style="margin-top: 0.4rem; font-size: 0.75rem; color: var(--accent-gold); font-weight: 800;">
+                  ${isSelected ? '✓ Selected' : 'Tap to switch ➔'}
+                </div>
               </div>
             </div>
-            <span style="background: ${o.is_cloud_kitchen ? 'rgba(59, 130, 246, 0.12)' : 'var(--accent-emerald-light)'}; color: ${o.is_cloud_kitchen ? '#2563EB' : 'var(--accent-emerald)'}; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 800; white-space: nowrap;">
-              ${o.is_cloud_kitchen ? 'Cloud Kitchen' : 'Flagship Dine-in'}
-            </span>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
+  },
+
+  setOutletFilter(filterType) {
+    this.state.outletModalFilter = filterType;
+    this.renderOutletList(this.state.outlets);
   },
 
   filterOutlets(query) {

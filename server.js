@@ -1,5 +1,5 @@
 /**
- * Nizami Biryani / Nawabi Zaika - Production HTTP Server & Real-Time SSE Hub
+ * Company A, Hyderabad - Production HTTP Server & Real-Time SSE Hub
  * Built with pure Node.js 24 native capabilities
  */
 
@@ -573,7 +573,7 @@ export const server = http.createServer(async (req, res) => {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   server.listen(PORT, () => {
     console.log(`=======================================================`);
-    console.log(`  NAWABI ZAIKA / NIZAMI BIRYANI DIRECT PLATFORM        `);
+    console.log(`  COMPANY A, HYDERABAD DIRECT ORDERING PLATFORM        `);
     console.log(`  Company A, Hyderabad - 14 Outlets & 3 Cloud Kitchens `);
     console.log(`  Server live at: http://localhost:${PORT}             `);
     console.log(`=======================================================`);
