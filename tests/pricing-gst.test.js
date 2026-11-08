@@ -42,7 +42,7 @@ test('Coupons: Validates min order value and discount capping', () => {
 });
 
 test('Loyalty Points: Earns 5% back on order amount and updates ledger', () => {
-  const testPhone = '+91 99999 11111';
+  const testPhone = '+91 99999 ' + Math.floor(10000 + Math.random() * 90000);
   const initialBalance = getCustomerLoyaltyBalance(testPhone);
   assert.equal(initialBalance, 0);
 
