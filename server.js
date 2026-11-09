@@ -953,7 +953,21 @@ export const server = http.createServer(async (req, res) => {
       if (fs.existsSync(zipPath)) {
         res.writeHead(200, {
           'Content-Type': 'application/zip',
-          'Content-Disposition': 'attachment; filename="Company_A_Submission.zip"',
+          'Content-Disposition': 'attachment; filename="Company_A_Full_Project.zip"',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        });
+        fs.createReadStream(zipPath).pipe(res);
+        return;
+      }
+    }
+
+    // Direct Download endpoint for 2-File Submission ZIP (TDD + deployment.md)
+    if ((pathname === '/download/docs.zip' || pathname === '/download/Company_A_Submission_Docs.zip') && req.method === 'GET') {
+      const zipPath = path.join(__dirname, 'Company_A_Submission_Docs.zip');
+      if (fs.existsSync(zipPath)) {
+        res.writeHead(200, {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="Company_A_Submission_Docs.zip"',
           'Cache-Control': 'no-cache, no-store, must-revalidate'
         });
         fs.createReadStream(zipPath).pipe(res);

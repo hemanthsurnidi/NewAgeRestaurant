@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: companya-biryani-direct
+    name: newagerestaurant
     runtime: node
     plan: free
     region: singapore

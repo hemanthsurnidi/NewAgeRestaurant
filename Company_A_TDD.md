@@ -1,4 +1,4 @@
-﻿# Technical Design Document (TDD)
+# Technical Design Document (TDD)
 ## Direct Ordering Web Platform & Kitchen Display System (KDS)
 
 **Client**: Company A, Hyderabad â€” Famous Biryani & Hyderabadi Food Chain  

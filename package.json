@@ -1,7 +1,7 @@
 {
-  "name": "nizami-biryani-direct",
+  "name": "new-age-restaurant",
   "version": "1.0.0",
-  "description": "Nawabi Zaika / Nizami Biryani direct ordering platform with real-time Kitchen Display System (KDS), Central Menu CMS, and AI Dynamic Prep-Time Estimation",
+  "description": "Company A / NewAgeRestaurant direct ordering platform with real-time Kitchen Display System (KDS), Central Menu CMS, and AI Dynamic Prep-Time Estimation",
   "type": "module",
   "main": "server.js",
   "scripts": {
