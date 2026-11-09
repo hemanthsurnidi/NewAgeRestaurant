@@ -5,7 +5,8 @@
 **Scope**: 14 Outlets + 3 Cloud Kitchens | 520 Staff | â‚¹96 Crore Annual Revenue  
 **Author / Candidate**: Hemanth Surnidi (`hemanthsurnidi20095@gmail.com`)  
 **Project GitHub Repository**: [https://github.com/hemanthsurnidi/NewAgeRestaurant](https://github.com/hemanthsurnidi/NewAgeRestaurant)  
-**Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
+**Live Production URL (Render)**: [https://newagerestaurant.onrender.com/](https://newagerestaurant.onrender.com/)  
+**Local Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
 **Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 **Date**: November 2026  
 

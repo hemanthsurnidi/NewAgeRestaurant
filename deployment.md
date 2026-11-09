@@ -5,6 +5,7 @@
 **Brand Identity**: **Company A** (Authentic Hyderabadi Biryani & Royal Delicacies)  
 **Author**: Senior Full-Stack Engineering Candidate  
 **GitHub Repository**: [https://github.com/hemanthsurnidi/NewAgeRestaurant](https://github.com/hemanthsurnidi/NewAgeRestaurant)  
+**Live Production Deployment (Render)**: [https://newagerestaurant.onrender.com/](https://newagerestaurant.onrender.com/)  
 **Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
 **Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 
