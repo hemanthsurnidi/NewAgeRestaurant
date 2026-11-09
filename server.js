@@ -913,16 +913,19 @@ export const server = http.createServer(async (req, res) => {
         });
       }
 
+      // Ensure target outlet exists in database
+      const validOutlet = outlet_id && getOutletById(outlet_id) ? outlet_id : 'out-kondapur';
+
       const partyId = `PARTY-${Math.floor(1000 + Math.random() * 9000)}`;
       const partyOrder = createPartyOrder({
         id: partyId,
         customer_name,
         customer_phone,
-        email,
+        email: email || body.customer_email || null,
         event_date,
         event_time,
         guest_count: Number(guest_count) || 20,
-        outlet_id: outlet_id || 'out-kondapur',
+        outlet_id: validOutlet,
         requirements_text: requirements_text || '',
         estimated_budget: Number(estimated_budget) || 15000,
         manager_notes: 'Submitted via Direct Portal - Pending Catering Specialist confirmation'

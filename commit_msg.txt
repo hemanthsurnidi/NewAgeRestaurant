@@ -1,0 +1,7 @@
+fix: fix admin bulk order header adaptation, add comprehensive E2E tests, and format TDD PDF to strict 11-page 1-section-per-page layout
+
+- Fixed header bug where clicking Bulk Orders in Central Menu Admin role inadvertently rendered the customer storefront header
+- Synchronized role state across login modals, demo switches, and header context
+- Added automated E2E lifecycle test verifying order placement, kitchen KDS routing, outlet isolation, stage advancements, notifications, lateness alert, and bulk approvals
+- Re-architected TDD PDF to strictly 11 pages (exactly 1 section per page) with spacious luxury Cover Page and neatly aligned tables
+- Synchronized Company_A_TDD.docx and repackaged submission zip archives

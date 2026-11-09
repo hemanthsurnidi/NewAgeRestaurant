@@ -222,13 +222,22 @@ export const App = {
         this.showToast(`Signed in as ${data.user.name} (${data.user.role})`, 'success');
 
         if (data.user.role === 'customer') {
+          this.state.currentRole = 'customer';
           this.state.customerName = data.user.name;
           if (data.user.phone) this.state.customerPhone = data.user.phone;
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'customer';
           this.navigate('ordering');
         } else if (data.user.role === 'kitchen_staff') {
+          this.state.currentRole = 'kitchen_staff';
           this.state.kdsOutletFilter = data.user.outlet_id || 'out-kondapur';
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'kds';
           this.navigate('kds');
         } else if (data.user.role === 'admin') {
+          this.state.currentRole = 'admin';
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'admin';
           this.navigate('cms');
         }
       } else {
@@ -260,11 +269,23 @@ export const App = {
         this.closeAuthModal();
         this.showToast(`Welcome back, ${data.user.name}!`, 'success');
 
-        if (data.user.role === 'customer') this.navigate('ordering');
-        else if (data.user.role === 'kitchen_staff') {
+        if (data.user.role === 'customer') {
+          this.state.currentRole = 'customer';
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'customer';
+          this.navigate('ordering');
+        } else if (data.user.role === 'kitchen_staff') {
+          this.state.currentRole = 'kitchen_staff';
           this.state.kdsOutletFilter = data.user.outlet_id || 'out-kondapur';
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'kds';
           this.navigate('kds');
-        } else if (data.user.role === 'admin') this.navigate('cms');
+        } else if (data.user.role === 'admin') {
+          this.state.currentRole = 'admin';
+          const topSelect = document.getElementById('top-role-select');
+          if (topSelect) topSelect.value = 'admin';
+          this.navigate('cms');
+        }
       } else {
         this.showToast(data.error || 'Invalid credentials', 'error');
       }
@@ -311,6 +332,9 @@ export const App = {
     } catch {}
     this.state.authToken = null;
     this.state.currentUser = null;
+    this.state.currentRole = 'customer';
+    const topSelect = document.getElementById('top-role-select');
+    if (topSelect) topSelect.value = 'customer';
     localStorage.removeItem('dumco_token');
     this.updateNavAuthPill();
     this.closeAuthModal();
@@ -702,10 +726,17 @@ export const App = {
   // HEADER ADAPTATION & ISOLATION (CUSTOMER STOREFRONT VS RESTAURANT STAFF)
   // --------------------------------------------------------------------------
   navigateToBulkOrders() {
-    if (this.state.currentRole === 'admin') {
-      this.setCmsTab('party_approvals');
+    const isAdmin = this.state.currentRole === 'admin' || (this.state.currentUser && this.state.currentUser.role === 'admin') || (document.getElementById('top-role-select')?.value === 'admin');
+    if (isAdmin) {
+      this.state.currentRole = 'admin';
+      const topSelect = document.getElementById('top-role-select');
+      if (topSelect) topSelect.value = 'admin';
+      this.state.cmsTab = 'party_approvals';
       if (this.state.currentView !== 'cms') {
         this.navigate('cms');
+      } else {
+        this.updateHeaderContext('cms');
+        this.renderCmsView();
       }
     } else {
       this.state.partyViewTab = 'active';
@@ -715,7 +746,8 @@ export const App = {
 
   updateHeaderContext(viewName) {
     const isKds = viewName === 'kds';
-    const isStaffRole = this.state.currentRole && this.state.currentRole !== 'customer';
+    const activeRole = this.state.currentRole || (this.state.currentUser ? this.state.currentUser.role : (document.getElementById('top-role-select')?.value || 'customer'));
+    const isStaffRole = activeRole && activeRole !== 'customer';
     const isStaffView = ['cms', 'analytics', 'ai_lab'].includes(viewName) || (viewName === 'party' && isStaffRole);
     const isStaff = isStaffRole || isStaffView;
     const navLinks = document.getElementById('main-nav-links');
@@ -733,12 +765,14 @@ export const App = {
       document.body.classList.add('view-staff');
       if (brandSub) brandSub.textContent = 'Restaurant Staff Portal';
       if (navLinks) {
+        const isBulkActive = (viewName === 'cms' && this.state.cmsTab === 'party_approvals') || (viewName === 'party' && isStaffRole);
+        const isDishesActive = viewName === 'cms' && this.state.cmsTab !== 'party_approvals';
         navLinks.innerHTML = `
-          <button class="cust-nav-link ${viewName === 'cms' && this.state.cmsTab !== 'party_approvals' ? 'active' : ''}" onclick="App.setCmsTab('dishes'); App.navigate('cms')">
+          <button class="cust-nav-link ${isDishesActive ? 'active' : ''}" onclick="App.setCmsTab('dishes'); App.navigate('cms')">
             <span class="nav-link-icon">📋</span>
             <span>Menu CMS</span>
           </button>
-          <button class="cust-nav-link ${(viewName === 'cms' && this.state.cmsTab === 'party_approvals') || viewName === 'party' ? 'active' : ''}" onclick="App.navigateToBulkOrders()">
+          <button class="cust-nav-link ${isBulkActive ? 'active' : ''}" onclick="App.navigateToBulkOrders()">
             <span class="nav-link-icon">🎉</span>
             <span>Bulk Orders</span>
           </button>
@@ -749,6 +783,10 @@ export const App = {
           <button class="cust-nav-link ${viewName === 'ai_lab' ? 'active' : ''}" onclick="App.navigate('ai_lab')">
             <span class="nav-link-icon">⏱️</span>
             <span>AI Prep-Time</span>
+          </button>
+          <button class="cust-nav-link" onclick="App.navigate('kds')">
+            <span class="nav-link-icon">🍳</span>
+            <span>Kitchen KDS</span>
           </button>
         `;
       }
@@ -3298,6 +3336,9 @@ Live tracker: https://order.company-a.isocode.in/track/${order.id}
       await this.fetchPartyOrders();
     }
     this.renderCmsView();
+    if (this.state.currentView === 'cms') {
+      this.updateHeaderContext('cms');
+    }
   },
 
   renderCmsView() {

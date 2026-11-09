@@ -690,3 +690,4 @@ try {
 } catch (e) {
   console.error('Failed to generate PDF with Chrome:', e);
 }
+

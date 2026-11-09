@@ -1042,15 +1042,15 @@ export function createPartyOrder(data) {
 
   stmt.run(
     data.id,
-    data.customer_name,
-    data.customer_phone,
-    data.email,
-    data.event_date,
-    data.event_time,
-    data.guest_count,
-    data.outlet_id,
-    data.requirements_text,
-    data.estimated_budget,
+    data.customer_name || '',
+    data.customer_phone || '',
+    data.email || data.customer_email || null,
+    data.event_date || '',
+    data.event_time || null,
+    Number(data.guest_count) || 20,
+    data.outlet_id || 'out-kondapur',
+    data.requirements_text || '',
+    Number(data.estimated_budget) || 15000,
     data.status || 'PENDING_REVIEW',
     data.manager_notes || ''
   );

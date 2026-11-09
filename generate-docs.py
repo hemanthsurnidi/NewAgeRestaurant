@@ -145,12 +145,12 @@ def build_pdf():
     story.append(Paragraph("Company A â€” Direct Ordering Platform & Real-Time Kitchen Display System (KDS)", subtitle_style))
 
     meta_text = """
-    <b>Client:</b> Company A, Hyderabad (14 Outlets + 3 Cloud Kitchens, 520 Staff, â‚¹96 Cr Turnover)<br/>
+    <b>Client:</b> Company A, Hyderabad (14 Outlets + 3 Cloud Kitchens, 520 Staff, ₹96 Cr Turnover)<br/>
     <b>Brand Identity:</b> Company A (Authentic Hyderabadi Biryani)<br/>
-    <b>Author / Role:</b> Senior Full-Stack Development Team (Design, Frontend, Backend, DB, AI, QA)<br/>
-    <b>Project GitHub URL:</b> <u>https://github.com/hemanthsurnidi/nizami-biryani-direct</u><br/>
-    <b>Live Evaluation Server:</b> http://localhost:5000 (Local evaluation server live)<br/>
-    <b>Test Verification:</b> 31 Passing Unit & Integration Tests (100% Pass Rate in ~1.2s)
+    <b>Author / Role:</b> Senior Full-Stack Engineering Candidate (Hemanth Surnidi)<br/>
+    <b>Project GitHub URL:</b> <u>https://github.com/hemanthsurnidi/NewAgeRestaurant</u><br/>
+    <b>Live Production URL (Render):</b> <u>https://newagerestaurant.onrender.com/</u><br/>
+    <b>Test Verification:</b> 31 Unit Tests + 42 E2E System Assertions (100% Pass Rate)
     """
     
     meta_table = Table([[Paragraph(meta_text, meta_style)]], colWidths=[504])
@@ -319,13 +319,13 @@ def build_docx():
     p_meta.add_run("Brand Identity: ").bold = True
     p_meta.add_run("Company A (Authentic Hyderabadi Biryani)\n")
     p_meta.add_run("Candidate / Role: ").bold = True
-    p_meta.add_run("Senior Full-Stack Development Team (Design, Frontend, Backend, DB, AI, QA)\n")
+    p_meta.add_run("Senior Full-Stack Engineering Candidate (Hemanth Surnidi)\n")
     p_meta.add_run("GitHub Repository URL: ").bold = True
-    p_meta.add_run("https://github.com/hemanthsurnidi/nizami-biryani-direct\n")
-    p_meta.add_run("Live Demo Deployment: ").bold = True
-    p_meta.add_run("http://localhost:5000 (Local evaluation server live)\n")
+    p_meta.add_run("https://github.com/hemanthsurnidi/NewAgeRestaurant\n")
+    p_meta.add_run("Live Production Deployment (Render): ").bold = True
+    p_meta.add_run("https://newagerestaurant.onrender.com/\n")
     p_meta.add_run("Automated Test Suite: ").bold = True
-    p_meta.add_run("31 Automated Unit & Integration Tests (100% Passed)")
+    p_meta.add_run("31 Unit Tests + 42 E2E Assertions (100% Passed)")
 
     sections = [
         ("1. Executive Summary & Business Problem Statement", [
