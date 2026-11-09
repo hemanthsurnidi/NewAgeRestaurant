@@ -4,7 +4,7 @@
 **Client**: Company A, Hyderabad â€” Famous Biryani & Hyderabadi Food Chain  
 **Scope**: 14 Outlets + 3 Cloud Kitchens | 520 Staff | â‚¹96 Crore Annual Revenue  
 **Author / Candidate**: Hemanth Surnidi (`hemanthsurnidi20095@gmail.com`)  
-**Project GitHub Repository**: [https://github.com/hemanthsurnidi/nizami-biryani-direct](https://github.com/hemanthsurnidi/nizami-biryani-direct)  
+**Project GitHub Repository**: [https://github.com/hemanthsurnidi/NewAgeRestaurant](https://github.com/hemanthsurnidi/NewAgeRestaurant)  
 **Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
 **Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 **Date**: November 2026  

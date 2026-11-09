@@ -1,16 +1,19 @@
-# Dum & Co. | Company A, Hyderabad Direct Platform
+# Company A (NewAgeRestaurant) | Hyderabad Direct Platform
 ### Direct Ordering Web Application & Real-Time Kitchen Display System (KDS)
 **Client**: Company A, Hyderabad — 14 Outlets + 3 Cloud Kitchens | 520 Staff | ₹96 Crore Revenue  
-**Brand Identity**: **Dum & Co.** (Royal Hyderabad Wood-Fire Biryani & Curries)  
-**Author**: Senior Full-Stack Development Team for Company A  
-**GitHub Repository**: [https://github.com/hemanthsurnidi/nizami-biryani-direct](https://github.com/hemanthsurnidi/nizami-biryani-direct)  
+**Brand Identity**: **Company A** (Authentic Hyderabadi Biryani & Royal Delicacies)  
+**Author**: Senior Full-Stack Engineering Candidate  
+**GitHub Repository**: [https://github.com/hemanthsurnidi/NewAgeRestaurant](https://github.com/hemanthsurnidi/NewAgeRestaurant)  
+**Live Demo Server**: [http://localhost:5000](http://localhost:5000)  
 
 [![Test Suite](https://img.shields.io/badge/tests-31%20passed%20(100%25)-success)](tests/)
-[![Node.js](https://img.shields.io/badge/node.js-v24.x-brightgreen)](package.json)
+[![E2E Suite](https://img.shields.io/badge/e2e%20assertions-42%20passed%20(100%25)-success)](scratch/e2e_full_test.cjs)
+[![Node.js](https://img.shields.io/badge/node.js-%3E%3D22.5.0-brightgreen)](package.json)
+[![Render Deploy](https://img.shields.io/badge/deploy-render-blue)](render.yaml)
 [![Database](https://img.shields.io/badge/database-native%20node%3Asqlite-blue)](database.js)
 [![Security](https://img.shields.io/badge/security-scrypt%20%7C%20RBAC%20%7C%20sessions-red)](database.js)
 [![Real-Time](https://img.shields.io/badge/real--time-Server--Sent%20Events%20(SSE)-orange)](server.js)
-[![Compliance](https://img.shields.io/badge/compliance-DPDP%202023%20%7C%20FSSAI%20%7C%205%25%20GST-purple)](tests/security-dpdp.test.js)
+[![Compliance](https://img.shields.io/badge/compliance-DPDP%202023%20%7C%20FSSAI%20%7C%205%25%20GST-purple)](tests/auth-security.test.js)
 
 ---
 
@@ -30,14 +33,14 @@ Company A loses **27% in commissions and fees (₹14.25 crore/year)** to food de
 
 ### 1. Clone & Run
 ```bash
-git clone https://github.com/hemanthsurnidi/nizami-biryani-direct.git
-cd nizami-biryani-direct
+git clone https://github.com/hemanthsurnidi/NewAgeRestaurant.git
+cd NewAgeRestaurant
 npm install
 npm test    # Runs 31 automated unit & integration tests (~1.2s)
-npm start   # Starts server at http://localhost:3000
+npm start   # Starts server at http://localhost:5000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ---
 

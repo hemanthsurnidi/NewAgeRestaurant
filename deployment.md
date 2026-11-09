@@ -1,9 +1,10 @@
 # Deployment & Evaluation Guide — Company A
 
-**Project**: Company A — Direct Kitchen Ordering Web Platform & Real-Time Kitchen Display System (KDS)  
+**Project**: Company A (NewAgeRestaurant) — Direct Kitchen Ordering Web Platform & Real-Time Kitchen Display System (KDS)  
 **Client**: Company A, Hyderabad (14 Dine-in Outlets + 3 Cloud Kitchens, 520 Staff, ₹96 Crore Revenue)  
 **Brand Identity**: **Company A** (Authentic Hyderabadi Biryani & Royal Delicacies)  
 **Author**: Senior Full-Stack Engineering Candidate  
+**GitHub Repository**: [https://github.com/hemanthsurnidi/NewAgeRestaurant](https://github.com/hemanthsurnidi/NewAgeRestaurant)  
 **Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
 **Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 
@@ -19,9 +20,10 @@ The platform is engineered on **Node.js 24** using pure native components (`node
 
 ### Step-by-Step Instructions
 
-1. **Unzip or Navigate to Directory**:
+1. **Clone or Navigate to Directory**:
    ```bash
-   cd nizami-biryani
+   git clone https://github.com/hemanthsurnidi/NewAgeRestaurant.git
+   cd NewAgeRestaurant
    ```
 
 2. **Verify Dependencies**:
