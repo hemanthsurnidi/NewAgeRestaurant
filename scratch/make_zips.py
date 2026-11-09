@@ -27,3 +27,4 @@ with zipfile.ZipFile(full_zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
             arcname = os.path.relpath(full_path, BASE_DIR)
             zf.write(full_path, arcname)
 print(f"✅ Generated full submission bundle: {full_zip_path} ({os.path.getsize(full_zip_path) / 1024:.1f} KB)")
+

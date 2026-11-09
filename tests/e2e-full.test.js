@@ -176,3 +176,4 @@ test('E2E: Bulk party order submission, admin approvals desk, confirmation', asy
   assert.equal(confirmRes.json().status, 'CONFIRMED');
   assert.ok(confirmRes.json().manager_notes.includes('Catering Manager'));
 });
+
