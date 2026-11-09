@@ -505,117 +505,122 @@ export const COUPONS = [
   }
 ];
 
-export const SAMPLE_ORDERS = [
-  {
-    id: "WEB-778120",
-    outlet_id: "out-kondapur",
-    customer_name: "Rahul Verma",
-    customer_phone: "+91 98490 12345",
-    delivery_address: "Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084",
-    items: [
-      {
-        item_id: "item-chicken-dum-biryani",
-        name: "Chicken Dum Biryani (Family Pack)",
-        portion: "Family Pack (4-5 Persons)",
-        quantity: 1,
-        unit_price: 900,
-        add_ons: []
-      },
-      {
-        item_id: "item-double-ka-meetha",
-        name: "Double Ka Meetha",
-        portion: "Single Serving",
-        quantity: 2,
-        unit_price: 140,
-        add_ons: []
-      }
-    ],
-    subtotal: 1180,
-    gst_amount: 56.19, // 5% GST included in price
-    discount_amount: 0,
-    loyalty_redeemed: 0,
-    total_amount: 1180,
-    payment_method: "UPI",
-    payment_status: "PAID",
-    status: "PREPARING",
-    placed_at: "2026-11-08T20:14:00+05:30",
-    promised_at: "2026-11-08T20:59:00+05:30",
-    ai_prep_estimate_minutes: 45,
-    manager_override_minutes: 0,
-    late_alert_triggered: 0,
-    dpdp_marketing_consent: 1
-  },
-  {
-    id: "WEB-778131",
-    outlet_id: "out-gachibowli-ck",
-    customer_name: "Sneha Reddy",
-    customer_phone: "+91 97010 54321",
-    delivery_address: "Tower 4, Apt 1102, My Home Bhooja, Gachibowli, Hyderabad - 500032",
-    items: [
-      {
-        item_id: "item-veg-biryani",
-        name: "Hyderabadi Subz Dum Biryani",
-        portion: "Regular (2 Persons)",
-        quantity: 2,
-        unit_price: 320,
-        add_ons: []
-      },
-      {
-        item_id: "item-mirchi-ka-salan",
-        name: "Mirchi Ka Salan (Signature)",
-        portion: "Full Bowl (350ml)",
-        quantity: 1,
-        unit_price: 0, // Complimentary with 2 biryanis in promo or included
-        add_ons: []
-      }
-    ],
-    subtotal: 640,
-    gst_amount: 30.48,
-    discount_amount: 0,
-    loyalty_redeemed: 0,
-    total_amount: 640,
-    payment_method: "Card",
-    payment_status: "PAID",
-    status: "READY_FOR_PICKUP",
-    placed_at: "2026-11-08T20:21:00+05:30",
-    promised_at: "2026-11-08T21:01:00+05:30",
-    ai_prep_estimate_minutes: 40,
-    manager_override_minutes: 0,
-    late_alert_triggered: 0,
-    dpdp_marketing_consent: 1
-  },
-  {
-    id: "WEB-778146",
-    outlet_id: "out-kukatpally",
-    customer_name: "Vikram Naidu",
-    customer_phone: "+91 99890 98765",
-    delivery_address: "Plot 89, 4th Phase, KPHB Colony, Kukatpally, Hyderabad - 500072",
-    items: [
-      {
-        item_id: "item-mutton-haleem",
-        name: "Shahi Mutton Haleem",
-        portion: "Regular Bowl (400g)",
-        quantity: 3,
-        unit_price: 350,
-        add_ons: []
-      }
-    ],
-    subtotal: 1050,
-    gst_amount: 50.00,
-    discount_amount: 0,
-    loyalty_redeemed: 0,
-    total_amount: 1050,
-    payment_method: "UPI",
-    payment_status: "PAID",
-    status: "PREPARING",
-    placed_at: "2026-11-08T20:26:00+05:30",
-    promised_at: "2026-11-08T21:16:00+05:30",
-    ai_prep_estimate_minutes: 50,
-    manager_override_minutes: 0,
-    late_alert_triggered: 1, // Late by 4 minutes as per sample data!
-    dpdp_marketing_consent: 1
-  }
-];
+export function getFreshSampleOrders() {
+  const now = Date.now();
+  return [
+    {
+      id: "WEB-778120",
+      outlet_id: "out-kondapur",
+      customer_name: "Rahul Verma",
+      customer_phone: "+91 98490 12345",
+      delivery_address: "Flat 402, Aditya Sunshine, Kondapur, Hyderabad - 500084",
+      items: [
+        {
+          item_id: "item-chicken-dum-biryani",
+          name: "Chicken Dum Biryani (Family Pack)",
+          portion: "Family Pack (4-5 Persons)",
+          quantity: 1,
+          unit_price: 900,
+          add_ons: []
+        },
+        {
+          item_id: "item-double-ka-meetha",
+          name: "Double Ka Meetha",
+          portion: "Single Serving",
+          quantity: 2,
+          unit_price: 140,
+          add_ons: []
+        }
+      ],
+      subtotal: 1180,
+      gst_amount: 56.19, // 5% GST included in price
+      discount_amount: 0,
+      loyalty_redeemed: 0,
+      total_amount: 1180,
+      payment_method: "UPI",
+      payment_status: "PAID",
+      status: "PREPARING",
+      placed_at: new Date(now - 14 * 60 * 1000).toISOString(),
+      promised_at: new Date(now + 16 * 60 * 1000).toISOString(),
+      ai_prep_estimate_minutes: 30,
+      manager_override_minutes: 0,
+      late_alert_triggered: 0,
+      dpdp_marketing_consent: 1
+    },
+    {
+      id: "WEB-778131",
+      outlet_id: "out-gachibowli-ck",
+      customer_name: "Sneha Reddy",
+      customer_phone: "+91 97010 54321",
+      delivery_address: "Tower 4, Apt 1102, My Home Bhooja, Gachibowli, Hyderabad - 500032",
+      items: [
+        {
+          item_id: "item-veg-biryani",
+          name: "Hyderabadi Subz Dum Biryani",
+          portion: "Regular (2 Persons)",
+          quantity: 2,
+          unit_price: 320,
+          add_ons: []
+        },
+        {
+          item_id: "item-mirchi-ka-salan",
+          name: "Mirchi Ka Salan (Signature)",
+          portion: "Full Bowl (350ml)",
+          quantity: 1,
+          unit_price: 0, // Complimentary with 2 biryanis in promo or included
+          add_ons: []
+        }
+      ],
+      subtotal: 640,
+      gst_amount: 30.48,
+      discount_amount: 0,
+      loyalty_redeemed: 0,
+      total_amount: 640,
+      payment_method: "Card",
+      payment_status: "PAID",
+      status: "READY_FOR_PICKUP",
+      placed_at: new Date(now - 22 * 60 * 1000).toISOString(),
+      promised_at: new Date(now - 2 * 60 * 1000).toISOString(),
+      ai_prep_estimate_minutes: 20,
+      manager_override_minutes: 0,
+      late_alert_triggered: 0,
+      dpdp_marketing_consent: 1
+    },
+    {
+      id: "WEB-778146",
+      outlet_id: "out-kukatpally",
+      customer_name: "Vikram Naidu",
+      customer_phone: "+91 99890 98765",
+      delivery_address: "Plot 89, 4th Phase, KPHB Colony, Kukatpally, Hyderabad - 500072",
+      items: [
+        {
+          item_id: "item-mutton-haleem",
+          name: "Shahi Mutton Haleem",
+          portion: "Regular Bowl (400g)",
+          quantity: 3,
+          unit_price: 350,
+          add_ons: []
+        }
+      ],
+      subtotal: 1050,
+      gst_amount: 50.00,
+      discount_amount: 0,
+      loyalty_redeemed: 0,
+      total_amount: 1050,
+      payment_method: "UPI",
+      payment_status: "PAID",
+      status: "PREPARING",
+      placed_at: new Date(now - 34 * 60 * 1000).toISOString(),
+      promised_at: new Date(now - 4 * 60 * 1000).toISOString(),
+      ai_prep_estimate_minutes: 30,
+      manager_override_minutes: 0,
+      late_alert_triggered: 1, // Late by 4 minutes as per sample data!
+      dpdp_marketing_consent: 1
+    }
+  ];
+}
+
+export const SAMPLE_ORDERS = getFreshSampleOrders();
 
 export const DEMO_USERS = [
   {

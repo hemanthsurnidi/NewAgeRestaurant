@@ -1,165 +1,187 @@
-# Deployment & Evaluation Guide
+# Deployment & Evaluation Guide — Company A
 
-**Project**: Dum & Co. — Direct Ordering Platform & Real-Time Kitchen Display System (KDS)  
+**Project**: Company A — Direct Kitchen Ordering Web Platform & Real-Time Kitchen Display System (KDS)  
 **Client**: Company A, Hyderabad (14 Dine-in Outlets + 3 Cloud Kitchens, 520 Staff, ₹96 Crore Revenue)  
-**Brand Identity**: **Dum & Co.** (Royal Hyderabad Wood-Fire Biryani & Curries)  
-**Author**: Senior Full-Stack Development Team for Company A  
-**GitHub Repository**: [https://github.com/hemanthsurnidi/nizami-biryani-direct](https://github.com/hemanthsurnidi/nizami-biryani-direct)  
+**Brand Identity**: **Company A** (Authentic Hyderabadi Biryani & Royal Delicacies)  
+**Author**: Senior Full-Stack Engineering Candidate  
+**Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
+**Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 
 ---
 
 ## 1. Quick Local Setup (Under 60 Seconds)
 
-The application is built with **Node.js 24** using native capabilities (`node:sqlite`, `node:crypto`, `node:test`, and native Server-Sent Events). It has **zero heavy native build dependencies**, meaning it boots instantly across Windows, macOS, and Linux without native C++ compilation failures.
+The platform is engineered on **Node.js 24** using pure native components (`node:sqlite`, `node:crypto`, `node:test`, and native Server-Sent Events). It has **zero heavy C++ native compilation dependencies**, ensuring instant cross-platform execution on Windows, macOS, and Linux.
 
 ### Prerequisites
-- Node.js `v20.0.0` or higher (Node.js `v24.x` recommended)
-- Git
+- Node.js `v20.0.0` or higher (`v24.x` recommended)
+- Standard Web Browser (Chrome, Edge, Firefox, Safari)
 
 ### Step-by-Step Instructions
 
-1. **Clone the Repository**:
+1. **Unzip or Navigate to Directory**:
    ```bash
-   git clone https://github.com/hemanthsurnidi/nizami-biryani-direct.git
-   cd nizami-biryani-direct
+   cd nizami-biryani
    ```
 
-2. **Verify / Install Dependencies**:
+2. **Verify Dependencies**:
    ```bash
    npm install
    ```
 
-3. **Run the Automated Test Suite**:
+3. **Run Automated Test Suite (31 Unit Tests)**:
    ```bash
    npm test
    ```
-   *Executes 31 comprehensive unit and integration tests covering scrypt password hashing, session tokens, RBAC outlet isolation, unavailable item checkout prevention, mock payment gateway failure/retry flow, delivery radius calculation, AI dynamic prep-time algorithm, 5% GST inclusive math, coupon capping, 24-hour party notice validator, and DPDP consent.*
+   *Verifies scrypt password hashing, session tokens, RBAC outlet isolation, 86 item out-of-stock locking, mock payment gateway failure/retry flow, 7km geofence delivery radius, AI dynamic prep-time algorithm, 5% GST inclusive calculations, coupon validation, 24-hour party notice validator, and DPDP Act 2023 consent.*
 
-4. **Start the Application**:
+4. **Run End-to-End System Integration Suite (42 Assertions)**:
+   ```bash
+   node scratch/e2e_full_test.cjs
+   ```
+   *Tests live order placement, deterministic kitchen routing, real-time KDS progression, WhatsApp messages, 10m overdue delay simulation & ₹50 compensation, bulk party catering confirmation, and financial analytics.*
+
+5. **Start the Live Server**:
    ```bash
    npm start
    ```
-   *Or for live file watch during development:*
-   ```bash
-   npm run dev
-   ```
+   *The server initializes the SQLite schema, seeds all 17 Hyderabad locations with valid FSSAI licenses, and listens on port 5000.*
 
-5. **Open in Browser**:
-   Open your browser and navigate to:
+6. **Open in Browser**:
    ```
-   http://localhost:3000
+   http://localhost:5000
    ```
 
 ---
 
-## 2. Cloud Deployment & Hosting Architecture
+## 2. Direct Package Download
 
-The application is structured for instant containerized or serverless hosting:
-
-### Deployment Platforms
-- **Render / Railway / Fly.io**: Connect GitHub repository, set `Build Command` to `npm install` and `Start Command` to `npm start`. Set port to `3000` (or allow dynamic `$PORT`).
-- **Docker**:
-  ```dockerfile
-  FROM node:24-alpine
-  WORKDIR /app
-  COPY package*.json ./
-  RUN npm install --production
-  COPY . .
-  EXPOSE 3000
-  CMD ["node", "server.js"]
-  ```
-- **Vercel / Netlify**: Deployable as a full-stack Node.js server with persistent volume for SQLite `data/nizami.db` (or remote Turso / PlanetScale database adapter).
+- **Browser One-Click Download**: [http://localhost:5000/download/submission.zip](http://localhost:5000/download/submission.zip)
+- **Local File Path**: `nizami-biryani/submission.zip`
 
 ---
 
-## 3. Environment Variables
+## 3. Reviewer Demo Logins & Credentials
 
-Copy `.env.example` to `.env` if custom configuration is desired (never commit secrets to version control):
+All demo accounts are secured via native **scrypt key-derivation password hashing with unique per-user salts**.
 
-| Variable Name | Required | Default | Description |
-| :--- | :---: | :---: | :--- |
-| `PORT` | Optional | `3000` | Port for the HTTP and SSE server |
-| `NODE_ENV` | Optional | `development` | Runtime environment (`development` / `production`) |
-| `DATABASE_PATH` | Optional | `./data/nizami.db` | Path to persistent SQLite database file |
-| `SESSION_SECRET` | Optional | `dum_co_secure_scrypt_salt_token_2026_hyderabad_key` | Secret salt for session token verification |
-| `GEMINI_API_KEY` | Optional | *None* | Optional Google Gemini API key for natural language chef notes. If omitted, the local deterministic AI workload heuristic runs with 100% offline accuracy. |
-
----
-
-## 4. Reviewer Demo Logins & Credentials
-
-All demo accounts are seeded into the relational database with secure **scrypt password hashes and unique salts**. 
-
-For maximum reviewer convenience, reviewers can authenticate either via:
-1. **The Navigation Bar "Sign In" Button**: Offers both manual email/password login and a **1-Click Demo Login** panel that signs in instantly.
-2. **The Floating "Reviewer Portal"**: Accessible via the discrete gear button on the right edge.
-3. **Standard Form Login**: Use the exact credentials below:
+For convenience, reviewers can authenticate using either:
+1. **The Navigation Bar "Sign In" Button**: Features standard login as well as a **1-Click Demo Login** panel for instant access.
+2. **Top Role Switcher**: The top strip contains a direct role switcher allowing instant persona jumping (`Customer Ordering`, `Kitchen Display (KDS)`, `Central Menu Admin`, `Outlet Dashboard`, `Party Orders`, `AI Prep-Time Estimate`).
+3. **Standard Manual Login**: Use any of the credentials below:
 
 | Persona | Email | Password | Role | Assigned Outlet / Access |
 | :--- | :--- | :--- | :--- | :--- |
-| **Customer** | `customer@dumco.in` | `Customer@123` | `customer` | Full customer ordering, 340 loyalty points, past orders history |
-| **Kitchen Staff (Kondapur)** | `kondapur@dumco.in` | `Kitchen@123` | `kitchen_staff` | Kondapur Flagship Kitchen Display (`out-kondapur`) |
-| **Kitchen Staff (Gachibowli)** | `gachibowli@dumco.in` | `Kitchen@123` | `kitchen_staff` | Gachibowli Cloud Kitchen (`out-gachibowli-ck`) |
-| **Kitchen Staff (Kukatpally)** | `kukatpally@dumco.in` | `Kitchen@123` | `kitchen_staff` | Kukatpally KPHB Kitchen Display (`out-kukatpally`) |
-| **Central Admin** | `admin@dumco.in` | `Admin@123` | `admin` | Full Central Menu CMS, city prices, and financial dashboard |
+| **Customer** | `customer@companya.in` | `Customer@123` | `customer` | Full customer ordering, 340 loyalty points, past orders history |
+| **Kitchen Staff (Kondapur)** | `kondapur@companya.in` | `Kitchen@123` | `kitchen_staff` | Kondapur Flagship Kitchen Display (`out-kondapur`) |
+| **Kitchen Staff (Gachibowli)** | `gachibowli@companya.in` | `Kitchen@123` | `kitchen_staff` | Gachibowli Cloud Kitchen (`out-gachibowli-ck`) |
+| **Kitchen Staff (Kukatpally)** | `kukatpally@companya.in` | `Kitchen@123` | `kitchen_staff` | Kukatpally KPHB Kitchen Display (`out-kukatpally`) |
+| **Central Admin** | `admin@companya.in` | `Admin@123` | `admin` | Full Central Menu CMS, 86 item stock pausing, bulk approvals, and analytics |
+
+*(Note: Legacy `@dumco.in` email aliases are also preserved for backward compatibility).*
+
+---
+
+## 4. Environment Variables
+
+Create or modify `.env` if custom configuration is desired (defaults are pre-configured):
+
+| Variable Name | Required | Default | Description |
+| :--- | :---: | :---: | :--- |
+| `PORT` | Optional | `5000` | HTTP and Server-Sent Events server port |
+| `NODE_ENV` | Optional | `production` | Runtime mode (`development` / `production`) |
+| `DATABASE_PATH` | Optional | `./data/nizami.db` | Path to persistent SQLite database file |
+| `SESSION_SECRET` | Optional | `companya_secure_scrypt_salt_token_2026_hyderabad_key` | Secret salt for session token verification |
 
 ---
 
 ## 5. Reviewer Guided Walkthrough & Key Workflows
 
-### 1. Customer Ordering & Geofence Verification
-- Open `http://localhost:3000`.
-- Notice the **Dum & Co.** branding, FSSAI licensing badge, and 5% GST inclusive pricing notice.
-- Click the **Delivering From** outlet pill in the navbar.
-- Try the interactive **Verify Delivery Radius** box:
-  - Type `Kondapur` or `Gachibowli` ➔ shows **Delivery Available (within radius)**.
-  - Type `Shamshabad Airport` ➔ shows **Outside Delivery Radius** with nearest outlet suggestion and pickup option.
-- Browse the menu, select portions (e.g., Family Pack), and choose add-ons (Extra Salan, Burani Raita).
-- Notice out-of-stock items ("86 items") are clearly marked and cannot be checked out.
+### 1. Customer Ordering & 7km Delivery Geofence
+- Open [http://localhost:5000](http://localhost:5000).
+- Select **Role: Customer Ordering** from the top switcher.
+- Notice the **Company A** branding, FSSAI license numbers (`13622014000298`), and clear 5% GST inclusive pricing notice.
+- Click the **Delivering From** outlet pill in the navbar:
+  - Enter `Kondapur` or `Gachibowli` ➔ shows **Within Delivery Radius (7 km)**.
+  - Enter `Shamshabad Airport` ➔ shows **Outside Delivery Radius** with nearest outlet suggestion.
+- Browse the 10 authentic Hyderabadi dishes with portion sizes (Single, Double, Family Pack) and add-ons.
 
 ### 2. Express Checkout & Payment Simulator (< 60 Seconds)
-- Add items to the cart and click **Proceed to Checkout**.
-- Apply coupon `DIRECT15` (15% off) or `NIZAM100` (₹100 off).
-- Slide the **Royalty Points Slider** to redeem points (1 point = ₹1 discount).
-- Click **Pay Online (Sandbox UPI / Card)**:
-  - Click **🟢 Authorize Payment (Simulate Success)** ➔ completes order and routes to live tracking.
-  - Or click **🔴 Simulate Bank Decline** ➔ demonstrates banking decline rejection banner and **🔄 Retry Payment** button.
-  - Or click **🟠 Simulate PSP Timeout** ➔ demonstrates gateway timeout handling.
+- Add dishes to your cart and click **Proceed to Checkout**.
+- Apply coupon `DIRECT15` (15% off) or `DIRECT50` (₹50 off).
+- Drag the **Loyalty Points Slider** to redeem points (1 point = ₹1 direct discount).
+- Note the explicit **5% GST breakdown** and **DPDP Act 2023 consent checkbox**.
+- Select payment method and test payment:
+  - Click **🟢 Authorize Payment** ➔ instant order confirmation.
+  - Or click **🔴 Simulate Bank Decline** ➔ displays decline banner with **🔄 Retry Payment** option.
 
-### 3. Kitchen Display System (KDS) & Real-Time Sync
-- Sign in as **Chef Mohammed Qasim** (`kondapur@dumco.in`).
-- Experience the 2-metre high-contrast industrial tablet interface.
-- Observe incoming orders appearing in real time via Server-Sent Events (SSE).
-- Hear the pleasant Web Audio synthesizer chime on new order arrival.
-- Advance orders: **Start Cooking** ➔ **Mark Ready for Pickup** ➔ **Rider Handover**.
-- Click **+5m Bump** to test manager prep-time override.
-- Verify outlet data isolation: staff cannot update tickets from other outlets.
+### 3. Kitchen Display System (KDS) & Multi-Tenant Routing
+- Switch to **Role: Kitchen Display (KDS)**.
+- Choose your kitchen from the dropdown: select **Kondapur Flagship** (or view **All 17 Kitchens**).
+- Experience the 2-metre readable industrial dark interface designed for commercial kitchen Android tablets.
+- Real-time order stages:
+  1. Click **🔥 Start Prep** ➔ advances to `Cooking` / `PREPARING`.
+  2. Click **✅ Ready for Pickup** ➔ advances to `Ready` / `READY_FOR_PICKUP`.
+  3. Click **🛵 Rider Handoff** ➔ advances to `Dispatched` / `DISPATCHED`.
+- Multi-tenant isolation: switch to another kitchen (e.g. Ameerpet) to verify that tickets are isolated per outlet.
 
-### 4. Overdue Order & Auto-Compensation
-- Inspect seeded order `#WEB-778146` (Kukatpally).
-- Observe the red overdue timer.
-- Click **⚡ Test 10m Late Trigger**:
-  - The KDS triggers a pulsing crimson critical banner.
-  - The customer live tracking screen immediately displays the **₹50 Royalty Credit Apology** notification.
+### 4. Overdue Order Monitor & Automatic ₹50 Compensation
+- On the KDS, locate an order with an overdue timer.
+- Click **⚡ Test 10m Delay**:
+  - The KDS displays a pulsing critical delay warning banner alerting the outlet manager.
+  - Customer live tracking view automatically awards a **₹50 Loyalty Compensation Credit** to the customer's ledger.
+  - Manager can click **+5m Override** to add a prep time buffer during rush hours.
 
-### 5. Central Menu CMS (Admin)
-- Sign in as **Zafar Khan** (`admin@dumco.in`).
-- Open **Central Menu CMS**:
-  - Click **＋ Create New Dish** to add a new Hyderabadi specialty.
-  - Click **✏️ Edit** on any dish to update spice level, allergens, or base price.
-  - Click **🗑️ Delete** to remove an item.
-  - Click **Live Stock Status (86 Item)** to pause an item for a specific outlet ➔ verify it instantly greys out on the customer menu!
-  - Click **🏙️ City Prices** to configure regional pricing overrides (Hyderabad Core vs Secunderabad vs Cyberabad).
+### 5. Central Menu CMS (Dish Management & 86 Item Pausing)
+- Switch to **Role: Central Menu Admin**.
+- Notice the staff portal header (`Menu CMS`, `Bulk Orders`, `Outlet Dashboard`, `AI Prep-Time`).
+- Click **＋ Add Dish** to add a new dish, or edit spice level and allergens.
+- Click **🏷️ City Pricing** to configure regional pricing overrides (Hyderabad Core vs Secunderabad vs Cyberabad).
+- Toggle **Live Stock Status (86 Item)** to pause an item ➔ verify it instantly greys out on the customer menu and rejects checkout!
 
-### 6. Executive Financial Economics Dashboard
-- Open the **Financial Dashboard** view.
-- Review Company A's progress toward the **₹1.14 Crore annual savings target**:
-  - Commission savings (15% net margin saved on direct delivery vs 27% aggregator fee).
-  - Outlets leaderboard across all 14 dine-in outlets and 3 cloud kitchens.
-  - Customer repeat rate (38.2% vs 35% target).
+### 6. Party & Bulk Catering Approval Desk
+- In Central Admin, click **Bulk Orders** (or switch to **Role: Party Orders**).
+- Review customer catering requests (>15 guests, 24h advance notice).
+- Click **✓ Manager Confirm**:
+  - Assigns Catering Head Ustad and schedules degh preparation.
+  - Order status updates to `CONFIRMED`.
+- Or click **✕ Decline** with reason notes.
 
-### 7. Party & Bulk Catering Desk
-- Open the **Party Catering** view.
-- Fill out the party catering builder.
-- Attempt to book an event with under 24 hours notice ➔ backend rejects with **24-hour advance notice requirement**.
-- Book for 3 days in advance ➔ request is accepted and routed to the Catering Specialist desk.
+### 7. Executive Financial Economics Dashboard
+- Switch to **Role: Outlet Dashboard**.
+- Review progress toward Company A's **₹1.14 Crore annual savings target**:
+  - 15% net margin saved on direct delivery vs 27% aggregator fee.
+  - Complete 17-outlet leaderboard ranking orders, revenue, cancellations, and prep times.
+  - 38.2% repeat customer rate (exceeding the 35% goal).
+
+### 8. AI Prep-Time Estimate Lab
+- Switch to **Role: AI Prep-Time Estimate**.
+- Test live predicted prep times based on active kitchen load, dish complexity, and Friday/Sunday dinner peaks (1,200 orders/hr).
+- Verifies that honest promised time is always the higher of the AI prediction and the outlet's minimum floor.
+
+---
+
+## 6. Cloud Deployment Architecture
+
+The application is structured for instant containerized deployment:
+
+### Docker
+```dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --omit=dev
+COPY . .
+EXPOSE 5000
+CMD ["node", "server.js"]
+```
+
+### Build & Run
+```bash
+docker build -t companya-platform .
+docker run -p 5000:5000 companya-platform
+```
+
+### Production Hosting Platforms
+- **Render / Railway / Fly.io**: Connect git repository, set build command `npm install` and start command `node server.js`. Configure `PORT=5000`.
+- **AWS ECS / DigitalOcean App Platform**: Deploy the Docker container directly with persistent volume mapping for `./data/nizami.db`.

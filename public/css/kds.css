@@ -82,9 +82,6 @@
   border-color: #D97706;
   color: #FBBF24;
 }
-  font-size: 0.85rem;
-  margin-top: 0.15rem;
-}
 
 /* KDS Metrics Strip */
 .kds-metrics-strip {
@@ -414,4 +411,721 @@
 .kds-override-btn:hover {
   background-color: #334155;
   border-color: #94A3B8;
+}
+
+/* ==========================================================================
+   INDUSTRIAL 3-COLUMN KANBAN KDS STYLES (TOAST / SQUARE KDS BENCHMARK)
+   ========================================================================== */
+.kds-channel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.kds-channel-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.kds-channel-pill {
+  background: #1E293B;
+  color: #94A3B8;
+  border: 1.5px solid #334155;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.kds-channel-pill:hover {
+  background: #334155;
+  color: #FFFFFF;
+}
+
+.kds-channel-pill.active {
+  background: #FC8019;
+  border-color: #FC8019;
+  color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(252, 128, 25, 0.4);
+}
+
+.kds-channel-count {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.kds-kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .kds-kanban-board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kds-kanban-col {
+  background: #0B1120;
+  border: 1.5px solid #1E293B;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.kds-col-header {
+  padding: 1rem 1.25rem;
+  background: #0F172A;
+  border-bottom: 2px solid #1E293B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kds-col-header.col-incoming {
+  border-top: 4px solid #38BDF8;
+}
+
+.kds-col-header.col-prep {
+  border-top: 4px solid #FB923C;
+}
+
+.kds-col-header.col-ready {
+  border-top: 4px solid #34D399;
+}
+
+.kds-col-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.02em;
+}
+
+.kds-col-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: #1E293B;
+  color: #94A3B8;
+  border: 1px solid #334155;
+}
+
+.col-incoming .kds-col-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.col-prep .kds-col-badge {
+  background: rgba(251, 146, 60, 0.15);
+  color: #FB923C;
+  border-color: rgba(251, 146, 60, 0.3);
+}
+
+.col-ready .kds-col-badge {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.kds-col-cards {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 250px;
+}
+
+.kds-empty-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748B;
+  border: 2px dashed #1E293B;
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.kds-empty-col-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.kds-empty-col-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #94A3B8;
+}
+
+.kds-empty-col-sub {
+  font-size: 0.82rem;
+  color: #64748B;
+  margin-top: 0.25rem;
+}
+
+/* Interactive Tap-to-Strike Checklist */
+.kds-item-row {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.kds-item-row:hover {
+  background-color: #1E293B;
+  border-color: #475569;
+}
+
+.kds-item-row.item-done {
+  background-color: rgba(16, 185, 129, 0.08);
+  border-color: #059669;
+  opacity: 0.8;
+}
+
+.kds-check-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 2px solid #475569;
+  background: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #10B981;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.kds-item-row.item-done .kds-check-box {
+  background: #059669;
+  border-color: #10B981;
+  color: #FFFFFF;
+}
+
+.kds-item-name.line-through {
+  text-decoration: line-through;
+  color: #94A3B8 !important;
+}
+
+.kds-done-pill {
+  background: #065F46;
+  color: #34D399;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  margin-left: auto;
+  align-self: center;
+}
+
+/* Order Channel Tag on Card Header */
+.kds-channel-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.kds-channel-delivery {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.kds-channel-takeaway {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.kds-channel-party {
+  background: rgba(168, 85, 247, 0.15);
+  color: #C084FC;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* ==========================================================================
+   KDS STAGE TABS & MOBILE RESPONSIVE ENHANCEMENTS
+   ========================================================================== */
+.kds-controls-cluster {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.kds-outlet-switcher {
+  font-size: 0.92rem !important;
+  font-weight: 700;
+  padding: 0.55rem 1rem !important;
+  background: #1E293B !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid #334155 !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  outline: none;
+}
+
+.kds-outlet-switcher:focus {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* KDS Stage Tabs for Mobile & Quick Filtering */
+.kds-stage-tabs-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kds-stage-tab-btn {
+  background: #0F172A;
+  border: 1.5px solid #1E293B;
+  color: #94A3B8;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.kds-stage-tab-btn:hover {
+  background: #1E293B;
+  color: #FFFFFF;
+}
+
+.kds-stage-tab-btn.active {
+  background: #174B3A;
+  border-color: #34D399;
+  color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+}
+
+.kds-stage-tab-btn.tab-incoming.active {
+  background: #0284C7;
+  border-color: #38BDF8;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+}
+
+.kds-stage-tab-btn.tab-prep.active {
+  background: #C2410C;
+  border-color: #FB923C;
+  box-shadow: 0 2px 10px rgba(251, 146, 60, 0.35);
+}
+
+.kds-stage-tab-btn.tab-ready.active {
+  background: #047857;
+  border-color: #34D399;
+  box-shadow: 0 2px 10px rgba(52, 211, 153, 0.35);
+}
+
+.kds-stage-tab-count {
+  background: rgba(0, 0, 0, 0.35);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Tablet Responsive KDS (< 900px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px), (max-device-width: 900px) {
+  .kds-critical-banner {
+    padding: 0.65rem 0.85rem !important;
+    margin-bottom: 0.85rem !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
+  }
+  .kds-critical-text {
+    font-size: 0.84rem !important;
+    gap: 0.25rem !important;
+  }
+  .kds-container {
+    padding: 0.85rem !important;
+  }
+  .kds-header {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.85rem !important;
+    border-radius: 12px !important;
+  }
+  .kds-title-group {
+    justify-content: space-between !important;
+  }
+  .kds-outlet-name {
+    font-size: 1.25rem !important;
+  }
+  .kds-controls-cluster {
+    display: flex !important;
+    gap: 0.5rem !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+  }
+  .kds-outlet-switcher {
+    flex: 1 1 200px !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  .kds-desktop-only-btn {
+    display: none !important;
+  }
+  .kds-metrics-strip {
+    justify-content: space-around !important;
+    width: 100% !important;
+  }
+  .kds-metric-box {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 0.45rem 0.5rem !important;
+  }
+  .kds-metric-val {
+    font-size: 1.35rem !important;
+  }
+  .kds-channel-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+  .kds-channel-pills {
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+  .kds-kanban-board {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+    grid-template-columns: 1fr !important;
+  }
+  .kds-kanban-col {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .kds-card {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Mobile Device Frame Simulator Overrides
+   -------------------------------------------------------------------------- */
+body.device-mode-mobile .kds-critical-banner {
+  padding: 0.6rem 0.8rem !important;
+  margin-bottom: 0.75rem !important;
+  border-width: 2px !important;
+  border-radius: 10px !important;
+}
+
+body.device-mode-mobile .kds-critical-text {
+  font-size: 0.82rem !important;
+  gap: 0.2rem !important;
+}
+
+body.device-mode-mobile .kds-container {
+  padding: 0.75rem !important;
+}
+
+body.device-mode-mobile .kds-header {
+  padding: 0.85rem 1rem !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.75rem !important;
+  border-radius: 12px !important;
+}
+
+body.device-mode-mobile .kds-outlet-name {
+  font-size: 1.2rem !important;
+}
+
+body.device-mode-mobile .kds-controls-cluster {
+  display: flex !important;
+  gap: 0.45rem !important;
+  flex-wrap: wrap !important;
+}
+
+body.device-mode-mobile .kds-outlet-switcher {
+  flex: 1 1 180px !important;
+  font-size: 0.82rem !important;
+  padding: 0.45rem 0.65rem !important;
+}
+
+body.device-mode-mobile .kds-desktop-only-btn {
+  display: none !important;
+}
+
+body.device-mode-mobile .kds-metrics-strip {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+body.device-mode-mobile .kds-metric-box {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0.4rem 0.35rem !important;
+}
+
+body.device-mode-mobile .kds-metric-val {
+  font-size: 1.25rem !important;
+}
+
+body.device-mode-mobile .kds-channel-pills {
+  overflow-x: auto !important;
+  flex-wrap: nowrap !important;
+  padding-bottom: 2px !important;
+}
+
+/* Hide all ugly native scrollbars in KDS horizontal containers */
+.kds-channel-pills,
+.kds-stage-tabs-row,
+.kds-stage-tabs-mobile {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.kds-channel-pills::-webkit-scrollbar,
+.kds-stage-tabs-row::-webkit-scrollbar,
+.kds-stage-tabs-mobile::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body.device-mode-mobile .kds-kanban-board {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.25rem !important;
+  grid-template-columns: 1fr !important;
+}
+
+body.device-mode-mobile .kds-kanban-col {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Scaled-down Mobile KDS Tickets & Typography */
+body.device-mode-mobile .kds-card,
+@media (max-width: 900px) {
+  .kds-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 12px !important;
+  }
+  .kds-card.status-critical-10m {
+    border-top-width: 5px !important;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35) !important;
+  }
+  .kds-card-header {
+    padding: 0.75rem 0.95rem !important;
+  }
+  .kds-order-number {
+    font-size: 1.15rem !important;
+  }
+  .kds-order-meta {
+    font-size: 0.76rem !important;
+  }
+  .kds-timer-badge {
+    font-size: 0.82rem !important;
+    padding: 0.25rem 0.55rem !important;
+    border-radius: 6px !important;
+  }
+  .kds-card-body {
+    padding: 0.85rem !important;
+  }
+  .kds-items-list {
+    gap: 0.6rem !important;
+  }
+  .kds-item-row {
+    padding: 0.6rem 0.75rem !important;
+    gap: 0.65rem !important;
+    border-radius: 8px !important;
+  }
+  .kds-qty-bubble {
+    font-size: 1.05rem !important;
+    min-width: 32px !important;
+    padding: 0.15rem 0.4rem !important;
+    border-radius: 6px !important;
+  }
+  .kds-item-name {
+    font-size: 0.92rem !important;
+    line-height: 1.25 !important;
+  }
+  .kds-portion-label {
+    font-size: 0.75rem !important;
+  }
+  .kds-check-box {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.82rem !important;
+    border-radius: 5px !important;
+  }
+  .kds-customer-strip {
+    padding: 0.5rem 0.85rem !important;
+    font-size: 0.76rem !important;
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+  }
+  .kds-card-actions {
+    padding: 0.65rem 0.85rem !important;
+    gap: 0.5rem !important;
+    flex-wrap: wrap !important;
+  }
+  .kds-stage-btn {
+    font-size: 0.82rem !important;
+    padding: 0.55rem 0.85rem !important;
+    border-radius: 8px !important;
+  }
+  .kds-channel-pill {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.78rem !important;
+  }
+  .kds-stage-tab-btn {
+    padding: 0.35rem 0.7rem !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+body.device-mode-mobile .kds-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  border-radius: 12px !important;
+}
+body.device-mode-mobile .kds-card.status-critical-10m {
+  border-top-width: 5px !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35) !important;
+}
+body.device-mode-mobile .kds-card-header {
+  padding: 0.75rem 0.95rem !important;
+}
+body.device-mode-mobile .kds-order-number {
+  font-size: 1.15rem !important;
+}
+body.device-mode-mobile .kds-order-meta {
+  font-size: 0.76rem !important;
+}
+body.device-mode-mobile .kds-timer-badge {
+  font-size: 0.82rem !important;
+  padding: 0.25rem 0.55rem !important;
+  border-radius: 6px !important;
+}
+body.device-mode-mobile .kds-card-body {
+  padding: 0.85rem !important;
+}
+body.device-mode-mobile .kds-items-list {
+  gap: 0.6rem !important;
+}
+body.device-mode-mobile .kds-item-row {
+  padding: 0.6rem 0.75rem !important;
+  gap: 0.65rem !important;
+  border-radius: 8px !important;
+}
+body.device-mode-mobile .kds-qty-bubble {
+  font-size: 1.05rem !important;
+  min-width: 32px !important;
+  padding: 0.15rem 0.4rem !important;
+  border-radius: 6px !important;
+}
+body.device-mode-mobile .kds-item-name {
+  font-size: 0.92rem !important;
+  line-height: 1.25 !important;
+}
+body.device-mode-mobile .kds-portion-label {
+  font-size: 0.75rem !important;
+}
+body.device-mode-mobile .kds-check-box {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.82rem !important;
+  border-radius: 5px !important;
+}
+body.device-mode-mobile .kds-customer-strip {
+  padding: 0.5rem 0.85rem !important;
+  font-size: 0.76rem !important;
+  flex-wrap: wrap !important;
+  gap: 0.35rem !important;
+}
+body.device-mode-mobile .kds-card-actions {
+  padding: 0.65rem 0.85rem !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+body.device-mode-mobile .kds-stage-btn {
+  font-size: 0.82rem !important;
+  padding: 0.55rem 0.85rem !important;
+  border-radius: 8px !important;
+}
+body.device-mode-mobile .kds-channel-pill {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.78rem !important;
+}
+body.device-mode-mobile .kds-stage-tab-btn {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.78rem !important;
+}
+
+
+
+/* Balanced KDS Metric Boxes */
+.kds-metrics-strip {
+  display: flex !important;
+  gap: 0.75rem !important;
+  align-items: stretch !important;
+  width: 100% !important;
+}
+.kds-metric-box {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  min-height: 58px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0.5rem 0.5rem !important;
+}
+.kds-metric-label {
+  white-space: nowrap !important;
 }

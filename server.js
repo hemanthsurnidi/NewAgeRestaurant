@@ -51,7 +51,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Set of connected Server-Sent Events (SSE) clients for real-time pub/sub
 const sseClients = new Set();
@@ -325,7 +325,7 @@ export const server = http.createServer(async (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         version: '1.0.0',
-        brand: 'Dum & Co. (Company A, Hyderabad)',
+        brand: 'Company A (Hyderabad Direct Platform)',
         active_sse_clients: sseClients.size
       });
     }
@@ -787,17 +787,35 @@ export const server = http.createServer(async (req, res) => {
       `).run(orderId);
 
       const updated = getOrderById(orderId);
+
+      // Auto-credit ₹50 loyalty apology compensation to the customer for late order
+      if (updated && updated.customer_phone) {
+        const curBalance = getCustomerLoyaltyBalance(updated.customer_phone);
+        db.prepare(`
+          INSERT INTO loyalty_ledger (customer_phone, points_earned, points_spent, balance, order_id, note)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(
+          updated.customer_phone,
+          50,
+          0,
+          curBalance + 50,
+          orderId,
+          `Delay Apology Credit: 10m overdue compensation for #${orderId}`
+        );
+      }
+
       const notification = generateNotificationPreview(updated, 'LATE_COMPENSATION_ALERT', { diff_minutes: 12 });
       broadcastSSE('ORDER_LATE_ALERT', { order: updated, lateness: { diff_minutes: 12, is_severely_late: true }, notification });
-      return sendJson(res, 200, { order: updated, notification });
+      return sendJson(res, 200, { success: true, order: updated, notification, compensation_credited: 50 });
     }
 
     // Kitchen Manager Prep Time Override
-    if (pathname.includes('/api/orders/') && pathname.endsWith('/override') && req.method === 'PATCH') {
+    if (pathname.includes('/api/orders/') && pathname.endsWith('/override') && (req.method === 'PATCH' || req.method === 'POST')) {
       const parts = pathname.split('/');
       const orderId = parts[3];
       const body = await parseJsonBody(req);
-      const { extra_minutes, reason } = body;
+      const { extra_minutes, override_minutes, reason } = body;
+      const minutesToAdd = Number(extra_minutes || override_minutes || 5);
 
       const order = getOrderById(orderId);
       if (!order) return sendJson(res, 404, { error: 'Order not found' });
@@ -810,9 +828,9 @@ export const server = http.createServer(async (req, res) => {
         });
       }
 
-      const overrideMinutes = (order.manager_override_minutes || 0) + Number(extra_minutes || 0);
+      const overrideMinutes = (order.manager_override_minutes || 0) + minutesToAdd;
       const currentPromised = new Date(order.promised_at);
-      const updatedPromised = new Date(currentPromised.getTime() + (extra_minutes * 60000));
+      const updatedPromised = new Date(currentPromised.getTime() + (minutesToAdd * 60000));
 
       db.prepare(`
         UPDATE orders SET
@@ -929,6 +947,20 @@ export const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, summary);
     }
 
+    // Direct Download endpoint for Evaluation Submission ZIP
+    if ((pathname === '/download/submission.zip' || pathname === '/submission.zip') && req.method === 'GET') {
+      const zipPath = path.join(__dirname, 'submission.zip');
+      if (fs.existsSync(zipPath)) {
+        res.writeHead(200, {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="Company_A_Submission.zip"',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        });
+        fs.createReadStream(zipPath).pipe(res);
+        return;
+      }
+    }
+
     // -------------------------------------------------------------
     // STATIC FILE SERVING FOR FRONTEND SPA
     // -------------------------------------------------------------
@@ -950,7 +982,7 @@ export const server = http.createServer(async (req, res) => {
       }
       res.writeHead(200, {
         'Content-Type': contentType,
-        'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600'
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       });
       res.end(content);
     });
@@ -963,9 +995,9 @@ export const server = http.createServer(async (req, res) => {
 
 // Start server if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`=======================================================`);
-    console.log(`  DUM & CO. - COMPANY A, HYDERABAD DIRECT PLATFORM    `);
+    console.log(`  COMPANY A - HYDERABAD DIRECT PLATFORM               `);
     console.log(`  14 Restaurant Outlets + 3 Cloud Kitchens            `);
     console.log(`  Server live at: http://localhost:${PORT}             `);
     console.log(`=======================================================`);

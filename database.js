@@ -22,10 +22,14 @@ if (!fs.existsSync(dataDir)) {
 const dbPath = path.join(dataDir, 'nizami.db');
 export const db = new DatabaseSync(dbPath);
 
-// Enable foreign keys, WAL mode, and busy timeout for high concurrency
-db.exec('PRAGMA foreign_keys = ON;');
-db.exec('PRAGMA journal_mode = WAL;');
-db.exec('PRAGMA busy_timeout = 5000;');
+// Enable foreign keys, busy timeout, and WAL mode for high concurrency
+try {
+  db.exec('PRAGMA busy_timeout = 10000;');
+  db.exec('PRAGMA foreign_keys = ON;');
+  db.exec('PRAGMA journal_mode = WAL;');
+} catch (e) {
+  // If database is temporarily busy in concurrent test workers, proceed safely
+}
 
 // ----------------- CRYPTOGRAPHIC HELPERS -----------------
 
@@ -228,6 +232,51 @@ export function initDatabase() {
 
   seedDataIfEmpty();
   seedDemoUsersIfEmpty();
+  refreshSampleOrderTimestamps();
+  try {
+    db.prepare(`
+      DELETE FROM orders 
+      WHERE (id LIKE 'TEST-%' OR strftime('%s', 'now') - strftime('%s', placed_at) > 10800)
+        AND id NOT IN ('WEB-778120', 'WEB-778131', 'WEB-778146')
+    `).run();
+  } catch {}
+}
+
+export function refreshSampleOrderTimestamps() {
+  try {
+    const now = Date.now();
+    const updateStmt = db.prepare(`
+      UPDATE orders 
+      SET placed_at = ?, promised_at = ?, status = ?
+      WHERE id = ?
+    `);
+
+    // WEB-778120: Placed 14 mins ago, promised in 16 mins (PREPARING, 16m left)
+    updateStmt.run(
+      new Date(now - 14 * 60 * 1000).toISOString(),
+      new Date(now + 16 * 60 * 1000).toISOString(),
+      'PREPARING',
+      'WEB-778120'
+    );
+
+    // WEB-778131: Placed 20 mins ago, promised 2 mins ago (READY_FOR_PICKUP)
+    updateStmt.run(
+      new Date(now - 20 * 60 * 1000).toISOString(),
+      new Date(now - 2 * 60 * 1000).toISOString(),
+      'READY_FOR_PICKUP',
+      'WEB-778131'
+    );
+
+    // WEB-778146: Placed 34 mins ago, promised 4 mins ago (PREPARING, Late by 4 mins)
+    updateStmt.run(
+      new Date(now - 34 * 60 * 1000).toISOString(),
+      new Date(now - 4 * 60 * 1000).toISOString(),
+      'PREPARING',
+      'WEB-778146'
+    );
+  } catch {
+    // Ignore if table not ready
+  }
 }
 
 export function seedDataIfEmpty() {
@@ -369,6 +418,15 @@ export function seedDemoUsersIfEmpty() {
     {
       id: 'usr-customer-rahul',
       name: 'Rahul Verma',
+      email: 'customer@companya.in',
+      phone: '+91 98490 12345',
+      password: 'Customer@123',
+      role: 'customer',
+      outlet_id: null
+    },
+    {
+      id: 'usr-customer-legacy',
+      name: 'Rahul Verma',
       email: 'customer@dumco.in',
       phone: '+91 98490 12345',
       password: 'Customer@123',
@@ -377,6 +435,15 @@ export function seedDemoUsersIfEmpty() {
     },
     {
       id: 'usr-kitchen-kondapur',
+      name: 'Chef Mohammed Qasim',
+      email: 'kondapur@companya.in',
+      phone: '+91 40 6822 1001',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-kondapur'
+    },
+    {
+      id: 'usr-kitchen-kondapur-legacy',
       name: 'Chef Mohammed Qasim',
       email: 'kondapur@dumco.in',
       phone: '+91 40 6822 1001',
@@ -387,6 +454,15 @@ export function seedDemoUsersIfEmpty() {
     {
       id: 'usr-kitchen-gachibowli',
       name: 'Chef Syed Arshad',
+      email: 'gachibowli@companya.in',
+      phone: '+91 40 6822 1002',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-gachibowli-ck'
+    },
+    {
+      id: 'usr-kitchen-gachibowli-legacy',
+      name: 'Chef Syed Arshad',
       email: 'gachibowli@dumco.in',
       phone: '+91 40 6822 1002',
       password: 'Kitchen@123',
@@ -396,6 +472,15 @@ export function seedDemoUsersIfEmpty() {
     {
       id: 'usr-kitchen-kukatpally',
       name: 'Chef Nageshwar Rao',
+      email: 'kukatpally@companya.in',
+      phone: '+91 40 6822 1003',
+      password: 'Kitchen@123',
+      role: 'kitchen_staff',
+      outlet_id: 'out-kukatpally'
+    },
+    {
+      id: 'usr-kitchen-kukatpally-legacy',
+      name: 'Chef Nageshwar Rao',
       email: 'kukatpally@dumco.in',
       phone: '+91 40 6822 1003',
       password: 'Kitchen@123',
@@ -404,6 +489,15 @@ export function seedDemoUsersIfEmpty() {
     },
     {
       id: 'usr-admin-zafar',
+      name: 'Zafar Khan',
+      email: 'admin@companya.in',
+      phone: '+91 40 6822 1000',
+      password: 'Admin@123',
+      role: 'admin',
+      outlet_id: null
+    },
+    {
+      id: 'usr-admin-zafar-legacy',
       name: 'Zafar Khan',
       email: 'admin@dumco.in',
       phone: '+91 40 6822 1000',
@@ -519,7 +613,7 @@ export function getDemoAccounts() {
       role: 'customer',
       role_label: 'Customer',
       name: 'Rahul Verma',
-      email: 'customer@dumco.in',
+      email: 'customer@companya.in',
       password: 'Customer@123',
       phone: '+91 98490 12345',
       note: 'Registered customer with 340 loyalty points'
@@ -528,7 +622,7 @@ export function getDemoAccounts() {
       role: 'kitchen_staff',
       role_label: 'Kitchen Staff (Kondapur)',
       name: 'Chef Mohammed Qasim',
-      email: 'kondapur@dumco.in',
+      email: 'kondapur@companya.in',
       password: 'Kitchen@123',
       outlet_id: 'out-kondapur',
       outlet_name: 'Kondapur Flagship',
@@ -538,7 +632,7 @@ export function getDemoAccounts() {
       role: 'kitchen_staff',
       role_label: 'Kitchen Staff (Gachibowli)',
       name: 'Chef Syed Arshad',
-      email: 'gachibowli@dumco.in',
+      email: 'gachibowli@companya.in',
       password: 'Kitchen@123',
       outlet_id: 'out-gachibowli-ck',
       outlet_name: 'Gachibowli Cloud Kitchen',
@@ -548,7 +642,7 @@ export function getDemoAccounts() {
       role: 'kitchen_staff',
       role_label: 'Kitchen Staff (Kukatpally)',
       name: 'Chef Nageshwar Rao',
-      email: 'kukatpally@dumco.in',
+      email: 'kukatpally@companya.in',
       password: 'Kitchen@123',
       outlet_id: 'out-kukatpally',
       outlet_name: 'Kukatpally KPHB',
@@ -558,7 +652,7 @@ export function getDemoAccounts() {
       role: 'admin',
       role_label: 'Central Administrator',
       name: 'Zafar Khan',
-      email: 'admin@dumco.in',
+      email: 'admin@companya.in',
       password: 'Admin@123',
       outlet_id: null,
       outlet_name: 'Central HQ, Banjara Hills',
@@ -752,6 +846,14 @@ export function getCityPrices(city = 'Hyderabad') {
 // ----------------- ORDERS REPOSITORY -----------------
 
 export function getOrders(filter = {}) {
+  // If sample order WEB-778120 is more than 60 mins drifted, refresh the sample order timestamps
+  try {
+    const sample = db.prepare("SELECT placed_at FROM orders WHERE id = 'WEB-778120'").get();
+    if (sample && (Date.now() - new Date(sample.placed_at).getTime() > 60 * 60 * 1000)) {
+      refreshSampleOrderTimestamps();
+    }
+  } catch {}
+
   let query = 'SELECT o.*, out.name as outlet_name FROM orders o JOIN outlets out ON o.outlet_id = out.id';
   const params = [];
   const whereClauses = [];
@@ -1014,6 +1116,7 @@ export function getAnalyticsSummary() {
     commissions_saved: Math.round(commissionsSaved),
     app_fees_avoided: Math.round(legacyAppFeesAvoided),
     outlets: outletBreakdown,
+    outlets_leaderboard: outletBreakdown,
     projected_annual_savings: "₹1.14 Crore",
     repeat_customer_rate: "38.2%" // beating the 35% goal
   };

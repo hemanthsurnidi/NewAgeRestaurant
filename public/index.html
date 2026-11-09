@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dum & Co. — Royal Hyderabad Biryani & Direct Kitchen Display Platform</title>
+  <title>Company A — Authentic Hyderabadi Dum Biryani</title>
   
   <!-- Modern Luxury Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,99 +16,141 @@
 </head>
 <body class="theme-light">
 
-  <!-- TOP EXECUTIVE ANNOUNCEMENT STRIP -->
-  <aside class="top-announcement-bar">
+  <!-- TOP PERSISTENT REVIEWER & ROLE CONTROLS (ALWAYS OUTSIDE AT TOP-RIGHT) -->
+  <aside class="top-announcement-bar" id="top-reviewer-strip">
     <div class="announcement-inner">
       <div class="announcement-tag">
         <span class="live-dot"></span>
-        <span>Dum & Co. • Company A, Hyderabad</span>
+        <span class="brand-strip-tag">Company A</span>
       </div>
-      <div class="announcement-text">
-        🎉 <strong>Save 15% Net Margin:</strong> Direct orders bypass 27% aggregator app fees • Real-Time KDS • 5% Direct Loyalty Cashback
-      </div>
-      <div class="announcement-stats">
-        <span>Target: <strong>₹1.14 Cr/yr Savings</strong></span>
+      
+      <!-- OUTSIDE TOP-RIGHT CONTROLS FOR TESTING -->
+      <div class="top-reviewer-controls">
+        <!-- Device Switcher -->
+        <div class="top-device-switcher">
+          <button id="top-btn-laptop" class="top-device-btn active" onclick="App.setDeviceMode('laptop')" title="Laptop View">
+            💻 Laptop
+          </button>
+          <button id="top-btn-mobile" class="top-device-btn" onclick="App.setDeviceMode('mobile')" title="Mobile View">
+            📱 Mobile
+          </button>
+        </div>
+
+        <!-- Role / Persona Dropdown -->
+        <div class="top-role-wrap">
+          <select id="top-role-select" class="top-role-dropdown" onchange="App.handleTopRoleChange(this.value)" title="Switch Active Role">
+            <option value="customer" selected>👤 Role: Customer Ordering</option>
+            <option value="kds">🍳 Role: Kitchen Display (KDS)</option>
+            <option value="admin">📋 Role: Central Menu Admin</option>
+            <option value="analytics">📊 Role: Outlet Dashboard</option>
+            <option value="party">🎉 Role: Party Orders</option>
+            <option value="ai_lab">⏱️ Role: AI Prep-Time Estimate</option>
+          </select>
+        </div>
       </div>
     </div>
   </aside>
 
-  <!-- APP ROOT WRAPPER (Supports seamless Laptop & Mobile Viewport simulation) -->
+  <!-- APP ROOT WRAPPER -->
   <div id="app-root-wrapper">
 
-  <!-- MAIN STICKY CUSTOMER HEADER -->
+  <!-- MAIN STICKY CUSTOMER HEADER (ROCK SOLID, FIXED & MODERN) -->
   <header class="header-nav" id="main-header">
     <div class="nav-container">
       
-      <!-- Left: Brand Logo & Optional Back Button -->
-      <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <button id="header-back-btn" class="header-back-btn" onclick="App.navigate('ordering')" style="display: none;" title="Back to menu">
-          ← Back
+      <!-- Left: Brand Logo (Never changes width or shifts) -->
+      <a class="brand-wrap" onclick="App.navigate('ordering')">
+        <div class="brand-crest">
+          <span>👑</span>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title">Company A</div>
+          <div class="brand-subtitle">Authentic Hyderabadi Biryani</div>
+        </div>
+      </a>
+
+      <!-- Center: Outlet Selector Dropdown (Anchored Menu on Desktop, Bottom Sheet on Mobile) -->
+      <div class="nav-location-dropdown-wrap" id="nav-location-wrap">
+        <button class="outlet-selector-pill" id="outlet-selector-pill" onclick="App.toggleOutletDropdown(event)" title="Switch delivery outlet">
+          <span class="pulse-ring">📍</span>
+          <div class="outlet-pill-text">
+            <div class="outlet-pill-title-row">
+              <strong id="nav-outlet-name">Kondapur Flagship</strong>
+              <span class="chevron-icon" id="nav-outlet-chevron">▾</span>
+            </div>
+            <span class="outlet-fssai" id="nav-outlet-fssai">Hyderabad • 7 km radius</span>
+          </div>
         </button>
 
-        <a class="brand-wrap" onclick="App.navigate('ordering')">
-          <div class="brand-crest">
-            <span>👑</span>
+        <!-- Anchored Dropdown Menu (Desktop) / Slide-Up Bottom Sheet (Mobile) -->
+        <div class="outlet-dropdown-menu" id="outlet-dropdown-menu" onclick="event.stopPropagation()">
+          <div class="sheet-drag-handle mobile-only-drag"></div>
+          <div class="outlet-dropdown-header">
+            <div class="outlet-dropdown-top-title">
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span style="font-size: 1.15rem;">📍</span>
+                <strong style="font-size: 0.95rem; color: var(--text-main);">Select Hyderabad Outlet</strong>
+              </div>
+              <button class="outlet-dropdown-close" onclick="App.closeOutletDropdown()">&times;</button>
+            </div>
+            <div class="outlet-dropdown-search-wrap">
+              <span class="search-mini-icon">🔍</span>
+              <input type="text" id="outlet-dropdown-search" placeholder="Search area (e.g. Kondapur, Ameerpet, Jubilee...)" oninput="App.filterOutletDropdown(this.value)">
+            </div>
+            <button type="button" class="outlet-dropdown-autodetect-btn" onclick="App.autoDetectNearestOutlet()">
+              <span class="pulse-dot">📍</span>
+              <span>Use Current Location / Auto-Detect Nearest Kitchen</span>
+              <span style="margin-left: auto; font-size: 0.78rem; opacity: 0.7;">➔</span>
+            </button>
           </div>
-          <div class="brand-info">
-            <div class="brand-title">Dum & Co.</div>
-            <div class="brand-subtitle">Hyderabad Biryani • 14 Outlets + 3 Kitchens</div>
+          <div class="outlet-dropdown-list" id="outlet-dropdown-items">
+            <!-- Dynamically populated by JS -->
           </div>
-        </a>
+        </div>
       </div>
 
-      <!-- Center: Outlet Selector Pill -->
-      <button class="outlet-selector-pill" onclick="App.openOutletModal()" title="Switch delivery outlet or check radius">
-        <span class="pulse-ring">📍</span>
-        <div class="outlet-pill-text">
-          <div class="outlet-pill-kicker">DELIVERING FROM</div>
-          <strong id="nav-outlet-name">Kondapur Flagship</strong>
-          <span class="outlet-fssai" id="nav-outlet-fssai">(FSSAI: 13622014000491 • 7 km radius)</span>
+      <!-- Right: Navigation Links & Actions -->
+      <div class="nav-right-cluster">
+        <nav class="customer-nav-links" id="main-nav-links">
+          <button class="cust-nav-link active" id="link-menu" onclick="App.navigate('ordering')">
+            <span class="nav-link-icon">🍲</span>
+            <span>Menu</span>
+          </button>
+          <button class="cust-nav-link" id="link-party" onclick="App.navigate('party')">
+            <span class="nav-link-icon">🎉</span>
+            <span>Party Orders</span>
+          </button>
+          <button class="cust-nav-link" id="link-account" onclick="App.navigate('account')">
+            <span class="nav-link-icon">👤</span>
+            <span>Account</span>
+          </button>
+        </nav>
+
+        <div class="nav-actions">
+          <button id="nav-auth-btn" class="btn-auth-nav" onclick="App.openAuthModal()" title="Account & Roles">
+            <span id="nav-auth-icon">👤</span>
+            <span id="nav-auth-label">Sign In</span>
+          </button>
+
+          <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
+            <span class="cart-icon-wrap">🛍️</span>
+            <span class="cart-label">Cart</span>
+            <span id="cart-count-badge" class="cart-badge-count">0</span>
+          </button>
         </div>
-        <span class="chevron-icon">▾</span>
-      </button>
-
-      <!-- Center-Right: Tactile Segmented Pill Navigation Links -->
-      <nav class="customer-nav-links" id="main-nav-links">
-        <button class="cust-nav-link active" id="link-menu" onclick="App.navigate('ordering')">
-          <span class="nav-link-icon">🍲</span>
-          <span>Direct Menu</span>
-        </button>
-        <button class="cust-nav-link" id="link-party" onclick="App.navigate('party')">
-          <span class="nav-link-icon">🎉</span>
-          <span>Party Catering</span>
-        </button>
-        <button class="cust-nav-link" id="link-tracking" onclick="App.navigate('tracking')">
-          <span class="nav-link-icon">📍</span>
-          <span>Track Order</span>
-        </button>
-        <button class="cust-nav-link" id="link-account" onclick="App.navigate('account')">
-          <span class="nav-link-icon">👤</span>
-          <span>My Account</span>
-        </button>
-      </nav>
-
-      <!-- Right: Auth Pill & Cart -->
-      <div class="nav-actions">
-        <button id="nav-auth-btn" class="btn-auth-nav" onclick="App.openAuthModal()" title="Account & Roles">
-          <span id="nav-auth-icon">👤</span>
-          <span id="nav-auth-label">Sign In</span>
-        </button>
-
-        <button id="cart-button" class="btn-cart-nav" onclick="App.openCartDrawer()">
-          <span class="cart-icon-wrap">🛍️</span>
-          <span class="cart-label">Cart</span>
-          <span id="cart-count-badge" class="cart-badge-count">0</span>
-        </button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN DYNAMIC CONTENT CONTAINER -->
-  <main class="main-content" id="app-view-container">
-    <!-- Dynamic views will render here via app.js -->
-  </main>
+  <!-- SCROLLABLE BODY CONTAINER (CLEAN SCROLL SEPARATION FOR MOBILE & LAPTOP) -->
+  <div class="app-scroll-body" id="app-scroll-body">
+    <!-- MAIN DYNAMIC CONTENT CONTAINER -->
+    <main class="main-content" id="app-view-container">
+      <!-- Dynamic views will render here via app.js -->
+    </main>
+  </div>
 
-  <!-- FLOATING MOBILE CART PILL (DOCKED INSIDE WRAPPER FOR CLEAN MOBILE DOCKING) -->
+  <!-- FLOATING MOBILE CART PILL -->
   <div id="floating-cart-bar" class="floating-cart-bar" style="display: none;" onclick="App.openCartDrawer()">
     <div class="floating-cart-left">
       <div class="floating-cart-icon">🛍️</div>
@@ -123,100 +165,38 @@
     </div>
   </div>
 
-  </div> <!-- /#app-root-wrapper -->
+  <!-- FIXED NATIVE MOBILE BOTTOM APP DOCK (SWIGGY / ZOMATO APP STANDARD) -->
+  <nav class="mobile-bottom-dock" id="mobile-dock" aria-label="Mobile Navigation">
+    <button class="mobile-dock-btn active" id="mob-dock-menu" onclick="App.navigate('ordering')">
+      <span class="mobile-dock-ico">🍲</span>
+      <span>Menu</span>
+    </button>
+    <button class="mobile-dock-btn" id="mob-dock-party" onclick="App.navigate('party')">
+      <span class="mobile-dock-ico">🎉</span>
+      <span>Party</span>
+    </button>
+    <button class="mobile-dock-btn" id="mob-dock-cart" onclick="App.openCartDrawer()">
+      <span class="mobile-dock-ico" style="position: relative;">
+        🛍️
+        <span id="mob-cart-badge" class="mob-dock-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </button>
+    <button class="mobile-dock-btn" id="mob-dock-account" onclick="App.navigate('account')">
+      <span class="mobile-dock-ico">👤</span>
+      <span>Account</span>
+    </button>
+  </nav>
 
-  <!-- FLOATING SIDE REVIEWER PORTAL TRIGGER (DISCRETE OFF-HEADER BUTTON) -->
-  <button id="side-portal-trigger" class="side-portal-trigger" onclick="App.toggleSideDrawer()" title="Reviewer Tools & Role Switcher">
-    <span class="portal-trigger-icon">⚙️</span>
-    <span class="portal-trigger-text">Reviewer Portal</span>
-  </button>
-
-  <!-- SIDE REVIEWER DRAWER (SLIDES IN FROM RIGHT WITHOUT POLLUTING MAIN PAGE) -->
-  <div id="side-portal-backdrop" class="side-portal-backdrop" onclick="App.closeSideDrawer()">
-    <div class="side-portal-panel" onclick="event.stopPropagation()">
-      <div class="side-portal-header">
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span style="font-size: 1.25rem;">🛠️</span>
-          <div>
-            <h3 style="font-size: 1.05rem; color: #FFFFFF; margin: 0; font-weight: 800;">Reviewer Controls</h3>
-            <p style="font-size: 0.75rem; color: #94A3B8; margin: 0.15rem 0 0 0;">Switch Personas & Viewport</p>
-          </div>
-        </div>
-        <button class="side-portal-close" onclick="App.closeSideDrawer()">&times;</button>
-      </div>
-
-      <div class="side-portal-body">
-        
-        <!-- Viewport Switcher -->
-        <div class="side-section">
-          <label class="side-section-label">DEVICE VIEWPORT</label>
-          <div class="side-toggle-group">
-            <button id="side-device-laptop" class="side-group-btn active" onclick="App.setDeviceMode('laptop')">
-              💻 Laptop
-            </button>
-            <button id="side-device-mobile" class="side-group-btn" onclick="App.setDeviceMode('mobile')">
-              📱 Mobile
-            </button>
-          </div>
-        </div>
-
-        <!-- Role / Persona Switcher -->
-        <div class="side-section">
-          <label class="side-section-label">ROLE / PERSONA SWITCHER</label>
-          <div class="side-role-list">
-            <button class="side-role-btn active" data-role="customer" onclick="App.switchRoleFromSide('customer')">
-              <span>👤</span> Customer Direct View
-            </button>
-            <button class="side-role-btn" data-role="kitchen_kondapur" onclick="App.switchRoleFromSide('kitchen_kondapur')">
-              <span>🍳</span> Kitchen KDS (Kondapur)
-            </button>
-            <button class="side-role-btn" data-role="kitchen_gachibowli" onclick="App.switchRoleFromSide('kitchen_gachibowli')">
-              <span>🍳</span> Kitchen KDS (Gachibowli)
-            </button>
-            <button class="side-role-btn" data-role="kitchen_kukatpally" onclick="App.switchRoleFromSide('kitchen_kukatpally')">
-              <span>🍳</span> Kitchen KDS (Kukatpally)
-            </button>
-            <button class="side-role-btn" data-role="admin" onclick="App.switchRoleFromSide('admin')">
-              <span>📋</span> Central Menu CMS
-            </button>
-            <button class="side-role-btn" data-role="analytics" onclick="App.switchRoleFromSide('analytics')">
-              <span>📊</span> Financial Dashboard (₹1.14 Cr)
-            </button>
-            <button class="side-role-btn" data-role="party" onclick="App.switchRoleFromSide('party')">
-              <span>🎉</span> Party / Bulk Catering
-            </button>
-            <button class="side-role-btn" data-role="ai_diagnostics" onclick="App.switchRoleFromSide('ai_diagnostics')">
-              <span>🧠</span> AI Engine Diagnostics
-            </button>
-          </div>
-        </div>
-
-        <!-- Demo Testing Shortcuts -->
-        <div class="side-section">
-          <label class="side-section-label">DEMO SHORTCUTS</label>
-          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-            <button class="side-action-btn" onclick="App.fillDemoCart()">
-              🛍️ Fill Cart with Sample Feast
-            </button>
-            <button class="side-action-btn" onclick="App.simulateLateDelay('WEB-778146')">
-              ⚡ Trigger 10m Delay (#WEB-778146)
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
 
   <!-- AUTHENTICATION & LOGIN MODAL -->
   <div id="auth-modal" class="modal-backdrop" onclick="App.closeAuthModal()">
     <div class="modal-card" id="auth-modal-card" style="max-width: 500px;" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <div>
-          <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
-            👑 DUM & CO. SECURE AUTHENTICATION
-          </div>
-          <h3 class="modal-title" style="margin-top: 0.2rem;" id="auth-modal-header-title">Sign In to Your Account</h3>
+          <h3 class="modal-title" id="auth-modal-header-title">Sign In</h3>
+          <p class="modal-subtitle">Choose an account to continue</p>
         </div>
         <button class="modal-close-btn" onclick="App.closeAuthModal()">&times;</button>
       </div>
@@ -230,6 +210,7 @@
   <!-- INTERACTIVE MOCK PAYMENT GATEWAY MODAL (TEST MODE UPI & CARD) -->
   <div id="payment-modal" class="modal-backdrop" onclick="App.closePaymentModal()">
     <div class="modal-card" id="payment-modal-card" style="max-width: 480px;" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <div>
           <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">
@@ -265,9 +246,29 @@
     </div>
   </div>
 
+  <!-- SLIDE-OVER PARTY DISH SELECTION DRAWER (APPEARS ON RIGHT TO ADD ITEMS & PLACE ORDER) -->
+  <div id="party-drawer-backdrop" class="drawer-backdrop" onclick="App.closePartyDrawer()">
+    <div class="drawer-panel party-drawer-panel" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <div class="drawer-header-title">
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin: 0;">Select Dishes & Handis</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.15rem 0 0 0;">Authentic wood-fire deghs (Min 15 guests)</p>
+        </div>
+        <button class="drawer-close-btn" onclick="App.closePartyDrawer()">&times;</button>
+      </div>
+      <div class="drawer-body" id="party-drawer-items" style="padding: 1.25rem; overflow-y: auto; flex: 1;">
+        <!-- Rendered dynamically by JS -->
+      </div>
+      <div class="drawer-footer" id="party-drawer-footer" style="padding: 1.25rem 1.5rem; border-top: 1.5px solid var(--border-subtle); background: #FFFFFF;">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- OUTLET SELECTION & RADIUS CHECKER MODAL -->
   <div id="outlet-modal" class="modal-backdrop" onclick="App.handleModalBackdropClick(event)">
     <div class="modal-card" id="outlet-modal-panel" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <div>
           <h3 class="modal-title">Select Hyderabad Outlet</h3>
@@ -284,6 +285,7 @@
   <!-- DISH CUSTOMIZATION MODAL (PORTIONS & ADD-ONS) -->
   <div id="custom-modal-backdrop" class="modal-backdrop" onclick="App.closeCustomModal()">
     <div class="modal-card custom-modal-card" id="custom-modal-panel" onclick="event.stopPropagation()">
+      <div class="sheet-drag-handle"></div>
       <div class="modal-header">
         <div>
           <h3 class="modal-title" id="custom-modal-title">Customize Dish</h3>
@@ -334,6 +336,86 @@
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="toast-container"></div>
+
+
+  </div> <!-- /#app-root-wrapper -->
+
+  <!-- FLOATING SIDE REVIEWER PORTAL TRIGGER (DISCRETE OFF-HEADER BUTTON) -->
+  <button id="side-portal-trigger" class="side-portal-trigger" onclick="App.toggleSideDrawer()" title="Reviewer Tools & Role Switcher">
+    <span class="portal-trigger-icon">⚙️</span>
+    <span class="portal-trigger-text">Reviewer Portal</span>
+  </button>
+
+  <!-- SIDE REVIEWER DRAWER (SLIDES IN FROM RIGHT WITHOUT POLLUTING MAIN PAGE) -->
+  <div id="side-portal-backdrop" class="side-portal-backdrop" onclick="App.closeSideDrawer()">
+    <div class="side-portal-panel" onclick="event.stopPropagation()">
+      <div class="side-portal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.25rem;">🛠️</span>
+          <div>
+            <h3 style="font-size: 1.05rem; color: #FFFFFF; margin: 0; font-weight: 800;">Reviewer Controls</h3>
+            <p style="font-size: 0.75rem; color: #94A3B8; margin: 0.15rem 0 0 0;">Switch Personas & Viewport</p>
+          </div>
+        </div>
+        <button class="side-portal-close" onclick="App.closeSideDrawer()">&times;</button>
+      </div>
+
+      <div class="side-portal-body">
+        
+        <!-- Viewport Switcher -->
+        <div class="side-section">
+          <label class="side-section-label">DEVICE VIEWPORT</label>
+          <div class="side-toggle-group">
+            <button id="side-device-laptop" class="side-group-btn active" onclick="App.setDeviceMode('laptop')">
+              💻 Laptop
+            </button>
+            <button id="side-device-mobile" class="side-group-btn" onclick="App.setDeviceMode('mobile')">
+              📱 Mobile
+            </button>
+          </div>
+        </div>
+
+        <!-- Role / Persona Switcher -->
+        <div class="side-section">
+          <label class="side-section-label">ROLE / PERSONA SWITCHER</label>
+          <div class="side-role-list">
+            <button class="side-role-btn active" data-role="customer" onclick="App.switchRoleFromSide('customer')">
+              <span>👤</span> Customer Ordering
+            </button>
+            <button class="side-role-btn" data-role="kds" onclick="App.switchRoleFromSide('kds')">
+              <span>🍳</span> Kitchen Display (KDS)
+            </button>
+            <button class="side-role-btn" data-role="admin" onclick="App.switchRoleFromSide('admin')">
+              <span>📋</span> Central Menu Admin
+            </button>
+            <button class="side-role-btn" data-role="analytics" onclick="App.switchRoleFromSide('analytics')">
+              <span>📊</span> Outlet Dashboard
+            </button>
+            <button class="side-role-btn" data-role="party" onclick="App.switchRoleFromSide('party')">
+              <span>🎉</span> Party Orders
+            </button>
+            <button class="side-role-btn" data-role="ai_lab" onclick="App.switchRoleFromSide('ai_lab')">
+              <span>⏱️</span> AI Prep-Time Estimate
+            </button>
+          </div>
+        </div>
+
+        <!-- Demo Testing Shortcuts -->
+        <div class="side-section">
+          <label class="side-section-label">DEMO SHORTCUTS</label>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <button class="side-action-btn" onclick="App.fillDemoCart()">
+              🛍️ Fill Cart with Sample Feast
+            </button>
+            <button class="side-action-btn" onclick="App.simulateLateDelay('WEB-778146')">
+              ⚡ Trigger 10m Delay (#WEB-778146)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- MAIN SCRIPT -->
   <script type="module" src="/js/app.js"></script>

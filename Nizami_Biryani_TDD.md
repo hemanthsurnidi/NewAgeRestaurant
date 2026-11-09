@@ -1,45 +1,46 @@
 # Technical Design Document (TDD)
 ## Direct Ordering Web Platform & Kitchen Display System (KDS)
 
-**Client**: Company A, Hyderabad — Famous Biryani & Hyderabadi Food Chain  
-**Scope**: 14 Outlets + 3 Cloud Kitchens | 520 Staff | ₹96 Crore Annual Revenue  
+**Client**: Company A, Hyderabad â€” Famous Biryani & Hyderabadi Food Chain  
+**Scope**: 14 Outlets + 3 Cloud Kitchens | 520 Staff | â‚¹96 Crore Annual Revenue  
 **Author / Candidate**: Hemanth Surnidi (`hemanthsurnidi20095@gmail.com`)  
 **Project GitHub Repository**: [https://github.com/hemanthsurnidi/nizami-biryani-direct](https://github.com/hemanthsurnidi/nizami-biryani-direct)  
-**Live Demo Deployment**: [http://localhost:3000](http://localhost:3000) (Evaluation server live)  
+**Live Evaluation Server**: [http://localhost:5000](http://localhost:5000)  
+**Direct Download Package**: [Download submission.zip](http://localhost:5000/download/submission.zip)  
 **Date**: November 2026  
 
 ---
 
 ## 1. Executive Summary & Business Problem Statement
 
-Company A is one of Hyderabad’s most celebrated culinary institutions, operating 14 dine-in outlets and 3 cloud kitchens across the twin cities, employing 520 staff, and generating ₹90–105 crore in annual revenue (baseline ₹96 crore).
+Company A is one of Hyderabadâ€™s most celebrated culinary institutions, operating 14 dine-in outlets and 3 cloud kitchens across the twin cities, employing 520 staff, and generating â‚¹90â€“105 crore in annual revenue (baseline â‚¹96 crore).
 
 ### Today's Operational Dilemma
-1. **Aggressive Delivery App Commissions**: 55% of Company A's annual turnover (₹52.8 crore) flows through third-party food delivery aggregators (Swiggy, Zomato). These apps charge an average 27% in commissions and service fees, draining **₹14.25 crore annually** from the brand's bottom line. More critically, the aggregators own the customer relationship, blocking Company A from customer data and direct repeat marketing.
-2. **Phone Line Leakage on Bulk & Party Orders**: A single unmanaged phone line handles catering and bulk party orders. Due to busy lines, dropped calls, and slow manual confirmations, the company loses an estimated **30 bulk orders per month** at an average order value of ₹18,000 and 30% margin.
+1. **Aggressive Delivery App Commissions**: 55% of Company A's annual turnover (â‚¹52.8 crore) flows through third-party food delivery aggregators (Swiggy, Zomato). These apps charge an average 27% in commissions and service fees, draining **â‚¹14.25 crore annually** from the brand's bottom line. More critically, the aggregators own the customer relationship, blocking Company A from customer data and direct repeat marketing.
+2. **Phone Line Leakage on Bulk & Party Orders**: A single unmanaged phone line handles catering and bulk party orders. Due to busy lines, dropped calls, and slow manual confirmations, the company loses an estimated **30 bulk orders per month** at an average order value of â‚¹18,000 and 30% margin.
 3. **Fragmented Operations & Kitchen Friction**: Outlets operate on disparate billing systems, menus and pricing are manually maintained across each aggregator app, and kitchens operate from physical paper tickets prone to misplacement, smoke damage, and missed preparation timers.
 
 ### The Financial Case & ROI Target
-* **Retail Order Commission Savings**: Migrating just 12% of app order volume (₹6.336 crore) to Company A's direct ordering website, where delivery partner and payment gateway fees average 12%, yields a net margin gain of 15% (27% - 12%):
-  $$\text{Retail Direct Savings} = ₹6.336\text{ crore} \times 15\% = ₹95.04\text{ lakh/year}$$
+* **Retail Order Commission Savings**: Migrating just 12% of app order volume (â‚¹6.336 crore) to Company A's direct ordering website, where delivery partner and payment gateway fees average 12%, yields a net margin gain of 15% (27% - 12%):
+  $$\text{Retail Direct Savings} = â‚¹6.336\text{ crore} \times 15\% = â‚¹95.04\text{ lakh/year}$$
 * **Party & Catering Order Recovery**: Capturing the lost 30 party orders per month through a streamlined digital booking portal with 24-hour notice validation:
-  $$\text{Catering Recovery} = 30\text{ orders/mo} \times ₹18,000 \times 30\%\text{ margin} \times 12\text{ months} = ₹19.44\text{ lakh/year}$$
-* **Total Annual Value Captured**: **₹1.1448 Crore per year** (₹1.14 Crore).
-* **Project Budget & Payback Period**: Against an initial investment of ₹9 lakh over 8 weeks, the payback period is **under 30 days** once the 12% direct migration target is met.
+  $$\text{Catering Recovery} = 30\text{ orders/mo} \times â‚¹18,000 \times 30\%\text{ margin} \times 12\text{ months} = â‚¹19.44\text{ lakh/year}$$
+* **Total Annual Value Captured**: **â‚¹1.1448 Crore per year** (â‚¹1.14 Crore).
+* **Project Budget & Payback Period**: Against an initial investment of â‚¹9 lakh over 8 weeks, the payback period is **under 30 days** once the 12% direct migration target is met.
 
 ```
 +-----------------------------------------------------------------------------------+
-|                        FINANCIAL VALUE RECOVERY: ₹1.14 CR/YR                      |
+|                        FINANCIAL VALUE RECOVERY: â‚¹1.14 CR/YR                      |
 |                                                                                   |
-|  [ Aggregator Sales: ₹52.8 Cr ] --( 12% Direct Migration )--> [ ₹6.336 Cr Direct ]|
+|  [ Aggregator Sales: â‚¹52.8 Cr ] --( 12% Direct Migration )--> [ â‚¹6.336 Cr Direct ]|
 |                                                                       |           |
 |                                                               15% Net Margin Gain |
 |                                                                       v           |
-|                                                               [ +₹95.04 Lakh ]    |
+|                                                               [ +â‚¹95.04 Lakh ]    |
 |                                                                       +           |
-|  [ Lost Phone Orders: 30/mo @ ₹18k ] -----------------------> [ +₹19.44 Lakh ]    |
+|  [ Lost Phone Orders: 30/mo @ â‚¹18k ] -----------------------> [ +â‚¹19.44 Lakh ]    |
 |                                                                       =           |
-|                                                        TOTAL: [ ₹1.14 CRORE/YR ]  |
+|                                                        TOTAL: [ â‚¹1.14 CRORE/YR ]  |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -53,7 +54,7 @@ In accordance with the assessment requirements, all technical and operational as
 * **[Assumption A2: Concurrency & Peak Demand Load]**: Hyderabad peak ordering windows occur on Friday and Sunday evenings between 19:30 and 22:30 IST, reaching peak network throughput of **1,200 orders per hour** across all 17 locations (~70 orders/hour/outlet, or ~1.2 orders/minute/outlet). System architecture must handle this throughput with sub-50ms latency.
 * **[Assumption A3: Logistics & Rider Scope]**: Delivery riders are sourced from third-party logistics partners (3PL, e.g., Shadowfax, Dunzo, Porter) at an average cost of 12% (including payment gateway costs). Developing a custom delivery fleet rider app is strictly out of scope; our system provides ready-for-handover status and SMS/WhatsApp dispatch webhooks.
 * **[Assumption A4: Indian Tax & Statutory Compliance]**: All consumer prices displayed on the menu include 5% GST as mandated by Indian restaurant tax laws. Each outlet must visibly display its unique 14-digit FSSAI license number. Customer contact numbers are classified as personal data under the **Digital Personal Data Protection (DPDP) Act 2023**, requiring affirmative consent for direct marketing.
-* **[Assumption A5: Artisanal Preparation Constraints]**: Traditional Hyderabadi Dum Biryani and Shahi Haleem are slow-cooked in large copper deghs sealed with dough. Consequently, bulk and party catering orders (>15 guests or ₹5,000+) strictly require **at least 24 to 48 hours advance notice** to procure ingredients and allocate dedicated ustad labor.
+* **[Assumption A5: Artisanal Preparation Constraints]**: Traditional Hyderabadi Dum Biryani and Shahi Haleem are slow-cooked in large copper deghs sealed with dough. Consequently, bulk and party catering orders (>15 guests or â‚¹5,000+) strictly require **at least 24 to 48 hours advance notice** to procure ingredients and allocate dedicated ustad labor.
 
 ---
 
@@ -226,7 +227,7 @@ erDiagram
 * `menu_items`: Central catalog containing dietary indicators (`is_veg`), spice meters, allergen alerts (Dairy, Gluten, Nuts), base preparation weights, and time-based availability rules (e.g., "All Day", "Dinner & Specials", "Midnight Special").
 * `outlet_stock`: The real-time inventory matrix. When a kitchen lead runs out of ingredients for a dish, toggling stock ("86 item") updates this table and triggers an SSE broadcast that immediately disables the item on customer menus in that specific outlet.
 * `orders`: Complete transaction record capturing items JSON, 5% GST calculation, coupon codes, loyalty points redeemed, AI prep estimate, manager override minutes, and DPDP marketing consent.
-* `loyalty_ledger`: Double-entry rewards system crediting **5% cashback** on every direct order and debiting redeemed points (1 point = ₹1).
+* `loyalty_ledger`: Double-entry rewards system crediting **5% cashback** on every direct order and debiting redeemed points (1 point = â‚¹1).
 * `party_orders`: Catering requests enforcing the 24-hour advance notice validation constraint, guest counts (15 to 500+), and manager approval workflows.
 
 ---
@@ -275,7 +276,7 @@ stateDiagram-v2
     }
 
     CriticalOverdue --> ManagerIncident: Alert Outlet Lead
-    ManagerIncident --> AutoApology: Dispatch WhatsApp ₹50 Apology Voucher
+    ManagerIncident --> AutoApology: Dispatch WhatsApp â‚¹50 Apology Voucher
 ```
 
 ### Flow 3: Real-Time Stock Management ("86 Item" Live Pause)
@@ -311,9 +312,9 @@ The raw preparation time is calculated from three deterministic components:
 3. **Peak Hour Demand Multiplier ($\text{Peak Factor}$)**:
    Based on historical Hyderabad dinner demand:
    * **Normal Hours**: $1.0\times$
-   * **Lunch Rush (12:00–15:00)**: $1.15\times$
-   * **Weekday Dinner (19:30–22:30)**: $1.25\times$
-   * **Weekend Dinner Peak (Friday & Sunday 19:30–22:30)**: **$1.40\times$** (accommodating the 1,200 orders/hour network surge).
+   * **Lunch Rush (12:00â€“15:00)**: $1.15\times$
+   * **Weekday Dinner (19:30â€“22:30)**: $1.25\times$
+   * **Weekend Dinner Peak (Friday & Sunday 19:30â€“22:30)**: **$1.40\times$** (accommodating the 1,200 orders/hour network surge).
 
 4. **Hard Business Constraint (Outlet Minimum Floor)**:
    $$\text{Raw AI Prep} = \lceil T_{\text{items}} + T_{\text{queue}} \rceil$$
@@ -329,8 +330,8 @@ When kitchen operations deviate from the AI prediction:
   1. KDS card enters a pulsing high-visibility crimson red animation with high-priority audio alert.
   2. The KDS and Central Dashboard display a **Critical Incident Banner** alerting the outlet manager.
   3. The system automatically dispatches an apologetic WhatsApp/SMS update to the customer:
-     > *"⚠️ Honest Delay Apology from Nizami Zaika: Due to peak kitchen load at Kondapur, order #WEB-778146 is running behind. ₹50 Nizami Loyalty Credit has been credited to your phone number for your next direct feast."*
-  4. The customer's loyalty ledger is credited with 50 points (₹50 value).
+     > *"âš ï¸ Honest Delay Apology from Company A: Due to peak kitchen load at Kondapur, order #WEB-778146 is running behind. â‚¹50 Loyalty Credit has been credited to your phone number for your next direct feast."*
+  4. The customer's loyalty ledger is credited with 50 points (â‚¹50 value).
 
 ### 3. Kitchen Manager Manual Override
 If an ustad opens a fresh degh or experiences charcoal delays, the kitchen manager can tap the **+5m Bump** button on the KDS tablet. This increments `manager_override_minutes`, pushes an updated promised arrival timestamp to the customer's live tracker, and logs the incident in the audit ledger.
@@ -371,25 +372,25 @@ We created a custom design system blending regal Hyderabadi culinary heritage wi
 2. **Screen 2: Express Checkout (< 60 Seconds Flow)**:
    * Two-column streamlined desktop layout collapsing to single-column on mobile.
    * Pre-filled Hyderabad addresses (Kondapur / Gachibowli) for instant one-tap completion.
-   * Interactive **Royalty Points Slider**: lets customers drag a slider to redeem loyalty points (1 point = ₹1) with immediate recalculation.
+   * Interactive **Royalty Points Slider**: lets customers drag a slider to redeem loyalty points (1 point = â‚¹1) with immediate recalculation.
    * Coupon code validation with instant discount feedback (`DIRECT15`, `NIZAM100`).
    * Explicit **DPDP Act 2023 Consent Checkbox** for transactional and marketing communications.
    * Simulated test payment gateway: instant UPI QR code generation and pre-filled test cards.
 
 3. **Screen 3: Live Order Tracking & WhatsApp Simulator**:
-   * Horizontal step-by-step progress timeline: Accepted ➔ Dum Cooking ➔ Packed ➔ Dispatched ➔ Delivered.
+   * Horizontal step-by-step progress timeline: Accepted âž” Dum Cooking âž” Packed âž” Dispatched âž” Delivered.
    * Live countdown timer displaying minutes remaining vs. honest promised time.
    * **Simulated WhatsApp Drawer**: Interactive container rendering the authentic WhatsApp notification pushed to the customer's mobile device, complete with outlet FSSAI number and tracking link.
-   * Automatic ₹50 late compensation banner if the order is delayed.
+   * Automatic â‚¹50 late compensation banner if the order is delayed.
 
-4. **Screen 4: Kitchen Display System (KDS) — Tablet Industrial View**:
+4. **Screen 4: Kitchen Display System (KDS) â€” Tablet Industrial View**:
    * **2-Metre Readability**: Massive typography (1.85rem order headers, 1.5rem quantity badges, 1.35rem dish titles).
    * **Dynamic Urgency Color Coding**:
      * Green border: On schedule (> 10 mins remaining).
      * Amber border: Due soon (< 10 mins remaining).
      * Red border: Overdue.
      * Pulsing Red + Critical Banner: Overdue by 10+ minutes.
-   * **Web Audio Synthesizer**: Generates a distinctive two-tone chime (880Hz ➔ 1320Hz) upon new order arrival without requiring external audio files.
+   * **Web Audio Synthesizer**: Generates a distinctive two-tone chime (880Hz âž” 1320Hz) upon new order arrival without requiring external audio files.
    * **One-Tap Stage Buttons**: Oversized buttons ("Start Cooking", "Ready for Pickup", "Handover to Rider") designed for greasy kitchen tablet touches.
    * **Manager Override Controls**: One-tap +5m bump to handle cooking spikes.
 
@@ -399,13 +400,13 @@ We created a custom design system blending regal Hyderabadi culinary heritage wi
    * Time-based menu configuration: tagging dishes for "All Day", "Dinner & Specials", or "Midnight Biryani".
 
 6. **Screen 6: Executive Analytics & Direct Savings Dashboard**:
-   * Live progress tracker toward the **₹1.14 Crore annual savings goal**.
+   * Live progress tracker toward the **â‚¹1.14 Crore annual savings goal**.
    * Real-time calculation of net margin saved (15%) and aggregator commission avoided (27%).
    * Outlet comparison leaderboard ranking all 14 dine-in outlets and 3 cloud kitchens by direct order volume and prep speed.
    * Customer retention metric (38.2% vs. client target of 35% by Month 6).
 
 7. **Screen 7: Party & Bulk Catering Desk**:
-   * Eliminates the lost phone orders (saving ₹19.44 lakh/year).
+   * Eliminates the lost phone orders (saving â‚¹19.44 lakh/year).
    * Enforces the **24-hour advance notice rule** using browser-native and server-side date validation.
    * Catering specialist confirmation flow with status badges (PENDING_REVIEW, CONFIRMED).
 
@@ -448,33 +449,65 @@ In accordance with the instruction to *"build a small part really well instead o
 * **SQL Injection Immunity**: 100% of database queries use parameterized SQL statements (`db.prepare('... VALUES (?, ?)')`).
 
 ### 2. Comprehensive Automated Test Suite
-The project includes **19 automated unit and integration tests** built using Node.js's native test runner (`node:test` and `node:assert`), runnable via `npm test`:
+The project is validated across two exhaustive test suites:
+1. **31 Automated Unit & API Integration Tests** built using Node.js native test runner (`node:test` and `node:assert`), runnable via `npm test`.
+2. **42 Live End-to-End System Integration Assertions** validating complete live browser and backend operations (`node scratch/e2e_full_test.cjs`).
 
 ```
 ================================================================================
- AUTOMATED TEST SUITE EXECUTION SUMMARY (`npm test`)
+ AUTOMATED TEST SUITE EXECUTION SUMMARY (`npm test`) — 31 UNIT TESTS
 ================================================================================
-✔ AI Prep-Time: Respects outlet minimum floor constraint (7.67ms)
-✔ AI Prep-Time: Increases with heavy item complexity and multiple quantities (0.93ms)
+✔ AI Prep-Time: Respects outlet minimum floor constraint (2.47ms)
+✔ AI Prep-Time: Increases with heavy item complexity and multiple quantities (0.64ms)
 ✔ AI Prep-Time: Detects Sunday/Friday dinner peak rush (1,200 orders/hr) (0.51ms)
-✔ Late Alert Monitor: Identifies orders late by <10m vs critical >=10m (1.11ms)
-✔ AI Customer Re-order: Never auto-adds items to cart and respects history (4.47ms)
-✔ 5% GST Mandate: Subtotal includes 5% GST accurately (1.32ms)
-✔ Coupons: Validates min order value and discount capping (1.77ms)
-✔ Loyalty Points: Earns 5% back on order amount and updates ledger (9.73ms)
-✔ Compliance: All 17 outlets must display valid FSSAI licenses (4.31ms)
-✔ Real-time 86 Stock Pause: Pausing an item makes it unavailable immediately (7.64ms)
-✔ DPDP Act 2023: Marketing consent explicitly stored with user order (1.05ms)
-✔ API GET /api/health returns healthy status (9.64ms)
-✔ API GET /api/outlets returns all 17 Hyderabad locations (1.27ms)
-✔ API GET /api/menu returns items with portions, add-ons and availability (3.01ms)
-✔ API GET /api/orders returns sample seeded orders WEB-778120, WEB-778131, WEB-778146 (3.59ms)
-✔ API POST /api/orders places order with AI prep time and loyalty cashback (52.64ms)
-✔ API PATCH /api/orders/:id/status updates prep stage (3.91ms)
-✔ API GET /api/analytics returns ₹1.14 Cr savings metrics (1.83ms)
-✔ API POST /api/party-orders validates 24h advance notice (4.78ms)
+✔ Late Alert Monitor: Correctly identifies orders late by <10m vs critical >=10m (0.50ms)
+✔ AI Customer Re-order: Never auto-adds items to cart and respects history (1.40ms)
+✔ Security: Native scrypt password hashing and verification (115.41ms)
+✔ Auth API: User registration and token session creation (56.87ms)
+✔ Auth API: Login with valid credentials vs invalid credentials (84.09ms)
+✔ Auth API: GET /api/auth/me returns authenticated user profile (44.25ms)
+✔ RBAC & Outlet Isolation: Kitchen staff cannot update orders of another outlet (57.25ms)
+✔ RBAC: Customers cannot modify menu or advance kitchen status (65.56ms)
+✔ RBAC: Admin has central permission to create and delete menu items (112.67ms)
+✔ Checkout Constraint: Prevents ordering items that are marked out-of-stock (86 item) (17.35ms)
+✔ Mock Payment Gateway: Handles success, banking decline, and network timeout (923.08ms)
+✔ Delivery Radius Check: Verifies address inside vs outside delivery radius (3.01ms)
+✔ 5% GST Mandate: Subtotal includes 5% GST accurately (0.80ms)
+✔ Coupons: Validates min order value and discount capping (1.40ms)
+✔ Loyalty Points: Earns 5% back on order amount and updates ledger (15.17ms)
+✔ Compliance: All 17 outlets must display valid FSSAI licenses (2.13ms)
+✔ Real-time 86 Stock Pause: Pausing an item makes it unavailable immediately (25.03ms)
+✔ DPDP Act 2023: Marketing consent explicitly stored with user order (0.52ms)
+✔ API GET /api/health returns healthy status (2.57ms)
+✔ API GET /api/outlets returns all 17 Hyderabad locations with FSSAI (0.59ms)
+✔ API GET /api/menu returns items with portions, add-ons and availability (0.85ms)
+✔ API GET /api/orders returns sample seeded orders WEB-778120, WEB-778131, WEB-778146 (1.94ms)
+✔ API POST /api/orders successfully places order with AI prep time and loyalty cashback (32.20ms)
+✔ API PATCH /api/orders/:id/status updates prep stage (3.47ms)
+✔ API POST /api/orders/:id/simulate-late triggers 10m overdue compensation alert (6.00ms)
+✔ API PATCH /api/orders/:id/cancel cancels order cleanly (9.81ms)
+✔ API GET /api/analytics returns ₹1.14 Cr savings and cancellation metrics (0.79ms)
+✔ API POST /api/party-orders validates 24h advance notice (3.01ms)
 --------------------------------------------------------------------------------
-TOTAL TESTS: 19 | PASSED: 19 | FAILED: 0 | DURATION: ~370ms
+TOTAL UNIT TESTS: 31 | PASSED: 31 | FAILED: 0
+================================================================================
+
+================================================================================
+ LIVE END-TO-END VERIFICATION SUITE (`node scratch/e2e_full_test.cjs`)
+================================================================================
+✔ Test 1: Server Health & Outlets FSSAI Compliance (5/5 checks passed)
+✔ Test 2: Delivery Radius Geofence 7km Constraint (2/2 checks passed)
+✔ Test 3: Menu Catalog, Photos, Portions, 5% GST Mandate (3/3 checks passed)
+✔ Test 4: Placing Order, Loyalty Cashback & Deterministic Kitchen Routing (9/9 checks passed)
+✔ Test 5: Kitchen KDS Queue & Multi-Tenant Outlet Isolation (2/2 checks passed)
+✔ Test 6: Kitchen Progression & Lifecycle Stages (3/3 checks passed)
+✔ Test 7: WhatsApp/SMS Notification Preview & DPDP Compliance (5/5 checks passed)
+✔ Test 8: Overdue Monitor (>10m Past Promise Alert & Loyalty Compensation) (4/4 checks passed)
+✔ Test 9: Bulk Party Catering Form & Manager Confirmation (4/4 checks passed)
+✔ Test 10: Central Menu CMS: 86 Item Pausing & Checkout Lock (2/2 checks passed)
+✔ Test 11: Operations Dashboard & Financial Savings (3/3 checks passed)
+--------------------------------------------------------------------------------
+TOTAL E2E ASSERTIONS: 42 | PASSED: 42 | FAILED: 0
 ================================================================================
 ```
 
@@ -483,4 +516,3 @@ TOTAL TESTS: 19 | PASSED: 19 | FAILED: 0 | DURATION: ~370ms
 ## 10. Conclusion
 
 This direct ordering platform and Kitchen Display System delivers an end-to-end, production-grade solution for Company A. By combining honest AI prep-time estimation, sub-50ms real-time kitchen push updates, statutory FSSAI and 5% GST compliance, and DPDP Act 2023 privacy protections, it directly recovers **₹1.14 Crore in annual revenue** while providing a delightful, appetizing ordering experience for Hyderabad's biryani lovers.
-

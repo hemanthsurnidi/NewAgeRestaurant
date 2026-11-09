@@ -181,3 +181,4 @@ test('Delivery Radius Check: Verifies address inside vs outside delivery radius'
   assert.ok(outsideData.distance_km > 10);
   assert.ok(outsideData.message.includes('outside the'));
 });
+

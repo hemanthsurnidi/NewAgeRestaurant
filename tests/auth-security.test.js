@@ -243,3 +243,4 @@ test('RBAC: Admin has central permission to create and delete menu items', async
   assert.equal(deleteRes.statusCode, 200);
   assert.ok(deleteRes.json().success);
 });
+
