@@ -10,6 +10,9 @@
     "test": "node --test tests/*.test.js",
     "seed": "node scripts/seed.js"
   },
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "keywords": [
     "food-tech",
     "kds",
